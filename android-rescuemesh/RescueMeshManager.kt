@@ -1,6 +1,7 @@
 package com.safehaven.rescuemesh
 
 import android.content.Context
+import java.util.UUID
 import android.util.Log
 import com.google.android.gms.nearby.Nearby
 import com.google.android.gms.nearby.connection.*
