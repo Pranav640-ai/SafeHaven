@@ -31,7 +31,7 @@ patch(appGradle, x => {
     x = x.replace(/dependencies\s*\{/, 'dependencies {\n    implementation "com.google.android.gms:play-services-nearby:19.3.0"');
   }
   if (!x.includes('kotlinOptions')) {
-    x = x.replace(/android\\s*\\{/, match => match + "\\n    kotlinOptions { jvmTarget = '21' }");
+    x = x.replace(/android\s*\{/, match => match + "\n    kotlinOptions { jvmTarget = '21' }");
   }
 
   if (!x.includes('play-services-nearby')) throw new Error('Cannot locate dependencies in app build.gradle');
