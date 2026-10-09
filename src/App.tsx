@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode, type UIEvent } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
-import useEmblaCarousel from 'embla-carousel-react';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import {
@@ -10,7 +9,7 @@ import {
   Languages, LocateFixed, LockKeyhole, Map, MapPin, Menu, MessageCircle,
   Navigation, Phone, Plus, Radio, RefreshCw, Search, Send, Settings,
   Shield, ShieldAlert, ShieldCheck, Smartphone, Sun, ThermometerSun,
-  Users, WifiOff, X, Zap, type LucideIcon,
+  Users, WifiOff, X, Zap, FileText, Save, Leaf, Mountain, Waves, Trees, BatteryCharging, Crosshair, Wifi, Signal, LifeBuoy, type LucideIcon,
 } from 'lucide-react';
 
 type Page = 'home' | 'explore' | 'risk' | 'replan' | 'guide' | 'mesh' | 'beacon' | 'pack' | 'profile';
@@ -45,6 +44,14 @@ const itinerary = [
   { day: '01', title: 'Arrive & explore', time: '4:00 PM', old: 'Old town walking tour', revised: 'Old town walking tour', changed: false },
   { day: '02', title: 'Scenic viewpoint', time: '10:00 AM', old: 'Outdoor viewpoint', revised: 'Indoor museum visit', changed: true },
   { day: '03', title: 'Coffee & departure', time: '11:30 AM', old: 'Coffee before checkout', revised: 'Coffee before checkout', changed: false },
+];
+
+const destinations = [
+  { name:'Manali', region:'Himachal Pradesh', label:'Mountain escape', image:'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=760&q=80', mood:'Mountains' },
+  { name:'Munnar', region:'Kerala', label:'Misty hills', image:'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=760&q=80', mood:'Nature' },
+  { name:'Goa', region:'West coast', label:'Sun and coast', image:'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=760&q=80', mood:'Coast' },
+  { name:'Coorg', region:'Karnataka', label:'Quiet trails', image:'https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?w=760&q=80', mood:'Nature' },
+  { name:'Kodaikanal', region:'Tamil Nadu', label:'Lakes and forests', image:'https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=760&q=80', mood:'Mountains' },
 ];
 
 const reports = [
@@ -84,28 +91,28 @@ function SkeletonScreen({ profile = false }: {profile?:boolean}) {
     <Skeleton height={38} width="52%" {...c}/><Skeleton height={145} borderRadius={20} {...c}/>
   </div>;
 }
+/* Native overflow carousel: phone momentum + desktop mouse dragging, no forced snap. */
+function SwipeRow({children, label}:{children:ReactNode;label:string}) {
+  const ref=useRef<HTMLDivElement>(null);
+  const drag=useRef({x:0,left:0,down:false,moved:false});
+  const [canPrev,setCanPrev]=useState(false);
+  const [canNext,setCanNext]=useState(true);
+  const update=()=>{const el=ref.current;if(!el)return;setCanPrev(el.scrollLeft>5);setCanNext(el.scrollLeft+el.clientWidth<el.scrollWidth-5)};
+  useEffect(()=>{update();const element=ref.current;if(!element)return;const observer=new ResizeObserver(update);observer.observe(element);return()=>observer.disconnect()},[children]);
+  return <div className="swipe-block"><div className="swipe-toolbar"><span>Swipe to see more</span><div><button aria-label={`Scroll ${label} left`} type="button" disabled={!canPrev} onClick={()=>ref.current?.scrollBy({left:-260,behavior:'smooth'})}><ChevronLeft size={18}/></button><button aria-label={`Scroll ${label} right`} type="button" disabled={!canNext} onClick={()=>ref.current?.scrollBy({left:260,behavior:'smooth'})}><ChevronRight size={18}/></button></div></div>
+    <div className="native-swipe-row" ref={ref} aria-label={label} onScroll={update}
+      onPointerDown={e=>{if(e.pointerType!=='mouse'||e.button!==0)return;drag.current={x:e.clientX,left:e.currentTarget.scrollLeft,down:true,moved:false}}}
+      onPointerMove={e=>{if(!drag.current.down)return;const delta=e.clientX-drag.current.x;if(Math.abs(delta)>7){drag.current.moved=true;if(!e.currentTarget.hasPointerCapture(e.pointerId))e.currentTarget.setPointerCapture(e.pointerId)}if(drag.current.moved){e.preventDefault();e.currentTarget.scrollLeft=drag.current.left-delta}}}
+      onPointerUp={e=>{drag.current.down=false;if(e.currentTarget.hasPointerCapture(e.pointerId))e.currentTarget.releasePointerCapture(e.pointerId);window.setTimeout(()=>{drag.current.moved=false},80)}}
+      onPointerCancel={()=>{drag.current.down=false}} onDragStart={e=>e.preventDefault()}
+      onClickCapture={e=>{if(drag.current.moved){e.preventDefault();e.stopPropagation();drag.current.moved=false}}}>
+      {children}
+    </div></div>;
+}
 function Carousel({items,onOpen}: {items:{kicker:string;title:string;subtitle:string;icon:LucideIcon;art:string;tint:string;page:Page}[];onOpen:(page:Page)=>void}) {
-  // Embla handles touch momentum, rubber-band containment and pointer gestures.
-  // dragFree keeps a swipe from feeling like a hard, sticky page snap.
-  const [ref,api] = useEmblaCarousel({align:'start',dragFree:true,containScroll:'trimSnaps',duration:27,watchDrag:true});
-  const [canPrev,setCanPrev] = useState(false);
-  const [canNext,setCanNext] = useState(true);
-  useEffect(()=>{
-    if(!api)return;
-    const update=()=>{setCanPrev(api.canScrollPrev());setCanNext(api.canScrollNext())};
-    api.on('select',update);api.on('reInit',update);api.on('scroll',update);update();
-    return ()=>{api.off('select',update);api.off('reInit',update);api.off('scroll',update)};
-  },[api]);
-  return <div className="carousel-unit">
-    <div className="carousel-controls"><span>Swipe to browse</span><div>
-      <button type="button" aria-label="Previous cards" disabled={!canPrev} onClick={()=>api?.scrollPrev()}><ChevronLeft size={19}/></button>
-      <button type="button" aria-label="Next cards" disabled={!canNext} onClick={()=>api?.scrollNext()}><ChevronRight size={19}/></button>
-    </div></div>
-    <div className="carousel-frame" ref={ref}><div className="carousel-track">{items.map(x=>{
-      const Icon=x.icon;
-      return <div className="carousel-slide" key={x.title}><motion.button whileTap={{scale:.985}} type="button" onClick={()=>onOpen(x.page)} className={`carousel-card carousel-${x.tint}`}><span className="carousel-overline">{x.kicker}</span><span className="carousel-art" aria-hidden="true"><span className="carousel-art-illustration">{x.art}</span><Icon className="carousel-art-symbol" size={24} strokeWidth={1.8}/></span><h3>{x.title}</h3><p>{x.subtitle}</p></motion.button></div>;
-    })}</div></div>
-  </div>;
+  return <SwipeRow label="Featured stories">{items.map(x=>{const Icon=x.icon;return <div className="native-carousel-item" key={x.title}>
+    <button type="button" onClick={()=>onOpen(x.page)} className={`carousel-card carousel-${x.tint}`}><span className="carousel-overline">{x.kicker}</span><span className="carousel-art" aria-hidden="true"><span className="carousel-art-illustration">{x.art}</span><Icon className="carousel-art-symbol" size={24}/></span><h3>{x.title}</h3><p>{x.subtitle}</p></button>
+  </div>})}</SwipeRow>;
 }
 function AppRow({icon:Icon,title,subtitle,end,onClick,tone='default'}:{icon:LucideIcon;title:string;subtitle?:string;end?:ReactNode;onClick:()=>void;tone?:string}) {
   return <button type="button" className="app-row" onClick={onClick}><span className={`row-icon row-${tone}`}><Icon size={20}/></span><span className="row-body"><strong>{title}</strong>{subtitle&&<small>{subtitle}</small>}</span>{end??<ChevronRight size={18} className="row-chevron"/>}</button>;
@@ -137,6 +144,13 @@ export default function App(){
   const [toast,setToast]=useState('');
   const [query,setQuery]=useState('');
   const [category,setCategory]=useState('All');
+  const [selectedDestination,setSelectedDestination]=useState('Manali');
+  const [destinationMood,setDestinationMood]=useState('All');
+  const [meshTab,setMeshTab]=useState<'Chats'|'Nearby'|'Beacons'|'SOS'>('Chats');
+  const [meshScanning,setMeshScanning]=useState(false);
+  const [tripNote,setTripNote]=useState('');
+  const [noteOpen,setNoteOpen]=useState(false);
+  const [noteSaved,setNoteSaved]=useState(false);
   const [guide,setGuide]=useState<GuideKind>('Flood');
   const [riskTab,setRiskTab]=useState('Overview');
   const [planMode,setPlanMode]=useState<'original'|'revised'>('revised');
@@ -155,6 +169,7 @@ export default function App(){
 
   useEffect(()=>{if(!authenticated)return;setLoading(true);const t=window.setTimeout(()=>setLoading(false),page==='home'?640:420);return()=>window.clearTimeout(t)},[page,authenticated]);
   useEffect(()=>{if(!toast)return;const t=window.setTimeout(()=>setToast(''),2700);return()=>window.clearTimeout(t)},[toast]);
+  const openDestination=(name:string)=>{setSelectedDestination(name);go('risk')};
   const go=(p:Page)=>{setPage(p);setCompact(false);lastTop.current=0;if(scrollRef.current) scrollRef.current.scrollTo({top:0,behavior:'instant'})};
   const handleScroll=(event:UIEvent<HTMLDivElement>)=>{const y=event.currentTarget.scrollTop;const diff=y-lastTop.current;if(y<66)setCompact(false);else if(diff>15)setCompact(true);else if(diff< -16)setCompact(false);lastTop.current=y;};
   const replay=()=>{go('home');setLoading(true);window.setTimeout(()=>setLoading(false),1850);setToast('Previewing loading states')};
@@ -204,6 +219,11 @@ export default function App(){
         <p>Checklist saved in this demo session only.</p>
       </div>
     </section>
+    <section className="home-note-area"><Heading title="Trip note" sub="Keep a reminder handy on this device" right={<button className="section-link" type="button" onClick={()=>setNoteOpen(v=>!v)}>{noteOpen?'Close':'Edit'} <ChevronRight size={15}/></button>}/>
+      <div className="home-note-card"><div className="home-note-head"><span><FileText size={20}/></span><div><strong>{noteSaved&&tripNote?'Your reminder':'A note for later'}</strong><small>Session only · not synced</small></div></div>
+        {noteOpen?<><textarea maxLength={220} aria-label="Trip reminder" placeholder="For example: hotel address, bus stop, or who to call" value={tripNote} onChange={e=>{setTripNote(e.target.value);setNoteSaved(false)}} rows={3}/><button className="note-save" type="button" onClick={()=>{setNoteSaved(true);setNoteOpen(false);setToast('Reminder saved for this session')}}><Save size={16}/> Save note</button></>:<button className="note-display" type="button" onClick={()=>setNoteOpen(true)}>{tripNote||'Add a hotel address, contact or meeting point.'}<ArrowRight size={17}/></button>}
+      </div>
+    </section>
     <section className="home-section"><Heading title="For your next trip" right={<button className="section-link" onClick={()=>go('explore')}>See all <ChevronRight size={15}/></button>}/>
       <Carousel onOpen={go} items={[
         {kicker:'DESTINATION CHECK',title:'Before you leave',subtitle:'Review known conditions',icon:MapPin,art:'🌍',tint:'indigo',page:'risk'},
@@ -215,16 +235,25 @@ export default function App(){
     <section className="home-section"><Heading title="Recent reports" sub="Examples of how updates will appear" right={<button className="section-link" onClick={()=>go('risk')}>View all <ChevronRight size={15}/></button>}/><div className="list-panel">{reports.map(r=><AppRow key={r.title} icon={r.icon} tone={r.tone} title={r.title} subtitle={r.subtitle} onClick={()=>go('risk')} end={<span className="row-end">Demo <ChevronRight size={16}/></span>}/>)}</div></section>
   </>}
 
-  function explore(){const destinations=['Manali, Himachal Pradesh','Kodaikanal, Tamil Nadu','Kerala, India','Goa, India'];const result=destinations.filter(s=>s.toLowerCase().includes(query.toLowerCase()));return <>
-    <BackHeader title="Explore" back={()=>go('home')}/><div className="search-field"><Search size={21}/><input placeholder="Search places or destinations" value={query} onChange={e=>setQuery(e.target.value)} aria-label="Search destinations"/>{query&&<button type="button" aria-label="Clear search" onClick={()=>setQuery('')}><X size={17}/></button>}</div>
-    <div className="tab-strip" role="tablist" aria-label="Search category">{['All','Destinations','Guides','Reports'].map(x=><button role="tab" type="button" aria-selected={category===x} className={category===x?'selected':''} key={x} onClick={()=>setCategory(x)}>{x}</button>)}</div>
-    <section className="explore-section"><Heading title="Explore destinations" sub="Sample locations for the UI preview"/>
-      <div className="list-panel">{(category==='All'||category==='Destinations'?result:[]).map((x,i)=><AppRow key={x} icon={MapPin} tone={['violet','teal','blue','amber'][i%4]} title={x} subtitle="Open sample risk overview" onClick={()=>go('risk')}/>)}{(category==='Guides'||category==='All')&&<AppRow icon={BookOpen} title="Emergency guidance" subtitle="Flood, extreme heat and earthquakes" tone="amber" onClick={()=>go('guide')}/>} {(category==='Reports'||category==='All')&&<AppRow icon={AlertTriangle} title="Incident examples" subtitle="Sample reports with source labels" tone="rose" onClick={()=>go('risk')}/>}{category==='Destinations'&&result.length===0&&<p className="empty-inline">No sample destinations match your search.</p>}</div>
-    </section><section className="explore-section"><Heading title="Quick access"/><div className="quick-access"><button onClick={()=>go('pack')}><Bookmark size={20}/>Safety pack<ArrowRight size={16}/></button><button onClick={()=>go('mesh')}><Radio size={20}/>RescueMesh<ArrowRight size={16}/></button></div></section>
-  </>}
+  function explore(){
+    const matched=destinations.filter(d=>(d.name+' '+d.region+' '+d.label).toLowerCase().includes(query.toLowerCase())&&(destinationMood==='All'||d.mood===destinationMood));
+    return <><BackHeader title="Explore" back={()=>go('home')}/>
+      <div className="explore-intro"><span className="eyebrow">DISCOVER PLACES</span><h2>Where to next?</h2><p>Find places worth exploring. Check conditions before making plans.</p></div>
+      <div className="search-field explore-search"><Search size={21}/><input placeholder="Search a place or region" value={query} onChange={e=>setQuery(e.target.value)} aria-label="Search destinations"/>{query&&<button type="button" aria-label="Clear search" onClick={()=>setQuery('')}><X size={17}/></button>}</div>
+      <div className="explore-editorial" role="img" aria-label="Mountains and lakes scenic photograph"><div className="explore-editorial-art"/><div className="explore-editorial-shade"/><span className="explore-overline"><Compass size={15}/> THE OUTDOORS</span><div><h3>Take the scenic route.</h3><p>Great trips start with a little preparation.</p></div></div>
+      <section className="explore-section"><Heading title="Find your kind of place"/><div className="explore-moods" role="group" aria-label="Filter destinations">{[
+        {name:'All',icon:Compass},{name:'Mountains',icon:Mountain},{name:'Nature',icon:Trees},{name:'Coast',icon:Waves}
+      ].map(x=>{const Icon=x.icon;return <button type="button" key={x.name} className={destinationMood===x.name?'selected':''} aria-pressed={destinationMood===x.name} onClick={()=>setDestinationMood(x.name)}><Icon size={17}/>{x.name}</button>})}</div></section>
+      <section className="explore-section explore-destinations"><Heading title={query?'Search results':'Popular destinations'} sub="Browse sample locations"/>
+        {matched.length>0?<SwipeRow label="Destination cards">{matched.map((d,i)=><button key={d.name} type="button" className="destination-tile" onClick={()=>openDestination(d.name)}><span className={`destination-photo destination-photo-${i%5}`} style={{backgroundImage:`linear-gradient(180deg,transparent 25%,#09110fdb 100%),url('${d.image}')`}}/><span className="destination-tile-copy"><span>{d.label}</span><strong>{d.name}</strong><small>{d.region}<ArrowRight size={14}/></small></span></button>)}</SwipeRow>:<div className="empty-feature empty-compact"><Search size={26}/><h3>No matches here</h3><p>Try another region or category.</p></div>}
+      </section>
+      <section className="explore-section"><Heading title="Check before you go" sub="Useful tools for your next stop"/><div className="explore-tools"><button type="button" onClick={()=>go('risk')}><span><ShieldCheck size={22}/></span><strong>Risk overview</strong><small>Understand report sources</small><ArrowRight size={17}/></button><button type="button" onClick={()=>go('guide')}><span><BookOpen size={22}/></span><strong>Safety essentials</strong><small>Guidance for common hazards</small><ArrowRight size={17}/></button></div></section>
+      <DemoNote>Destinations and risk information are examples, not live recommendations.</DemoNote>
+    </>
+  }
 
   function risk(){return <><BackHeader title="Risk intelligence" back={()=>go('home')} action={<IconButton icon={CircleHelp} label="About this preview" onClick={()=>setDialog('help')}/>}/>
-    <div className="destination-cover"><div className="destination-cover-art"/><span className="destination-overline">SAMPLE DESTINATION</span><h2>Manali, India</h2><p><MapPin size={14}/> Himachal Pradesh</p></div>
+    <div className="destination-cover"><div className="destination-cover-art"/><span className="destination-overline">SAMPLE DESTINATION</span><h2>{selectedDestination}, India</h2><p><MapPin size={14}/> Destination preview</p></div>
     <div className="tab-strip tab-tight" role="tablist" aria-label="Risk views">{['Overview','Weather','Reports'].map(x=><button role="tab" aria-selected={riskTab===x} className={riskTab===x?'selected':''} key={x} onClick={()=>setRiskTab(x)}>{x}</button>)}</div>
     <DemoNote>Demonstration only. No official warnings or real-time data are connected.</DemoNote>
     {riskTab==='Overview'&&<><section className="risk-summary"><span className="risk-summary-symbol"><ShieldAlert size={27}/></span><span><small>EXAMPLE RISK SCENARIO</small><strong>Weather advisory preview</strong><p>Illustrates how a weather-related warning would be presented.</p></span></section><Heading title="What to check"/><div className="metric-two"><div><Sun size={22}/><span>Weather</span><strong>Not connected</strong></div><div><Shield size={22}/><span>Official alerts</span><strong>Not connected</strong></div></div></>}
@@ -247,10 +276,16 @@ export default function App(){
     <button className="simple-cta guide-next" type="button" onClick={()=>go('pack')}><Bookmark size={21}/><span>View safety pack</span><ArrowRight size={18}/></button>
   </>}
 
-  function mesh(){return <><BackHeader title="RescueMesh" back={()=>go('home')} action={<IconButton icon={CircleHelp} label="About mesh preview" onClick={()=>setDialog('help')}/>}/><div className="mesh-status"><span className="mesh-status-icon"><WifiOff size={25}/></span><div><strong>Offline messaging</strong><p>Not connected · Android feature pending</p></div><span className="mesh-state">OFF</span></div>
-    <Heading title="Chats" sub="Sample conversation" right={<button className="section-link" onClick={()=>go('beacon')}>Beacons <ChevronRight size={15}/></button>}/><div className="chat-panel"><div className="chat-top"><span className="chat-avatar"><Users size={23}/></span><div><strong>Travel group</strong><small>Demo conversation · Not delivered</small></div></div><div className="chat-content"><div className="bubble incoming">Is everyone at the meeting point?<small>Example message</small></div><div className="bubble outgoing">I'm checking the route now.<small>Example reply</small></div>{demoMessages.map((m,i)=><div className="bubble outgoing" key={`${i}-${m}`}>{m}<small>Local preview · Not sent</small></div>)}</div><form className="message-compose" onSubmit={e=>{e.preventDefault();if(message.trim()){setDemoMessages(a=>[...a,message.trim()]);setMessage('');setToast('Added to local preview — message not sent');}}}><input aria-label="Demo message" value={message} maxLength={150} placeholder="Type a demo message" onChange={e=>setMessage(e.target.value)}/><button type="submit" aria-label="Preview message" disabled={!message.trim()}><Send size={18}/></button></form></div>
-    <section className="content-section"><Heading title="Nearby"/><div className="empty-feature empty-compact"><Radio size={30}/><h3>No devices connected</h3><p>Real nearby discovery requires the Android app and permission from both devices.</p></div></section>
-    <button className="simple-cta" type="button" onClick={()=>go('beacon')}><MapPin size={21}/><span>Community safety beacon</span><ArrowRight size={18}/></button>
+  function mesh(){return <><BackHeader title="RescueMesh" back={()=>go('home')} action={<IconButton icon={CircleHelp} label="About RescueMesh" onClick={()=>setDialog('help')}/>}/>
+    <div className="mesh-intro"><div className="mesh-orbits" aria-hidden="true"><span/><span/><Radio size={27}/></div><div><span className="eyebrow">OFFLINE NETWORK</span><h2>Stay in reach.</h2><p>Messages can travel between nearby phones once the Android mesh is connected.</p></div></div>
+    <div className="mesh-status"><span className="mesh-status-icon"><WifiOff size={23}/></span><div><strong>No mesh connection</strong><p>Native Android connection not enabled in this preview</p></div><span className="mesh-state">DEMO</span></div>
+    <div className="mesh-tabs" role="tablist" aria-label="RescueMesh sections">{(['Chats','Nearby','Beacons','SOS'] as const).map(t=><button role="tab" type="button" key={t} aria-selected={meshTab===t} className={meshTab===t?'selected':''} onClick={()=>setMeshTab(t)}>{t}</button>)}</div>
+    <AnimatePresence mode="wait" initial={false}><motion.div key={meshTab} className="mesh-tab-content" initial={{opacity:0,x:9}} animate={{opacity:1,x:0}} exit={{opacity:0,x:-9}} transition={{duration:.19}}>
+    {meshTab==='Chats'&&<><Heading title="Travel group" sub="Message preview · nothing transmitted"/><div className="chat-panel"><div className="chat-top"><span className="chat-avatar"><Users size={23}/></span><div><strong>Group conversation</strong><small>Offline demo · no connected peers</small></div></div><div className="chat-content"><div className="bubble incoming">Is everyone at the meeting point?<small>Example message</small></div><div className="bubble outgoing">I'm checking the route now.<small>Example reply</small></div>{demoMessages.map((m,i)=><div className="bubble outgoing" key={`${i}-${m}`}>{m}<small>Local preview · Not sent</small></div>)}</div><form className="message-compose" onSubmit={e=>{e.preventDefault();if(message.trim()){setDemoMessages(a=>[...a,message.trim()]);setMessage('');setToast('Local message preview — not sent');}}}><input aria-label="Demo message" value={message} maxLength={150} placeholder="Type a message…" onChange={e=>setMessage(e.target.value)}/><button type="submit" aria-label="Preview message" disabled={!message.trim()}><Send size={18}/></button></form></div></>}
+    {meshTab==='Nearby'&&<><Heading title="Nearby devices" sub="Available after Android setup"/><div className="mesh-empty"><div className="mesh-empty-art"><Radio size={35}/></div><h3>{meshScanning?'Looking for connections…':'No devices connected'}</h3><p>{meshScanning?'This is only a visual scan preview.':'Mesh discovery works between participating Android phones with permissions enabled.'}</p><button className="secondary-button" type="button" disabled={meshScanning} onClick={()=>{setMeshScanning(true);window.setTimeout(()=>setMeshScanning(false),1300)}}><RefreshCw size={16} className={meshScanning?'spin-icon':''}/> {meshScanning?'Scanning preview':'Preview scan'}</button></div></>}
+    {meshTab==='Beacons'&&<><Heading title="Community safety beacons" sub="Opt-in places shared by people nearby"/><div className="mesh-beacon-feature"><MapPin size={27}/><h3>Need a meeting point?</h3><p>A person can share a temporary, self-reported location. These are never official shelters or verified safe routes.</p><button type="button" onClick={()=>go('beacon')}>Create beacon preview <ArrowRight size={17}/></button></div><DemoNote>No active beacons are available. Nothing has been shared.</DemoNote></>}
+    {meshTab==='SOS'&&<><Heading title="SOS and relay" sub="Emergency messages when connectivity returns"/><div className="mesh-sos-card"><ShieldAlert size={31}/><div><strong>Emergency sending unavailable</strong><p>Queueing, relaying and acknowledgements will require the native Android bridge.</p></div></div><button className="secondary-button" type="button" onClick={()=>setDialog('sos')}><LifeBuoy size={18}/> View SOS demo <ArrowRight size={17}/></button><DemoNote>No SOS is queued, transmitted or delivered in this preview.</DemoNote></>}
+    </motion.div></AnimatePresence>
   </>}
 
   function beacon(){return <><BackHeader title="Community beacon" back={()=>go('mesh')}/><div className="beacon-cover"><span className="beacon-map-halo one"/><span className="beacon-map-halo two"/><span className="beacon-map-halo three"/><span className="beacon-map-point"><MapPin size={27}/></span><span className="beacon-overline">COMMUNITY SAFETY</span></div><div className="beacon-heading"><h2>Share a temporary meeting point</h2><p>Only when you choose. Others may see your approximate location over RescueMesh once supported.</p></div>
