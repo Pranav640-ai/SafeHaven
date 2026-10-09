@@ -1,0 +1,75 @@
+import { test, expect } from '@playwright/test';
+test('itinerary edits persist and saved pack reopens offline', async ({ page, context }) => {
+    const errors: string[] = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Explore as guest' }).click();
+    await page.getByRole('button', { name: /Trip replanner/ }).click();
+    await page.getByRole('textbox', { name: 'Activity', exact: true }).fill('Museum visit');
+    await page.getByLabel('Activity type', { exact: true }).selectOption('indoor');
+    await page.getByRole('button', { name: 'Add activity' }).click();
+    await expect(page.getByRole('heading', { name: 'Museum visit' })).toBeVisible();
+    await page.getByRole('button', { name: 'Edit', exact: true }).click();
+    await page.getByRole('textbox', { name: 'Activity', exact: true }).fill('Gallery visit');
+    await page.getByRole('button', { name: 'Save activity changes' }).click();
+    await page.reload();
+    await page.getByRole('button', { name: 'Explore as guest' }).click();
+    await page.getByRole('button', { name: /Safety pack Things to keep/ }).click();
+    await expect(page.getByRole('heading', { name: 'Gallery visit' })).toBeVisible();
+    await page.getByRole('button', { name: 'Prepare offline guidance' }).click();
+    await expect(page.getByText('Flood · en', { exact: true })).toBeVisible();
+    await page.getByLabel('Hotel details and meeting point').fill('Test hotel, lobby meeting point');
+    await page.getByLabel('Contact name', { exact: true }).fill('Travel companion');
+    await page.getByLabel('Phone number', { exact: true }).fill('+910000000000');
+    await page.getByRole('button', { name: 'Save contact locally' }).click();
+    await page.evaluate(async () => { await navigator.serviceWorker.ready; });
+    await expect.poll(() => page.evaluate(() => Boolean(navigator.serviceWorker.controller))).toBeTruthy();
+    await context.setOffline(true);
+    await page.reload();
+    await page.getByRole('button', { name: 'Explore as guest' }).click();
+    await page.getByRole('button', { name: /Safety pack Things to keep/ }).click();
+    await expect(page.getByLabel('Hotel details and meeting point')).toHaveValue('Test hotel, lobby meeting point');
+    await expect(page.getByText('Travel companion', { exact: true })).toBeVisible();
+    await expect(page.getByText('Flood · en', { exact: true })).toBeVisible();
+    await page.getByText('Flood · en', { exact: true }).click();
+    await expect(page.getByText('Avoid walking, swimming or driving through floodwater.', { exact: true })).toBeVisible();
+    expect(errors).toEqual([]);
+});
+test('prepared multilingual guidance preserves source and SOS access', async ({ page }) => {
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Explore as guest' }).click();
+    await page.getByRole('button', { name: 'Emergency SOS', exact: true }).click();
+    await page.getByRole('button', { name: 'View emergency guidance' }).click();
+    await page.getByLabel('Preferred language').selectOption('ta');
+    await expect(page.getByText(/Prepared translation/)).toBeVisible();
+    await expect(page.locator('.steps')).toHaveAttribute('lang', 'ta');
+    await expect(page.getByRole('link', { name: 'Ready.gov · Floods' })).toHaveAttribute('href', 'https://www.ready.gov/floods');
+    await page.getByRole('button', { name: 'Emergency SOS', exact: true }).click();
+    await expect(page.getByRole('dialog')).toBeVisible();
+});
+for (const width of [320, 375, 430, 768]) {
+    test(`mobile layout has no horizontal overflow at ${width}px`, async ({ page }) => {
+        await page.setViewportSize({ width, height: 844 });
+        await page.goto('/');
+        await page.getByRole('button', { name: 'Explore as guest' }).click();
+        await page.getByRole('button', { name: /Trip replanner/ }).click();
+        const overflow = await page.locator('.phone-scroll').evaluate(e => e.scrollWidth > e.clientWidth + 1);
+        expect(overflow).toBeFalsy();
+    });
+}
+test('private group consent, status synchronization and leaving work', async ({ page }) => {
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Explore as guest' }).click();
+    await page.getByRole('button', { name: /Safety pack Things to keep/ }).click();
+    await page.getByLabel('Your display name').fill('Browser traveler');
+    await page.getByLabel('New group name').fill('Browser verification group');
+    await expect(page.getByRole('button', { name: 'Create private group' })).toBeDisabled();
+    await page.getByLabel('I agree to share my name and chosen status with this group.').check();
+    await page.getByRole('button', { name: 'Create private group' }).click();
+    await expect(page.getByRole('heading', { name: 'Browser verification group' })).toBeVisible();
+    await page.getByLabel('Share my next status with this group.').check();
+    await page.getByRole('button', { name: "I'm safe", exact: true }).click();
+    await expect(page.getByText(/Reported safe/)).toBeVisible();
+    await page.getByRole('button', { name: 'Leave group and remove my shared status' }).click();
+    await expect(page.getByLabel('New group name')).toBeVisible();
+});

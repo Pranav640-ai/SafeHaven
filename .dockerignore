@@ -1,0 +1,10 @@
+.git
+node_modules
+.venv
+dist
+android
+backend/data
+**/.env
+**/.env.*
+test-results
+__pycache__

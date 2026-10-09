@@ -2,6 +2,10 @@
 
 **As of 2026-10-10.** This file is an actionable handoff, not a claim of a completed or field-proven emergency system.
 
+## Web implementation update
+
+Steps 6–13 now have backend/frontend implementations; see [IMPLEMENTATION.md](IMPLEMENTATION.md) for current behavior, setup and deployment limits. The user explicitly deferred mesh verification. The readiness matrix below records the earlier pre-backend handoff; use the implementation guide for current web status. Hosting and credential-backed providers require account/key setup before live validation.
+
 ## Mandatory first action
 
 Check out **`ui`**, the consolidated development branch. It includes `feature/rescuemesh-android-bridge` and `handoff/risk-ui-onboarding-codex`, including the latest UI fixes. Read `README.md`, `RESCUEMESH_INTEGRATION.md`, `package.json`, `capacitor.config.ts` and the native bridge source. `main` contains historical incomplete Kotlin experiments; the older UI branches are design backups.

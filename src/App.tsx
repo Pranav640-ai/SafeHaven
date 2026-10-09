@@ -5,6 +5,8 @@ import 'react-loading-skeleton/dist/skeleton.css';
 import { RescueMeshScreen } from './mesh/RescueMeshScreen';
 import { useRescueMesh } from './mesh/useRescueMesh';
 import './mesh/mesh.css';
+import { RiskTool, ReplanTool, GuidanceTool, PackTool } from './features/TravelTools';
+import { useSaved } from './services/storage';
 import {
   AlertCircle, AlertTriangle, ArrowLeft, ArrowRight, Bell, Bookmark,
   BookOpen, Check, CheckCheck, ChevronDown, ChevronRight, CircleHelp,
@@ -187,7 +189,7 @@ export default function App(){
   const meshApi=useRescueMesh();
   const [sosOpenCount,setSosOpenCount]=useState(0);
   const [meshScanning,setMeshScanning]=useState(false);
-  const [tripNote,setTripNote]=useState('');
+  const [tripNote,setTripNote]=useSaved('trip-note','');
   const [noteOpen,setNoteOpen]=useState(false);
   const [noteSaved,setNoteSaved]=useState(false);
   const [guide,setGuide]=useState<GuideKind>('Flood');
@@ -197,11 +199,11 @@ export default function App(){
   const [demoMessages,setDemoMessages]=useState<string[]>([]);
   const [beaconText,setBeaconText]=useState('Community meeting point');
   const [beaconDraft,setBeaconDraft]=useState(false);
-  const [checklist,setChecklist]=useState<string[]>([]);
+  const [checklist,setChecklist]=useSaved<string[]>('checklist',[]);
   const [checkedIn,setCheckedIn]=useState(false);
   const [showQuickGuide,setShowQuickGuide]=useState(false);
   const [homeGuide,setHomeGuide]=useState<GuideKind>('Flood');
-  const [homeChecklist,setHomeChecklist]=useState<string[]>([]);
+  const [homeChecklist,setHomeChecklist]=useSaved<string[]>('home-checklist',[]);
   const scrollRef=useRef<HTMLDivElement>(null);
   const lastTop=useRef(0);
   const reduceMotion=useReducedMotion();
@@ -255,12 +257,12 @@ export default function App(){
       </motion.div>}</AnimatePresence>
       <div className="home-prep"><div><strong>Before you head out</strong><span>{homeChecklist.length} of 3 reviewed</span></div>
         <div className="home-prep-tasks">{['Check forecast','Save emergency contacts','Share plans with your group'].map(t=><button type="button" key={t} aria-pressed={homeChecklist.includes(t)} className={homeChecklist.includes(t)?'done':''} onClick={()=>setHomeChecklist(old=>old.includes(t)?old.filter(v=>v!==t):[...old,t])}><span>{homeChecklist.includes(t)?<Check size={15}/>:null}</span>{t}</button>)}</div>
-        <p>Your checklist is saved for this session.</p>
+        <p>Your checklist is saved on this device.</p>
       </div>
     </section>
     <section className="home-note-area"><Heading title="Trip note" sub="Keep a reminder handy on this device" right={<button className="section-link" type="button" onClick={()=>setNoteOpen(v=>!v)}>{noteOpen?'Close':'Edit'} <ChevronRight size={15}/></button>}/>
       <div className="home-note-card"><div className="home-note-head"><span><FileText size={20}/></span><div><strong>{noteSaved&&tripNote?'Your reminder':'A note for later'}</strong><small>Saved on this device</small></div></div>
-        {noteOpen?<><textarea maxLength={220} aria-label="Trip reminder" placeholder="For example: hotel address, bus stop, or who to call" value={tripNote} onChange={e=>{setTripNote(e.target.value);setNoteSaved(false)}} rows={3}/><button className="note-save" type="button" onClick={()=>{setNoteSaved(true);setNoteOpen(false);setToast('Reminder saved for this session')}}><Save size={16}/> Save note</button></>:<button className="note-display" type="button" onClick={()=>setNoteOpen(true)}>{tripNote||'Add a hotel address, contact or meeting point.'}<ArrowRight size={17}/></button>}
+        {noteOpen?<><textarea maxLength={220} aria-label="Trip reminder" placeholder="For example: hotel address, bus stop, or who to call" value={tripNote} onChange={e=>{setTripNote(e.target.value);setNoteSaved(false)}} rows={3}/><button className="note-save" type="button" onClick={()=>{setNoteSaved(true);setNoteOpen(false);setToast('Reminder saved on this device')}}><Save size={16}/> Save note</button></>:<button className="note-display" type="button" onClick={()=>setNoteOpen(true)}>{tripNote||'Add a hotel address, contact or meeting point.'}<ArrowRight size={17}/></button>}
       </div>
     </section>
     <section className="home-section"><Heading title="For your next trip" right={<button className="section-link" onClick={()=>go('explore')}>See all <ChevronRight size={15}/></button>}/>
@@ -291,40 +293,16 @@ export default function App(){
     </>
   }
 
-  function risk(){return <><BackHeader title="Risk intelligence" back={()=>go('home')} action={<IconButton icon={CircleHelp} label="About this preview" onClick={()=>setDialog('help')}/>}/>
-    <div className="destination-cover"><div className="destination-cover-art"/><span className="destination-overline">DESTINATION</span><h2>{selectedDestination}, India</h2><p><MapPin size={14}/> Destination overview</p></div>
-    <div className="tab-strip tab-tight risk-view-tabs" role="tablist" aria-label="Risk views">{['Overview','Weather','Reports'].map(x=><button role="tab" aria-selected={riskTab===x} className={riskTab===x?'selected':''} key={x} onClick={()=>setRiskTab(x)}>{x}</button>)}</div>
-    <DemoNote>Sample conditions · live alerts not yet connected.</DemoNote>
-    {riskTab==='Overview'&&<><section className="risk-summary"><span className="risk-summary-symbol"><ShieldAlert size={27}/></span><span><small>WEATHER SNAPSHOT</small><strong>Weather information</strong><p>Check official sources for current advisories.</p></span></section><Heading title="What to check"/><div className="metric-two"><div><Sun size={22}/><span>Weather</span><strong>Not connected</strong></div><div><Shield size={22}/><span>Official alerts</span><strong>Not connected</strong></div></div></>}
-    {riskTab==='Weather'&&<><Heading title="Weather outlook"/><div className="empty-feature"><CloudRain size={33}/><h3>Weather data isn't connected</h3><p>Live temperature and forecasts will be shown here when Open-Meteo is integrated.</p></div></>}
-    {riskTab==='Reports'&&<><Heading title="Reported incidents"/><div className="list-panel">{reports.map(r=><AppRow key={r.title} icon={r.icon} title={r.title} subtitle={r.subtitle} tone={r.tone} onClick={()=>setDialog('help')}/>)}</div></>}
-    <section className="content-section"><Heading title="Need guidance?"/><button type="button" className="simple-cta" onClick={()=>go('guide')}><BookOpen size={21}/><span>Open emergency guide</span><ArrowRight size={18}/></button></section>
-  </>}
+  function risk(){return <RiskTool key={selectedDestination} destination={selectedDestination} back={()=>go('home')} notify={setToast}/>;}
 
-  function replan(){return <><BackHeader title="Trip replanner" back={()=>go('home')}/><div className="replan-banner"><span><Navigation size={24}/></span><small>ITINERARY PREVIEW</small><h2>Keep your plans flexible.</h2><p>See an example of a small itinerary adjustment.</p></div>
-    <DemoNote>Sample plan only · weather and AI checks not connected.</DemoNote><div className="segmented" role="tablist" aria-label="Itinerary version"><button type="button" role="tab" aria-selected={planMode==='original'} className={planMode==='original'?'selected':''} onClick={()=>setPlanMode('original')}>Original plan</button><button type="button" role="tab" aria-selected={planMode==='revised'} className={planMode==='revised'?'selected':''} onClick={()=>setPlanMode('revised')}>Revised plan</button></div>
-    <div className="itinerary-list">{itinerary.map((x,i)=><motion.div className="itinerary-day" key={x.day} layout><div className="day-track"><span>{x.day}</span><i/></div><div className="day-card"><span className="day-card-label">DAY {i+1} <span>·</span> {x.time}</span><h3>{x.title}</h3><p>{planMode==='original'?x.old:x.revised}</p>{planMode==='revised'&&x.changed&&<span className="plan-change"><Check size={14}/> Example alternative</span>}</div></motion.div>)}</div>
-    <div className="why-card"><AlertCircle size={19}/><p><strong>What changed?</strong> On Day 2, the outdoor activity is swapped for an indoor stop. This is a sample comparison, not a safety assessment.</p></div>
-    <button type="button" className="primary-button" onClick={()=>{setPlanMode('revised');setToast('Example revised plan displayed')}}>Show revised itinerary <ArrowRight size={18}/></button>
-  </>}
+  function replan(){return <ReplanTool back={()=>go('home')} notify={setToast}/>;}
 
-  function guidePage(){const g=guides[guide];const Icon=g.icon;return <><BackHeader title="Emergency guide" back={()=>go('home')} action={<IconButton icon={Languages} label="Language information" onClick={()=>setToast('Translated guidance will be available after integration')}/>}/><p className="page-lead">Clear steps for difficult situations.</p><div className="guide-picker" role="tablist" aria-label="Emergency type">{(Object.keys(guides) as GuideKind[]).map(k=>{const ItemIcon=guides[k].icon;return <button type="button" role="tab" aria-selected={guide===k} className={guide===k?'selected':''} key={k} onClick={()=>setGuide(k)}><ItemIcon size={22}/><small>{k}</small></button>})}</div>
-    <div className="guide-cover"><div className="guide-cover-symbol"><Icon size={37}/></div><span>QUICK REFERENCE</span><h2>{guide} safety</h2><p>{g.lead}</p></div><DemoNote>General educational guidance. Verify instructions with the relevant local authority.</DemoNote>
-    <Heading title="What should you do?"/>
-    <div className="steps">{g.steps.map((step,i)=><div className="step" key={step}><span>{i+1}</span><p>{step}</p></div>)}</div>
-    <button className="simple-cta guide-next" type="button" onClick={()=>go('pack')}><Bookmark size={21}/><span>View safety pack</span><ArrowRight size={18}/></button>
-  </>}
+  function guidePage(){return <GuidanceTool back={()=>go('home')} notify={setToast}/>;}
 
   function mesh(){return <RescueMeshScreen key={`${meshTab}-${sosOpenCount}`} mesh={meshApi} onBack={()=>go('home')} initialTab={meshTab}/>;}
   function beacon(){return <RescueMeshScreen key="beacon" mesh={meshApi} onBack={()=>go('mesh')} initialTab="Beacons"/>;}
 
-  function pack(){const tasks=[{title:'Emergency contacts',detail:'Add people to reach in an emergency',icon:Phone},{title:'Safety guidance',detail:'Review essential instructions',icon:BookOpen},{title:'Trip details',detail:'Keep your itinerary accessible',icon:Map},{title:'Group check-in',detail:'Decide who can see your status',icon:Users}];return <><BackHeader title="Safety pack" back={()=>go('home')} action={<IconButton icon={CircleHelp} label="About safety pack" onClick={()=>setDialog('help')}/>}/>
-    <div className="pack-hero"><span className="pack-hero-mark"><Bookmark size={28}/></span><div><span>YOUR ESSENTIALS</span><h2>Prepared, wherever you go.</h2><p>Review key information before the connection drops.</p></div></div><DemoNote>Offline downloads are not connected yet.</DemoNote>
-    <Heading title="Before you go" sub="Items to review"/><div className="list-panel checklist-panel">{tasks.map(t=>{const Icon=t.icon;const done=checklist.includes(t.title);return <button type="button" className="checklist-row" key={t.title} onClick={()=>setChecklist(p=>done?p.filter(x=>x!==t.title):[...p,t.title])}><span className="checklist-icon"><Icon size={21}/></span><span className="row-body"><strong>{t.title}</strong><small>{t.detail}</small></span><span className={`checkmark ${done?'is-checked':''}`}>{done&&<Check size={14}/>}</span></button>})}</div>
-    <section className="content-section"><Heading title="Group check-in"/><div className="checkin-block"><span className="checkin-symbol"><Users size={23}/></span><h3>{checkedIn?'Marked safe locally':'Let your group know'}</h3><p>{checkedIn?'This status has not been shared with anyone.':'Review your check-in before sharing becomes available.'}</p><button className="secondary-button" type="button" onClick={()=>{setCheckedIn(x=>!x);setToast('Status changed locally — not shared')}}>{checkedIn?'Reset preview':'Mark myself safe'} <ArrowRight size={17}/></button></div></section>
-    {meshApi.available && meshApi.state.peers.length>0 && <button type="button" className="secondary-button" onClick={()=>{void meshApi.sendCheckIn('safe').then(()=>setToast('Check-in offered to nearby phones')).catch(()=>setToast('Check-in not sent'))}}><Users size={18}/> Share safe status via RescueMesh</button>}
-    <section className="content-section"><Heading title="Saved content"/><div className="list-panel"><AppRow icon={BookOpen} tone="violet" title="Emergency guide" subtitle="General safety instructions" onClick={()=>go('guide')}/><AppRow icon={Download} tone="blue" title="Offline downloads" subtitle="Not available yet" onClick={()=>setToast('Offline downloading is not connected')}/></div></section>
-  </>}
+  function pack(){return <PackTool back={()=>go('home')} notify={setToast} checklist={checklist} toggleChecklist={title=>setChecklist(old=>old.includes(title)?old.filter(x=>x!==title):[...old,title])} nearbyShare={meshApi.available&&meshApi.state.peers.length>0?meshApi.sendCheckIn:undefined}/>;}
 
   function profile(){return <>
     <BackHeader title="Profile" back={()=>go('home')} action={<IconButton icon={Settings} label="Help and settings" onClick={()=>setDialog('help')}/>}/>

@@ -8,3 +8,9 @@ dist/
 
 android/
 *.tsbuildinfo
+.venv/
+__pycache__/
+.pytest_cache/
+backend/data/
+*.db
+test-results/
