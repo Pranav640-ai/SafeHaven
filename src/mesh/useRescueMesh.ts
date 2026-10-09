@@ -1,0 +1,135 @@
+import { useEffect, useState } from 'react';
+import { Capacitor, registerPlugin, type PluginListenerHandle } from '@capacitor/core';
+import { Geolocation } from '@capacitor/geolocation';
+
+export type MeshPeer = { id: string; name: string };
+export type MeshBeacon = {
+  id: string; beaconId: string; body: string; from: string; fromName: string;
+  latitude: number; longitude: number; expiresAt: number; createdAt: number; unverified: true;
+};
+export type MeshMessage = {
+  id: string; type: 'chat' | 'sos' | 'checkin'; from: string; fromName: string;
+  body: string; createdAt: number; received: boolean; status?: string;
+};
+export type MeshState = {
+  running: boolean; advertising: boolean; discovering: boolean; peers: MeshPeer[];
+  discovered: MeshPeer[]; beacons: MeshBeacon[]; queuedSOS: number;
+  identity: string; deviceName: string;
+};
+export type ConnectionRequest = { id: string; name: string; code: string };
+export type SendReceipt = { id: string; status: 'offered' | 'queued-in-memory' | 'local-only' | 'none' };
+
+type EventNames = 'state' | 'error' | 'connectionRequest' | 'connected' | 'disconnected' |
+  'message' | 'ack' | 'beacon' | 'beaconRemoved' | 'queuedSOSOffered' | 'connectionFailed';
+interface NativeRescueMesh {
+  start(options: {deviceName: string}): Promise<MeshState>;
+  stop(): Promise<MeshState>;
+  getState(): Promise<MeshState>;
+  accept(options: {id: string}): Promise<void>;
+  rejectPeer(options: {id: string}): Promise<void>;
+  sendChat(options: {text: string}): Promise<SendReceipt>;
+  sendSOS(options: {text: string}): Promise<SendReceipt>;
+  cancelQueuedSOS(): Promise<{cancelled:number}>;
+  sendCheckIn(options: {status: 'safe' | 'needHelp'}): Promise<SendReceipt>;
+  publishBeacon(options: {text: string; latitude: number; longitude: number; minutes: number}): Promise<SendReceipt>;
+  withdrawBeacon(): Promise<SendReceipt>;
+  addListener(eventName: EventNames, listener: (event: any) => void): Promise<PluginListenerHandle>;
+}
+const native = registerPlugin<NativeRescueMesh>('RescueMesh');
+const available = Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'android';
+const empty: MeshState = {
+  running: false, advertising: false, discovering: false, peers: [], discovered: [],
+  beacons: [], queuedSOS: 0, identity: '', deviceName: '',
+};
+
+export function useRescueMesh() {
+  const [state, setState] = useState<MeshState>(empty);
+  const [requests, setRequests] = useState<ConnectionRequest[]>([]);
+  const [messages, setMessages] = useState<MeshMessage[]>([]);
+  const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
+  const [ownBeacon, setOwnBeacon] = useState<string | null>(null);
+  const [position, setPosition] = useState<{latitude: number; longitude: number} | null>(null);
+
+  useEffect(() => {
+    if (!available) return;
+    let mounted = true;
+    const listeners: PluginListenerHandle[] = [];
+    const listen = async (event: EventNames, cb: (detail: any) => void) => {
+      const l = await native.addListener(event, detail => { if (mounted) cb(detail); });
+      if (mounted) listeners.push(l); else void l.remove();
+    };
+    void (async () => {
+      await listen('state', e => setState(e as MeshState));
+      await listen('connectionRequest', e => setRequests(list =>
+        list.some(p => p.id === e.id) ? list : [...list, e as ConnectionRequest]));
+      await listen('message', e => setMessages(list =>
+        list.some(p => p.id === e.id) ? list : [...list, {...e, received: true} as MeshMessage]));
+      await listen('ack', e => setMessages(list => list.map(m =>
+        m.id === e.refId ? {...m, status: 'Peer acknowledged'} : m)));
+      await listen('beacon', () => void native.getState().then(setState));
+      await listen('beaconRemoved', () => void native.getState().then(setState));
+      await listen('queuedSOSOffered', e => setMessages(list => list.map(m =>
+        m.id === e.id ? {...m, status: 'Offered to nearby peers'} : m)));
+      await listen('error', e => setError(`${e.action}: ${e.message}`));
+      await listen('connectionFailed', e => setError(e.message || 'Connection failed'));
+      await listen('disconnected', () => void native.getState().then(setState));
+      await listen('connected', () => void native.getState().then(setState));
+      await native.getState().then(s => {if (mounted) setState(s)});
+    })().catch(e => {if(mounted)setError(String(e))});
+    return () => {mounted = false; listeners.forEach(l => void l.remove());};
+  }, []);
+
+  const attempt = async <T,>(action: () => Promise<T>): Promise<T> => {
+    setError('');
+    if (!available) throw new Error('Offline nearby connections require the Android app.');
+    try {return await action();} catch (e) {setError(e instanceof Error ? e.message : String(e));throw e;}
+  };
+  const refresh = () => attempt(async () => {const s = await native.getState();setState(s);return s;});
+  const start = async (deviceName: string) => attempt(async () => {
+    const result = await native.start({deviceName});setState(result);return result;
+  });
+  const stop = async () => attempt(async () => {const s=await native.stop();setState(s);setRequests([]);setOwnBeacon(null);setMessages(list=>list.map(m=>m.type==='sos'&&m.status==='Queued on this phone until app closes'?{...m,status:'Cancelled — network stopped'}:m));return s;});
+  const approve = (id: string) => attempt(async () => {await native.accept({id});setRequests(p=>p.filter(x=>x.id!==id));});
+  const reject = (id: string) => attempt(async () => {await native.rejectPeer({id});setRequests(p=>p.filter(x=>x.id!==id));});
+  const sendChat = (text: string) => attempt(async () => {
+    const receipt = await native.sendChat({text});
+    setMessages(old => [...old,{id:receipt.id,type:'chat',from:state.identity,fromName:state.deviceName,
+      body:text,createdAt:Date.now(),received:false,status:'Offered to nearby peers'}]);
+    return receipt;
+  });
+  const sendSOS = (text: string) => attempt(async () => {
+    const receipt = await native.sendSOS({text});
+    setMessages(old=>[...old,{id:receipt.id,type:'sos',from:state.identity,fromName:state.deviceName,
+      body:text,createdAt:Date.now(),received:false,
+      status:receipt.status==='queued-in-memory'?'Queued on this phone until app closes':'Offered to nearby peers'}]);
+    return receipt;
+  });
+  const cancelQueuedSOS = () => attempt(async () => {const r=await native.cancelQueuedSOS();await native.getState().then(setState);setMessages(list=>list.map(m=>m.type==='sos'&&m.status==='Queued on this phone until app closes'?{...m,status:'Cancelled — not sent'}:m));return r;});
+  const sendCheckIn = (status: 'safe'|'needHelp') => attempt(async () => {
+    const receipt=await native.sendCheckIn({status});
+    setNotice('Check-in offered to nearby peers. Await an acknowledgement.');
+    return receipt;
+  });
+  const locate = () => attempt(async () => {
+    const location = await Geolocation.getCurrentPosition({enableHighAccuracy:true,timeout:15000});
+    const next={latitude:location.coords.latitude,longitude:location.coords.longitude};
+    setPosition(next);return next;
+  });
+  const publishBeacon = (text: string, minutes=30) => attempt(async () => {
+    const {latitude,longitude}=await locate();
+    const receipt=await native.publishBeacon({text,latitude,longitude,minutes});
+    setOwnBeacon(receipt.id);
+    await native.getState().then(setState);
+    setNotice(receipt.status==='local-only'?'Beacon saved locally. No peer is connected.':'Beacon offered to nearby peers.');
+    return receipt;
+  });
+  const withdrawBeacon = () => attempt(async () => {
+    const receipt=await native.withdrawBeacon();setOwnBeacon(null);
+    await native.getState().then(setState);setNotice('Beacon withdrawn locally; offline peers may retain it until the withdrawal relays or it expires.');
+    return receipt;
+  });
+  return {available,state,requests,messages,error,notice,position,ownBeacon,
+    refresh,start,stop,approve,reject,sendChat,sendSOS,cancelQueuedSOS,sendCheckIn,publishBeacon,withdrawBeacon,locate};
+}
+export type MeshController = ReturnType<typeof useRescueMesh>;
