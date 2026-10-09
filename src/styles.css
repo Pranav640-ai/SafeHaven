@@ -976,3 +976,37 @@ h1,h2,h3,h4,.brand{font-weight:500}
   radial-gradient(ellipse at 12% 65%,#cdcfba55,transparent 52%),
   radial-gradient(ellipse at 51% 55%,#caccb5 0%,#5c9683 49%,#265948 100%)}
 @media(max-width:719px){.preview-stage{background:#eeefe8}}
+
+/* Quiet botanical light and atlas-inspired linework, behind the interface. */
+.phone-shell::after{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
+  background:
+    repeating-radial-gradient(ellipse at 125% 24%,transparent 0 37px,#496c5810 38px 39px,transparent 40px 61px),
+    radial-gradient(ellipse at 8% 78%,#fff8e646,transparent 55%);
+  mask-image:linear-gradient(180deg,#0006,transparent 43%,#0005 78%,transparent)}
+.phone-shell::before{background:
+  radial-gradient(ellipse 92% 32% at 88% 4%,#fffdf2ce,transparent 77%),
+  radial-gradient(ellipse 70% 38% at 0% 38%,#c0d3ab86,transparent 80%),
+  radial-gradient(ellipse 76% 30% at 98% 73%,#e6d7b56b,transparent 80%),
+  radial-gradient(ellipse 85% 29% at 22% 100%,#b7d9c27a,transparent 80%),
+  linear-gradient(#5f968411 1px,transparent 1px),
+  linear-gradient(90deg,#5f968411 1px,transparent 1px);
+  background-size:auto,auto,auto,auto,36px 36px,36px 36px}
+.phone-onboarding .login-art{background:
+  radial-gradient(ellipse at 81% 9%,#fff3cb66,transparent 50%),
+  radial-gradient(ellipse at 9% 65%,#c5d7a966,transparent 53%),
+  radial-gradient(ellipse at 51% 51%,#98b99c 0%,#497f6b 51%,#214e40 100%)}
+.phone-onboarding .login-art::before{content:'';position:absolute;inset:0;pointer-events:none;
+  background:repeating-radial-gradient(ellipse at 115% 9%,transparent 0 41px,#f5f1d71c 42px 43px,transparent 44px 67px);
+  mask-image:linear-gradient(180deg,#000,transparent 91%)}
+.welcome-compass{display:grid;place-items:center;isolation:isolate;min-height:188px}
+.welcome-halo{position:absolute;width:232px;height:232px;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,#f7efcd36,transparent 68%);
+  border:1px solid #fff8d72a;box-shadow:0 0 0 21px #fff8d70a,0 0 0 43px #fff8d708}
+.welcome-symbol{position:relative;display:grid;place-items:center;width:132px;height:132px;border-radius:50%;
+  color:#fff8e4;background:linear-gradient(145deg,#fbf7df27,#ffffff08);
+  border:1px solid #fff8e65c;box-shadow:inset 0 1px 0 #fffbe866,0 18px 42px #173b352b;
+  backdrop-filter:blur(12px)}
+.welcome-symbol svg{filter:drop-shadow(0 3px 8px #173b3540)}
+.profile-revamp::before{background:
+  radial-gradient(ellipse at 100% 0%,#f4e7ba30,transparent 59%),
+  repeating-radial-gradient(ellipse at 113% 25%,transparent 0 27px,#fff9df0e 28px 29px,transparent 30px 46px)}

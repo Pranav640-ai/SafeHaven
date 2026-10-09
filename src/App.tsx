@@ -205,7 +205,7 @@ export default function App(){
 
   function login(){return <div className="login-screen">
     <section className="login-art"><div className="login-top"><Brand/><button className="login-skip" type="button" onClick={()=>enter(true)}>Skip</button></div>
-      <div className="login-visual" aria-hidden="true"><span className="orbit orbit-one"/><span className="orbit orbit-two"/><span className="login-point main-point"><ShieldCheck size={53} strokeWidth={1.5}/></span><span className="login-point side-point"><MapPin size={25}/></span><span className="login-point left-point"><Radio size={22}/></span></div>
+      <div className="login-visual welcome-compass" aria-hidden="true"><span className="welcome-halo"/><span className="welcome-symbol"><Compass size={72} strokeWidth={1.25}/></span></div>
       <div className="login-art-copy"><span>YOUR JOURNEY, YOUR SAFETY</span><h1>Go further.<br/><em>Stay prepared.</em></h1></div>
     </section>
     <section className="login-panel"><h2>Your journey starts here</h2><p>Plan ahead, keep informed and stay connected.</p>
