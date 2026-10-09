@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState, type ReactNode, type UIEvent } from 'react';
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import { AnimatePresence, animate, motion, useMotionValue, useReducedMotion } from 'motion/react';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import {
   AlertCircle, AlertTriangle, ArrowLeft, ArrowRight, Bell, Bookmark,
-  BookOpen, Check, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, CircleHelp,
+  BookOpen, Check, CheckCheck, ChevronDown, ChevronRight, CircleHelp,
   Clock3, CloudRain, Compass, Download, Globe2, Heart, Home,
   Languages, LocateFixed, LockKeyhole, Map, MapPin, Menu, MessageCircle,
   Navigation, Phone, Plus, Radio, RefreshCw, Search, Send, Settings,
@@ -83,7 +83,7 @@ function FeatureCard({feature, index, open}: {feature:typeof features[number];in
   </motion.button>;
 }
 function SkeletonScreen({ profile = false }: {profile?:boolean}) {
-  const c = {baseColor:'#26252b',highlightColor:'#4b4857',duration:1.25};
+  const c = {baseColor:'#dfe8e9',highlightColor:'#f7fbfa',duration:1.25};
   return <div className="loading-scene" aria-busy="true" aria-label="Loading preview content">
     <Skeleton height={19} width="48%" {...c}/><Skeleton height={34} width="72%" {...c}/>
     <Skeleton height={profile?220:182} borderRadius={24} {...c}/>
@@ -91,23 +91,45 @@ function SkeletonScreen({ profile = false }: {profile?:boolean}) {
     <Skeleton height={38} width="52%" {...c}/><Skeleton height={145} borderRadius={20} {...c}/>
   </div>;
 }
-/* Native overflow carousel: phone momentum + desktop mouse dragging, no forced snap. */
+/* Native momentum scrolling, with a small springy pull past either edge. */
 function SwipeRow({children, label}:{children:ReactNode;label:string}) {
-  const ref=useRef<HTMLDivElement>(null);
-  const drag=useRef({x:0,left:0,down:false,moved:false});
-  const [canPrev,setCanPrev]=useState(false);
-  const [canNext,setCanNext]=useState(true);
-  const update=()=>{const el=ref.current;if(!el)return;setCanPrev(el.scrollLeft>5);setCanNext(el.scrollLeft+el.clientWidth<el.scrollWidth-5)};
-  useEffect(()=>{update();const element=ref.current;if(!element)return;const observer=new ResizeObserver(update);observer.observe(element);return()=>observer.disconnect()},[children]);
-  return <div className="swipe-block"><div className="swipe-toolbar"><span>Swipe to see more</span><div><button aria-label={`Scroll ${label} left`} type="button" disabled={!canPrev} onClick={()=>ref.current?.scrollBy({left:-260,behavior:'smooth'})}><ChevronLeft size={18}/></button><button aria-label={`Scroll ${label} right`} type="button" disabled={!canNext} onClick={()=>ref.current?.scrollBy({left:260,behavior:'smooth'})}><ChevronRight size={18}/></button></div></div>
-    <div className="native-swipe-row" ref={ref} aria-label={label} onScroll={update}
-      onPointerDown={e=>{if(e.pointerType!=='mouse'||e.button!==0)return;drag.current={x:e.clientX,left:e.currentTarget.scrollLeft,down:true,moved:false}}}
-      onPointerMove={e=>{if(!drag.current.down)return;const delta=e.clientX-drag.current.x;if(Math.abs(delta)>7){drag.current.moved=true;if(!e.currentTarget.hasPointerCapture(e.pointerId))e.currentTarget.setPointerCapture(e.pointerId)}if(drag.current.moved){e.preventDefault();e.currentTarget.scrollLeft=drag.current.left-delta}}}
-      onPointerUp={e=>{drag.current.down=false;if(e.currentTarget.hasPointerCapture(e.pointerId))e.currentTarget.releasePointerCapture(e.pointerId);window.setTimeout(()=>{drag.current.moved=false},80)}}
-      onPointerCancel={()=>{drag.current.down=false}} onDragStart={e=>e.preventDefault()}
-      onClickCapture={e=>{if(drag.current.moved){e.preventDefault();e.stopPropagation();drag.current.moved=false}}}>
-      {children}
-    </div></div>;
+  const ref = useRef<HTMLDivElement>(null);
+  const overshoot = useMotionValue(0);
+  const gesture = useRef({startX:0,startY:0,scrollStart:0,pressed:false,moved:false});
+  const animation = useRef<{stop:()=>void}|null>(null);
+  const reducedMotion = useReducedMotion();
+  const settle = () => {
+    gesture.current.pressed = false;
+    animation.current?.stop();
+    if(reducedMotion){overshoot.set(0);return;}
+    animation.current = animate(overshoot,0,{type:'spring',stiffness:410,damping:25,mass:.7});
+  };
+  const pull = (dx:number,dy:number) => {
+    const el=ref.current;
+    if(!el || Math.abs(dx)<Math.abs(dy)*1.18){overshoot.set(0);return;}
+    const max=Math.max(0,el.scrollWidth-el.clientWidth);
+    const beyondStart=gesture.current.scrollStart-dx<0;
+    const beyondEnd=gesture.current.scrollStart-dx>max;
+    if(beyondStart || beyondEnd){
+      const excess=beyondStart ? dx-gesture.current.scrollStart : dx+(max-gesture.current.scrollStart);
+      overshoot.set(Math.sign(excess)*Math.min(36,Math.pow(Math.abs(excess),.72)*1.6));
+    } else overshoot.set(0);
+  };
+  return <div className="swipe-block">
+    <div className="swipe-viewport">
+      <motion.div ref={ref} style={{x:overshoot}} className="native-swipe-row" aria-label={label}
+        onTouchStart={e=>{const t=e.touches[0];if(!t)return;animation.current?.stop();gesture.current={startX:t.clientX,startY:t.clientY,scrollStart:e.currentTarget.scrollLeft,pressed:true,moved:false};}}
+        onTouchMove={e=>{if(!gesture.current.pressed)return;const t=e.touches[0];if(t)pull(t.clientX-gesture.current.startX,t.clientY-gesture.current.startY);}}
+        onTouchEnd={settle} onTouchCancel={settle}
+        onPointerDown={e=>{if(e.pointerType!=='mouse'||e.button!==0)return;animation.current?.stop();gesture.current={startX:e.clientX,startY:e.clientY,scrollStart:e.currentTarget.scrollLeft,pressed:true,moved:false};}}
+        onPointerMove={e=>{if(e.pointerType!=='mouse'||!gesture.current.pressed)return;const dx=e.clientX-gesture.current.startX;if(Math.abs(dx)>6){gesture.current.moved=true;if(!e.currentTarget.hasPointerCapture(e.pointerId))e.currentTarget.setPointerCapture(e.pointerId);e.preventDefault();e.currentTarget.scrollLeft=gesture.current.scrollStart-dx;pull(dx,0);}}}
+        onPointerUp={e=>{settle();if(e.currentTarget.hasPointerCapture(e.pointerId))e.currentTarget.releasePointerCapture(e.pointerId);window.setTimeout(()=>{gesture.current.moved=false},90);}}
+        onPointerCancel={settle} onDragStart={e=>e.preventDefault()}
+        onClickCapture={e=>{if(gesture.current.moved){e.preventDefault();e.stopPropagation();gesture.current.moved=false;}}}>
+        {children}
+      </motion.div>
+    </div>
+  </div>;
 }
 function Carousel({items,onOpen}: {items:{kicker:string;title:string;subtitle:string;icon:LucideIcon;art:string;tint:string;page:Page}[];onOpen:(page:Page)=>void}) {
   return <SwipeRow label="Featured stories">{items.map(x=>{const Icon=x.icon;return <div className="native-carousel-item" key={x.title}>
