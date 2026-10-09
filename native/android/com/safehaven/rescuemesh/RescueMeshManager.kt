@@ -89,6 +89,8 @@ class RescueMeshManager(
         client.stopDiscovery()
         client.stopAllEndpoints()
         peers.clear(); pending.clear(); discovered.clear()
+        pendingSOS.clear() // Stop means no queued SOS should be sent after a later restart.
+        ownBeaconId = null; beaconStore.clear()
         running = false; advertising = false; discovering = false
         update()
     }
@@ -228,6 +230,12 @@ class RescueMeshManager(
         if (peers.isEmpty()) { pendingSOS.add(p); update(); return JSObject().put("id", p.getString("id")).put("status", "queued-in-memory") }
         sendAll(p)
         return JSObject().put("id", p.getString("id")).put("status", "offered")
+    }
+    fun cancelQueuedSOS(): JSObject {
+        val removed = pendingSOS.size
+        pendingSOS.clear()
+        update()
+        return JSObject().put("cancelled", removed)
     }
     private fun flushSOS() {
         if (peers.isEmpty()) return
