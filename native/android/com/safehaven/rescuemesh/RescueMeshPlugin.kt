@@ -90,6 +90,7 @@ class RescueMeshPlugin : Plugin() {
         try { call.resolve(mesh.sos(call.getString("text") ?: "")) }
         catch (e: Exception) { call.reject(e.message ?: "Cannot queue SOS") }
     }
+    @PluginMethod fun cancelQueuedSOS(call: PluginCall) { call.resolve(mesh.cancelQueuedSOS()) }
     @PluginMethod fun sendCheckIn(call: PluginCall) {
         try { call.resolve(mesh.checkIn(call.getString("status") ?: "")) }
         catch (e: Exception) { call.reject(e.message ?: "Cannot send check-in") }
