@@ -299,8 +299,12 @@ export default function App(){
   </>}
 
   function mesh(){return <><BackHeader title="RescueMesh" back={()=>go('home')} action={<IconButton icon={CircleHelp} label="About RescueMesh" onClick={()=>setDialog('help')}/>}/>
-    <div className="mesh-intro"><div className="mesh-orbits" aria-hidden="true"><span/><span/><Radio size={27}/></div><div><span className="eyebrow">OFFLINE NETWORK</span><h2>Stay in reach.</h2><p>Messages can travel between nearby phones once the Android mesh is connected.</p></div></div>
-    <div className="mesh-status"><span className="mesh-status-icon"><WifiOff size={23}/></span><div><strong>No mesh connection</strong><p>Native Android connection not enabled in this preview</p></div><span className="mesh-state">DEMO</span></div>
+    <section className="mesh-intro mesh-intro-v6" aria-label="Offline network overview">
+      <div className="mesh-v6-head"><span className="mesh-v6-symbol"><Radio size={25}/></span><span className="mesh-v6-offline"><WifiOff size={14}/> Not connected</span></div>
+      <h2>Your offline network.</h2>
+      <p>Find participating Android phones nearby. Messaging is unavailable until the native mesh is connected.</p>
+      <button className="mesh-v6-open" type="button" onClick={()=>setMeshTab('Nearby')}>View nearby devices <ArrowRight size={17}/></button>
+    </section>
     <div className="mesh-tabs" role="tablist" aria-label="RescueMesh sections">{(['Chats','Nearby','Beacons','SOS'] as const).map(t=><button role="tab" type="button" key={t} aria-selected={meshTab===t} className={meshTab===t?'selected':''} onClick={()=>setMeshTab(t)}>{t}</button>)}</div>
     <AnimatePresence mode="wait" initial={false}><motion.div key={meshTab} className="mesh-tab-content" initial={{opacity:0,x:9}} animate={{opacity:1,x:0}} exit={{opacity:0,x:-9}} transition={{duration:.19}}>
     {meshTab==='Chats'&&<><Heading title="Travel group" sub="Message preview · nothing transmitted"/><div className="chat-panel"><div className="chat-top"><span className="chat-avatar"><Users size={23}/></span><div><strong>Group conversation</strong><small>Offline demo · no connected peers</small></div></div><div className="chat-content"><div className="bubble incoming">Is everyone at the meeting point?<small>Example message</small></div><div className="bubble outgoing">I'm checking the route now.<small>Example reply</small></div>{demoMessages.map((m,i)=><div className="bubble outgoing" key={`${i}-${m}`}>{m}<small>Local preview · Not sent</small></div>)}</div><form className="message-compose" onSubmit={e=>{e.preventDefault();if(message.trim()){setDemoMessages(a=>[...a,message.trim()]);setMessage('');setToast('Local message preview — not sent');}}}><input aria-label="Demo message" value={message} maxLength={150} placeholder="Type a message…" onChange={e=>setMessage(e.target.value)}/><button type="submit" aria-label="Preview message" disabled={!message.trim()}><Send size={18}/></button></form></div></>}
