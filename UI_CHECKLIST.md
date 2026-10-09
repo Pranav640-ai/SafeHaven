@@ -48,3 +48,14 @@ These are the acceptance rules for the front-end prototype, based on the supplie
 
 Wire API content and official source provenance; make real authentication optional; implement Android/Kotlin Nearby Connections and independently validate direct links before relays; implement consent-based beacon lifecycle and location expiration; test Android APK on two or three real devices. None are implied to work in this UI prototype.
 - [x] Parent phone scroll container uses `touch-action: auto`, avoiding the vertical-only gesture restriction that blocked inner horizontal strips.
+
+### v6 visual and interaction review
+
+- [x] Porcelain, ocean blue, muted sea-glass and sand replaces previous neon green/dark theme.
+- [x] Consistent type roles: Nunito for UI text, Raleway for headings, Abril Fatface only for editorial emphasis.
+- [x] Frosted white translucent widgets over a subtle grid and soft spotlight.
+- [x] Preserved red for SOS and amber for caution.
+- [x] Removed swipe-strip arrow buttons and compulsory snap.
+- [x] Implemented restrained elastic edge pull on both sides of native horizontal strips.
+- [x] Kept every RescueMesh action clearly marked demo only.
+- [ ] Verify real touch interactions and contrast after the React dependencies install locally.
