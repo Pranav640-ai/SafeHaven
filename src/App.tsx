@@ -6,7 +6,7 @@ import { RescueMeshScreen } from './mesh/RescueMeshScreen';
 import { useRescueMesh } from './mesh/useRescueMesh';
 import './mesh/mesh.css';
 import { RiskTool, ReplanTool, GuidanceTool, PackTool } from './features/TravelTools';
-import { useSaved } from './services/storage';
+import { useSaved, read } from './services/storage';
 import {
   AlertCircle, AlertTriangle, ArrowLeft, ArrowRight, Bell, Bookmark,
   BookOpen, Check, CheckCheck, ChevronDown, ChevronRight, CircleHelp,
@@ -329,7 +329,7 @@ export default function App(){
     </section>
     <section className="profile-section"><Heading title="Preferences"/>
       <div className="list-panel profile-settings-list">
-        <AppRow icon={Languages} title="Language" subtitle="English" onClick={()=>setToast('More languages will be available soon')}/>
+        <AppRow icon={Languages} title="Language" subtitle={({en:'English',hi:'Hindi',ta:'Tamil',fr:'French',es:'Spanish'} as Record<string,string>)[read('language','en')]||'English'} onClick={()=>go('guide')}/>
         <AppRow icon={Bell} title="Notifications" subtitle="Manage alerts" onClick={()=>setDialog('alerts')}/>
         <AppRow icon={LockKeyhole} title="Privacy & sharing" subtitle="Location sharing is off" onClick={()=>setDialog('help')}/>
       </div>

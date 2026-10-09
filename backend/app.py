@@ -223,7 +223,10 @@ async def model_json(prompt, schema):
         return None
     from google import genai
     from google.genai import types
-    client = genai.Client(api_key=os.environ['GEMINI_API_KEY'])
+    tls = ssl.create_default_context()
+    client = genai.Client(api_key=os.environ['GEMINI_API_KEY'], http_options=types.HttpOptions(
+        client_args={'verify': tls}, async_client_args={'verify': tls},
+    ))
     try:
         async with ai_slots:
             response = await asyncio.wait_for(client.aio.models.generate_content(model=os.getenv('GEMINI_MODEL', 'gemini-2.5-flash'), contents=prompt, config=types.GenerateContentConfig(response_mime_type='application/json', response_schema=schema, temperature=0.1)), timeout=15)

@@ -68,4 +68,10 @@ Gemini/GNews live execution needs keys. Physical Android APK and Nearby tests re
 
 ### Observed results
 
-On 2026-10-10, the production build/PWA generation, 9 backend tests and 7 browser tests passed. Live provider smoke checks returned 8 Manali place matches, 16 forecast days and a successfully retrieved GDACS feed (0 nearby matches for that destination). No Gemini/GNews credential-backed call, hosted deployment, Docker runtime or physical Android test has been established locally.
+On 2026-10-10, the production build/PWA generation, 9 backend tests and 7 browser tests passed. Live provider smoke checks returned 8 Manali place matches, 16 forecast days and a successfully retrieved GDACS feed (0 nearby matches for that destination). Later on 2026-10-10, a live structured Gemini request and French guidance translation passed after configuring system-trusted TLS. The current debug Android APK also compiled successfully. GNews, hosted deployment, Docker runtime and physical mesh verification remain pending.
+
+## Android emulator preview
+
+Run `npm run api` and `npm run dev` in separate terminals. Then run `npm run android:emulator` and press Run on the chosen emulator in Android Studio. This opt-in command uses `http://10.0.2.2:5173` to load the current frontend from the host; Vite proxies API requests to port 8000. Use Vite port 5173 for this preview. Before release packaging, run `npm run android:sync` normally to restore bundled assets and remove the local preview URL.
+
+Language controls are in Emergency guide → Preferred language, also reachable through Profile → Language. Guidance supports prepared English/Hindi/Tamil; French/Spanish and report translation need the server Gemini key. App navigation labels are currently English.
