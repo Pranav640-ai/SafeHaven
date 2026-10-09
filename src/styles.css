@@ -1011,15 +1011,8 @@ h1,h2,h3,h4,.brand{font-weight:500}
   radial-gradient(ellipse at 100% 0%,#f4e7ba30,transparent 59%),
   repeating-radial-gradient(ellipse at 113% 25%,transparent 0 27px,#fff9df0e 28px 29px,transparent 30px 46px)}
 
-/* Warm beige notifications with a gentle lift and fade. */
+/* Forest green notifications with a gentle lift and fade. */
 .toast-anchor{position:absolute;z-index:25;left:23px;right:23px;bottom:calc(102px + env(safe-area-inset-bottom));display:flex;justify-content:center;pointer-events:none}
-.notification-toast{position:relative;width:100%;max-width:340px;min-height:48px;border-radius:18px;background:linear-gradient(135deg,#dac6aa,#cdb593);border:1px solid #ad8e6873;box-shadow:0 9px 25px #5d432525,inset 0 1px #fff5df80;color:#503820;font:500 12px/1.5 'Nunito',sans-serif;text-align:center}
+.notification-toast{position:relative;width:100%;max-width:340px;min-height:48px;border-radius:18px;background:linear-gradient(135deg,#306b58,#4c957e);border:1px solid #81b59c80;box-shadow:0 9px 25px #214e402b,inset 0 1px #ffffff24;color:#f6faf3;font:500 12px/1.5 'Nunito',sans-serif;text-align:center}
 .toast-copy{display:block;width:100%;padding:13px 18px;min-width:0}
 
-/* Scroll-linked pastel light stays behind all content and hit targets. */
-.ambient-backdrop{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;background:radial-gradient(ellipse at 10% 54%,#c6edd87a,transparent 70%)}
-.ambient-wash{position:absolute;inset:-55px -35px;pointer-events:none;will-change:transform,opacity}
-.ambient-warm{background:radial-gradient(ellipse 90% 44% at 94% 12%,#ffc9b9bb,transparent 78%),radial-gradient(ellipse 82% 45% at 0% 75%,#d8c6f5b3,transparent 79%),radial-gradient(ellipse 90% 34% at 95% 98%,#ffe2ab91,transparent 80%)}
-.ambient-cool{background:radial-gradient(ellipse 90% 46% at 8% 20%,#b7dff6cc,transparent 78%),radial-gradient(ellipse 88% 43% at 98% 60%,#c9bbf2b8,transparent 79%),radial-gradient(ellipse 85% 42% at 14% 96%,#ade6ceba,transparent 80%)}
-.phone-shell::before{opacity:.45}
-@media(prefers-reduced-motion:reduce){.ambient-wash{will-change:auto}}

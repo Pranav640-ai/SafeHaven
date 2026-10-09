@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode, type UIEvent } from 'react';
-import { AnimatePresence, animate, motion, useMotionValue, useTransform, useReducedMotion } from 'motion/react';
+import { AnimatePresence, animate, motion, useMotionValue, useReducedMotion } from 'motion/react';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { RescueMeshScreen } from './mesh/RescueMeshScreen';
@@ -204,17 +204,13 @@ export default function App(){
   const [homeChecklist,setHomeChecklist]=useState<string[]>([]);
   const scrollRef=useRef<HTMLDivElement>(null);
   const lastTop=useRef(0);
-  const ambientScroll=useMotionValue(0);
-  const ambientCool=useTransform(ambientScroll,[0,.5,1],[0,.9,.3]);
-  const ambientWarm=useTransform(ambientScroll,[0,.5,1],[.8,.1,1]);
-  const ambientDrift=useTransform(ambientScroll,[0,1],[0,-45]);
   const reduceMotion=useReducedMotion();
 
   useEffect(()=>{if(!authenticated)return;setLoading(true);const t=window.setTimeout(()=>setLoading(false),page==='home'?640:420);return()=>window.clearTimeout(t)},[page,authenticated]);
   useEffect(()=>{if(!toast)return;const t=window.setTimeout(()=>setToast(''),3800);return()=>window.clearTimeout(t)},[toast]);
   const openDestination=(name:string)=>{setSelectedDestination(name);go('risk')};
-  const go=(p:Page)=>{setPage(p);setCompact(false);lastTop.current=0;ambientScroll.set(0);if(scrollRef.current) scrollRef.current.scrollTo({top:0,behavior:'instant'})};
-  const handleScroll=(event:UIEvent<HTMLDivElement>)=>{const y=event.currentTarget.scrollTop;const range=event.currentTarget.scrollHeight-event.currentTarget.clientHeight;ambientScroll.set(range>0?Math.min(1,Math.max(0,y/range)):0);const diff=y-lastTop.current;if(y<66)setCompact(false);else if(diff>15)setCompact(true);else if(diff< -16)setCompact(false);lastTop.current=y;};
+  const go=(p:Page)=>{setPage(p);setCompact(false);lastTop.current=0;if(scrollRef.current) scrollRef.current.scrollTo({top:0,behavior:'instant'})};
+  const handleScroll=(event:UIEvent<HTMLDivElement>)=>{const y=event.currentTarget.scrollTop;const diff=y-lastTop.current;if(y<66)setCompact(false);else if(diff>15)setCompact(true);else if(diff< -16)setCompact(false);lastTop.current=y;};
   const replay=()=>{go('home');setLoading(true);window.setTimeout(()=>setLoading(false),1850);setToast('Loading updated')};
   const tab:Page = ['risk','replan','guide','beacon'].includes(page)?'explore':page;
   const enter=(guest:boolean)=>{if(!guest && phone.replace(/\D/g,'').length<7){setToast('Enter a valid phone number or continue as guest');return;}setAuthenticated(true);setPage('home');setToast(guest?'Welcome to SafeHaven':'Mobile verification is not available yet');};
@@ -372,10 +368,6 @@ export default function App(){
   return <div className="preview-stage">
     <aside className="desktop-side"><Brand/><h1>Thoughtful design.<br/><span>Ready for the journey.</span></h1><p>Discover places, prepare for the unexpected, and keep your plans in one place.</p><div className="desktop-help"><Smartphone size={21}/><span>Use Chrome device mode for a phone-sized preview.<br/><b>F12 → Ctrl + Shift + M</b></span></div><p className="desktop-disclaimer">Emergency information is source-dependent. Always check local authorities.</p></aside>
     <main className={`phone-shell ${!authenticated?'phone-onboarding':''}`} aria-label="SafeHaven application">
-      <div className="ambient-backdrop" aria-hidden="true">
-        <motion.div className="ambient-wash ambient-warm" style={{opacity:reduceMotion?.6:ambientWarm,y:reduceMotion?0:ambientDrift}}/>
-        <motion.div className="ambient-wash ambient-cool" style={{opacity:reduceMotion?.5:ambientCool,y:reduceMotion?0:ambientDrift}}/>
-      </div>
       <div className="phone-scroll" ref={scrollRef} onScroll={handleScroll}>
         {!authenticated ? login() : <AnimatePresence mode="wait" initial={false}><motion.div key={page} className="screen-content" initial={reduceMotion?false:{opacity:0,y:14,filter:'blur(3px)'}} animate={{opacity:1,y:0,filter:'blur(0px)'}} exit={reduceMotion?{}:{opacity:0,y:-9,filter:'blur(2px)'}} transition={{type:'spring',stiffness:310,damping:31,mass:.8}}>
           {loading?<SkeletonScreen profile={page==='profile'}/>:content()}
