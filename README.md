@@ -12,7 +12,7 @@ The former `feature/rescuemesh-android-bridge` and `handoff/risk-ui-onboarding-c
 
 `main` retains the original incomplete standalone Kotlin experiments for audit; their corrected implementation is in `native/android/` on `ui`. Do not merge those obsolete sources into the integrated app. Draft PR #1 is the earlier bridge-to-main proposal; it does not define the canonical development branch.
 
-Detailed developer handoff: **[CODEX_HANDOFF.md](CODEX_HANDOFF.md)**. Android-specific testing and warnings: **[RESCUEMESH_INTEGRATION.md](RESCUEMESH_INTEGRATION.md)**.
+Detailed developer handoff: **[CODEX_HANDOFF.md](CODEX_HANDOFF.md)**. Android implementation: **[RESCUEMESH_INTEGRATION.md](RESCUEMESH_INTEGRATION.md)**. Detailed device tests and expected results: **[MESH_TEST_GUIDE.md](MESH_TEST_GUIDE.md)**.
 
 ## Product scope — integrated web modules
 
@@ -47,7 +47,7 @@ npm run build
 npm run preview
 ```
 
-The login/phone-number UI is **not an OTP authentication service**; guest entry is available. In a browser, RescueMesh must say Android/native hardware is required rather than invent peers or delivered messages.
+Entry is guest-only; there is no OTP authentication service. Profile → Language opens dedicated language settings for guidance/report explanations; the rest of the interface remains English. Page Back, browser Back and Android system Back use the navigation history. In a browser, RescueMesh must say Android/native hardware is required rather than invent peers or delivered messages.
 
 ## Build one Android app
 
@@ -68,7 +68,7 @@ npm run android:sync
 npm run android:open
 ```
 
-See `RESCUEMESH_INTEGRATION.md` for permissions, pairing approval and detailed tests. Never test real Nearby networking using Chrome device emulation or a web-only deployment.
+See `MESH_TEST_GUIDE.md` for installation, permissions, pairing approval, expected results and troubleshooting. Never test real Nearby networking using Chrome device emulation or a web-only deployment.
 
 ## Repository map
 

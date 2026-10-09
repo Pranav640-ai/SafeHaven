@@ -1,3 +1,5 @@
+import { App as NativeApp } from '@capacitor/app';
+import { Capacitor } from '@capacitor/core';
 import { useEffect, useRef, useState, type ReactNode, type UIEvent } from 'react';
 import { AnimatePresence, animate, motion, useMotionValue, useReducedMotion } from 'motion/react';
 import Skeleton from 'react-loading-skeleton';
@@ -17,9 +19,9 @@ import {
   Users, WifiOff, X, Zap, FileText, Save, Leaf, Mountain, Waves, Trees, BatteryCharging, Crosshair, Wifi, Signal, LifeBuoy, UserRound, CalendarCheck2, FolderOpen, type LucideIcon,
 } from 'lucide-react';
 
-type Page = 'home' | 'explore' | 'risk' | 'replan' | 'guide' | 'mesh' | 'beacon' | 'pack' | 'profile';
+type Page = 'home' | 'explore' | 'risk' | 'replan' | 'guide' | 'mesh' | 'beacon' | 'pack' | 'profile' | 'language' | 'privacy';
 type GuideKind = 'Flood' | 'Extreme heat' | 'Earthquake';
-type Dialog = 'sos' | 'profile' | 'help' | 'alerts' | null;
+type Dialog = 'sos' | 'profile' | 'help' | null;
 
 const features: { title: string; detail: string; icon: LucideIcon; art: string; accent: string; page: Page }[] = [
   { title: 'Risk insights', detail: 'Warnings & reports', icon: ShieldAlert, art: '', accent: 'rose', page: 'risk' },
@@ -45,23 +47,12 @@ const guides: Record<GuideKind, {icon:LucideIcon; lead:string; steps:string[]}> 
   ] }
 };
 
-const itinerary = [
-  { day: '01', title: 'Arrive & explore', time: '4:00 PM', old: 'Old town walking tour', revised: 'Old town walking tour', changed: false },
-  { day: '02', title: 'Scenic viewpoint', time: '10:00 AM', old: 'Outdoor viewpoint', revised: 'Indoor museum visit', changed: true },
-  { day: '03', title: 'Coffee & departure', time: '11:30 AM', old: 'Coffee before checkout', revised: 'Coffee before checkout', changed: false },
-];
-
 const destinations = [
   { name:'Manali', region:'Himachal Pradesh', label:'Mountain escape', image:'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=760&q=80', mood:'Mountains' },
   { name:'Munnar', region:'Kerala', label:'Misty hills', image:'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=760&q=80', mood:'Nature' },
   { name:'Goa', region:'West coast', label:'Sun and coast', image:'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=760&q=80', mood:'Coast' },
   { name:'Coorg', region:'Karnataka', label:'Quiet trails', image:'https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?w=760&q=80', mood:'Nature' },
   { name:'Kodaikanal', region:'Tamil Nadu', label:'Lakes and forests', image:'https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=760&q=80', mood:'Mountains' },
-];
-
-const reports = [
-  { icon: CloudRain, title: 'Heavy rainfall', subtitle: 'Mountain district · Weather scenario', time: 'Sample', tone: 'amber' },
-  { icon: MapPin, title: 'Road access report', subtitle: 'Community report · Unverified', time: 'Sample', tone: 'violet' },
 ];
 
 function Brand({ compact = false }: {compact?:boolean}) {
@@ -151,10 +142,9 @@ function Modal({kind,close,go,person,saveName}: {kind:Dialog;close:()=>void;go:(
     <motion.section className="bottom-sheet" role="dialog" aria-modal="true" aria-label={`${kind} dialog`} onClick={e=>e.stopPropagation()}
       initial={{y:'100%'}} animate={{y:0}} exit={{y:'100%'}} transition={{type:'spring',stiffness:340,damping:34}}>
       <div className="sheet-handle"/><IconButton icon={X} onClick={close} label="Close dialog" className="sheet-close"/>
-      {kind==='sos'&&<><div className="sos-icon"><ShieldAlert size={39}/></div><h2>Emergency SOS</h2><p>SOS is not connected yet. No message will be sent.</p><div className="caution-inline"><AlertTriangle size={19}/> Emergency sending is not connected</div><button className="primary-button" type="button" onClick={()=>{close();go('guide')}}>View emergency guidance <ArrowRight size={18}/></button><button className="quiet-button" type="button" onClick={close}>Close</button></>}
+      {kind==='sos'&&<><div className="sos-icon"><ShieldAlert size={39}/></div><h2>Emergency SOS</h2><p>SOS is not connected yet. No message will be sent.</p><div className="caution-inline"><AlertTriangle size={19}/> Emergency sending is not connected</div><button className="primary-button" type="button" onClick={()=>go('guide')}>View emergency guidance <ArrowRight size={18}/></button><button className="quiet-button" type="button" onClick={close}>Close</button></>}
       {kind==='profile'&&<><h2>Edit display name</h2><p>This change stays in your browser session.</p><label className="field-label" htmlFor="profile-name">Display name</label><input className="form-input" id="profile-name" maxLength={32} value={draft} onChange={e=>setDraft(e.target.value)}/><button className="primary-button" type="button" onClick={()=>{saveName(draft.trim()||'Traveler');close()}}>Save changes</button></>}
       {kind==='help'&&<><h2>About SafeHaven</h2><p>On Android, RescueMesh connects participating phones with Nearby Connections and manual code confirmation. Online data services and downloadable packs are separate features.</p><button className="primary-button" type="button" onClick={close}>Understood</button></>}
-      {kind==='alerts'&&<><h2>Notifications</h2><p>Notifications are not available yet.</p><div className="sheet-list"><AppRow icon={CloudRain} title="Heavy rainfall" subtitle="Sample weather notification" tone="amber" onClick={()=>{close();go('risk')}}/></div><button className="quiet-button" type="button" onClick={close}>Close</button></>}
     </motion.section>
   </motion.div>}</AnimatePresence>;
 }
@@ -173,8 +163,8 @@ function NotificationToast({message}:{message:string}) {
 
 export default function App(){
   const [authenticated,setAuthenticated]=useState(false);
-  const [phone,setPhone]=useState('');
-  const [country,setCountry]=useState('+91');
+
+
   const [name,setName]=useState('Traveler');
   const [page,setPage]=useState<Page>('home');
   const [loading,setLoading]=useState(false);
@@ -182,25 +172,16 @@ export default function App(){
   const [compact,setCompact]=useState(false);
   const [toast,setToast]=useState('');
   const [query,setQuery]=useState('');
-  const [category,setCategory]=useState('All');
+  const packSection=useRef<'contacts'|'group'|null>(null);
   const [selectedDestination,setSelectedDestination]=useState('Manali');
   const [destinationMood,setDestinationMood]=useState('All');
   const [meshTab,setMeshTab]=useState<'Chats'|'Nearby'|'Beacons'|'SOS'>('Chats');
   const meshApi=useRescueMesh();
   const [sosOpenCount,setSosOpenCount]=useState(0);
-  const [meshScanning,setMeshScanning]=useState(false);
   const [tripNote,setTripNote]=useSaved('trip-note','');
   const [noteOpen,setNoteOpen]=useState(false);
   const [noteSaved,setNoteSaved]=useState(false);
-  const [guide,setGuide]=useState<GuideKind>('Flood');
-  const [riskTab,setRiskTab]=useState('Overview');
-  const [planMode,setPlanMode]=useState<'original'|'revised'>('revised');
-  const [message,setMessage]=useState('');
-  const [demoMessages,setDemoMessages]=useState<string[]>([]);
-  const [beaconText,setBeaconText]=useState('Community meeting point');
-  const [beaconDraft,setBeaconDraft]=useState(false);
   const [checklist,setChecklist]=useSaved<string[]>('checklist',[]);
-  const [checkedIn,setCheckedIn]=useState(false);
   const [showQuickGuide,setShowQuickGuide]=useState(false);
   const [homeGuide,setHomeGuide]=useState<GuideKind>('Flood');
   const [homeChecklist,setHomeChecklist]=useSaved<string[]>('home-checklist',[]);
@@ -211,11 +192,55 @@ export default function App(){
   useEffect(()=>{if(!authenticated)return;setLoading(true);const t=window.setTimeout(()=>setLoading(false),page==='home'?640:420);return()=>window.clearTimeout(t)},[page,authenticated]);
   useEffect(()=>{if(!toast)return;const t=window.setTimeout(()=>setToast(''),1600);return()=>window.clearTimeout(t)},[toast]);
   const openDestination=(name:string)=>{setSelectedDestination(name);go('risk')};
-  const go=(p:Page)=>{setPage(p);setCompact(false);lastTop.current=0;if(scrollRef.current) scrollRef.current.scrollTo({top:0,behavior:'instant'})};
+  const pendingScroll=useRef<number|null>(null);
+  const navigationDepth=useRef(0);
+  const languageNames:Record<string,string>={en:'English',hi:'Hindi',ta:'Tamil',fr:'French',es:'Spanish'};
+  const [language,setLanguage]=useSaved('language','en');
+  const rememberScroll=()=>window.history.replaceState({...window.history.state,scroll:scrollRef.current?.scrollTop||0},'');
+  const go=(p:Page)=>{
+    if(p===page && !dialog)return;
+    if(p!=='pack')packSection.current=null;
+    rememberScroll();
+    if(!dialog)navigationDepth.current+=1;
+    window.history[dialog?'replaceState':'pushState']({safehaven:true,page:p,scroll:0,depth:navigationDepth.current,dialog:null},'');
+    setDialog(null);setPage(p);pendingScroll.current=0;setCompact(false);
+  };
+  const openDialog=(d:Dialog)=>{
+    if(!d)return;
+    rememberScroll();navigationDepth.current+=1;
+    window.history.pushState({safehaven:true,page,scroll:scrollRef.current?.scrollTop||0,depth:navigationDepth.current,dialog:d},'');
+    setDialog(d);
+  };
+  const back=()=>{if(navigationDepth.current>0)window.history.back();else if(page!=='home')go('home');};
+  const closeDialog=()=>{if(dialog)back();};
+  useEffect(()=>{
+    window.history.replaceState({safehaven:true,page:'home',scroll:0,depth:0,dialog:null},'');
+    const pop=(event:PopStateEvent)=>{
+      const entry=event.state;
+      navigationDepth.current=entry?.safehaven?entry.depth:0;
+      setPage(entry?.safehaven?entry.page:'home');setDialog(entry?.safehaven?entry.dialog:null);
+      pendingScroll.current=entry?.scroll||0;setCompact(false);
+    };
+    window.addEventListener('popstate',pop);
+    return()=>window.removeEventListener('popstate',pop);
+  },[]);
+  useEffect(()=>{
+    if(loading || pendingScroll.current===null)return;
+    const timer=window.setTimeout(()=>{if(scrollRef.current){scrollRef.current.scrollTop=pendingScroll.current||0;lastTop.current=scrollRef.current.scrollTop;pendingScroll.current=null;}},250);
+    return()=>window.clearTimeout(timer);
+  },[page,loading,dialog,authenticated]);
+  useEffect(()=>{
+    const key=(event:KeyboardEvent)=>{if(event.key==='Escape' && dialog)closeDialog();};
+    window.addEventListener('keydown',key);
+    const listener=Capacitor.isNativePlatform()?NativeApp.addListener('backButton',()=>{
+      if(dialog || navigationDepth.current>0 || page!=='home')back();else void NativeApp.exitApp();
+    }):null;
+    return()=>{window.removeEventListener('keydown',key);if(listener)void listener.then(handle=>handle.remove());};
+  },[dialog,page]);
   const handleScroll=(event:UIEvent<HTMLDivElement>)=>{const y=event.currentTarget.scrollTop;const diff=y-lastTop.current;if(y<66)setCompact(false);else if(diff>15)setCompact(true);else if(diff< -16)setCompact(false);lastTop.current=y;};
-  const replay=()=>{go('home');setLoading(true);window.setTimeout(()=>setLoading(false),1850);setToast('Loading updated')};
-  const tab:Page = ['risk','replan','guide','beacon'].includes(page)?'explore':page;
-  const enter=(guest:boolean)=>{if(!guest && phone.replace(/\D/g,'').length<7){setToast('Enter a valid phone number or continue as guest');return;}setAuthenticated(true);setPage('home');setToast(guest?'Welcome to SafeHaven':'Mobile verification is not available yet');};
+
+  const tab:Page = ['language','privacy'].includes(page)?'profile':['risk','replan','guide','beacon','pack'].includes(page)?'explore':page;
+  const enter=(_guest:boolean)=>{navigationDepth.current=0;window.history.replaceState({safehaven:true,page:'home',scroll:0,depth:0,dialog:null},'');setAuthenticated(true);setPage('home');setToast('Welcome to SafeHaven');};
 
   function login(){return <div className="login-screen">
     <section className="login-art"><div className="login-top"><Brand/><button className="login-skip" type="button" onClick={()=>enter(true)}>Skip</button></div>
@@ -223,15 +248,13 @@ export default function App(){
       <div className="login-art-copy"><span>YOUR JOURNEY, YOUR SAFETY</span><h1>Go further.<br/><em>Stay prepared.</em></h1></div>
     </section>
     <section className="login-panel"><h2>Your journey starts here</h2><p>Plan ahead, keep informed and stay connected.</p>
-      <label className="field-label" htmlFor="phone">Mobile number</label><div className="phone-field"><label className="country-select-wrap"><span className="sr-only">Country code</span><select value={country} onChange={e=>setCountry(e.target.value)} aria-label="Country code"><option value="+91">+91</option><option value="+973">+973</option><option value="+1">+1</option><option value="+44">+44</option></select><ChevronDown size={14}/></label><input id="phone" type="tel" autoComplete="tel-national" inputMode="tel" maxLength={16} placeholder="Enter your number" value={phone} onChange={e=>setPhone(e.target.value)}/></div>
-      <button type="button" className="primary-button login-cta" onClick={()=>enter(false)}>Continue <ArrowRight size={18}/></button>
-      <div className="or-divider"><span/>or<span/></div><button type="button" className="guest-button" onClick={()=>enter(true)}><Shield size={19}/> Explore as guest <ArrowRight size={17}/></button>
-      <p className="login-legal">Phone verification is coming soon. You can continue as a guest.</p>
+      <button type="button" className="guest-button" onClick={()=>enter(true)}><Shield size={19}/> Explore as guest <ArrowRight size={17}/></button>
+      <p className="login-legal">Your preparation is saved on this device. No account is required.</p>
     </section>
   </div>}
 
   function home(){return <>
-    <header className="home-header"><button className="home-location" type="button" onClick={()=>go('explore')}><MapPin size={21}/><span><small>YOUR DESTINATION</small><strong>Explore a location <ChevronDown size={14}/></strong></span></button><div className="header-actions"><IconButton icon={Bell} onClick={()=>setDialog('alerts')} label="Notifications"/><button className="avatar-button" type="button" onClick={()=>go('profile')} aria-label="Open profile"><span>{name.charAt(0).toUpperCase()}</span></button></div></header>
+    <header className="home-header"><button className="home-location" type="button" onClick={()=>go('explore')}><MapPin size={21}/><span><small>YOUR DESTINATION</small><strong>Explore a location <ChevronDown size={14}/></strong></span></button><div className="header-actions"><button className="avatar-button" type="button" onClick={()=>go('profile')} aria-label="Open profile"><span>{name.charAt(0).toUpperCase()}</span></button></div></header>
     <div className="home-welcome"><p>Welcome to SafeHaven</p><h1>A better way to be prepared.</h1></div>
     <button type="button" className="hero-risk" onClick={()=>go('risk')}><img className="hero-risk-photo" src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1100&q=82" onError={e=>{e.currentTarget.style.display="none"}} alt="Mountain landscape" loading="eager"/><div className="hero-risk-bg"/><div className="hero-risk-top"><span className="hero-shield"><ShieldCheck size={24}/></span><span className="hero-label">DESTINATION SAFETY</span><ArrowRight size={20}/></div><h2>Know before<br/>you go.</h2><p>Check weather, reports and local guidance for your next stop.</p><span className="hero-link">Explore risk insights <ChevronRight size={16}/></span></button>
     
@@ -240,9 +263,9 @@ export default function App(){
     <section className="home-quick-section" aria-label="Quick safety actions">
       <Heading title="Quick actions" />
       <div className="home-action-grid">
-        <motion.button type="button" whileTap={{scale:.97}} className={`home-action ${checkedIn?'home-action-done':''}`} onClick={()=>{setCheckedIn(v=>!v);setToast('Check-in changed locally. Nothing was shared.')}}>
+        <motion.button type="button" whileTap={{scale:.97}} className="home-action" onClick={()=>{packSection.current='group';go('pack')}}>
           <span className="home-action-icon"><CheckCheck size={25}/></span>
-          <span><strong>{checkedIn?'Checked in locally':'Quick check-in'}</strong><small>{checkedIn?'Tap to reset · not shared':'Visible on this device only'}</small></span>
+          <span><strong>Quick check-in</strong><small>Share with your private group</small></span>
           <ChevronRight size={18}/>
         </motion.button>
         <motion.button type="button" whileTap={{scale:.97}} className={`home-action ${showQuickGuide?'home-action-done':''}`} aria-expanded={showQuickGuide} onClick={()=>setShowQuickGuide(v=>!v)}>
@@ -273,12 +296,11 @@ export default function App(){
       ]}/>
 
     </section>
-    <section className="home-section"><Heading title="Recent reports" sub="Reports need verification" right={<button className="section-link" onClick={()=>go('risk')}>View all <ChevronRight size={15}/></button>}/><div className="list-panel">{reports.map(r=><AppRow key={r.title} icon={r.icon} tone={r.tone} title={r.title} subtitle={r.subtitle} onClick={()=>go('risk')} end={<span className="row-end">Sample <ChevronRight size={16}/></span>}/>)}</div></section>
   </>}
 
   function explore(){
     const matched=destinations.filter(d=>(d.name+' '+d.region+' '+d.label).toLowerCase().includes(query.toLowerCase())&&(destinationMood==='All'||d.mood===destinationMood));
-    return <><BackHeader title="Explore" back={()=>go('home')}/>
+    return <><BackHeader title="Explore" back={back}/>
       <div className="explore-intro"><span className="eyebrow">DISCOVER PLACES</span><h2>Where to next?</h2><p>Find places worth exploring. Check conditions before making plans.</p></div>
       <div className="search-field explore-search"><Search size={21}/><input placeholder="Search a place or region" value={query} onChange={e=>setQuery(e.target.value)} aria-label="Search destinations"/>{query&&<button type="button" aria-label="Clear search" onClick={()=>setQuery('')}><X size={17}/></button>}</div>
       <div className="explore-editorial" role="img" aria-label="Mountains and lakes scenic photograph"><div className="explore-editorial-art"/><div className="explore-editorial-shade"/><span className="explore-overline"><Compass size={15}/> THE OUTDOORS</span><div><h3>Take the scenic route.</h3><p>Great trips start with a little preparation.</p></div></div>
@@ -293,24 +315,24 @@ export default function App(){
     </>
   }
 
-  function risk(){return <RiskTool key={selectedDestination} destination={selectedDestination} back={()=>go('home')} notify={setToast}/>;}
+  function risk(){return <RiskTool key={selectedDestination} destination={selectedDestination} back={back} notify={setToast}/>;}
 
-  function replan(){return <ReplanTool back={()=>go('home')} notify={setToast}/>;}
+  function replan(){return <ReplanTool back={back} notify={setToast}/>;}
 
-  function guidePage(){return <GuidanceTool back={()=>go('home')} notify={setToast}/>;}
+  function guidePage(){return <GuidanceTool back={back} notify={setToast}/>;}
 
-  function mesh(){return <RescueMeshScreen key={`${meshTab}-${sosOpenCount}`} mesh={meshApi} onBack={()=>go('home')} initialTab={meshTab}/>;}
-  function beacon(){return <RescueMeshScreen key="beacon" mesh={meshApi} onBack={()=>go('mesh')} initialTab="Beacons"/>;}
+  function mesh(){return <RescueMeshScreen key={`${meshTab}-${sosOpenCount}`} mesh={meshApi} onBack={back} initialTab={meshTab}/>;}
+  function beacon(){return <RescueMeshScreen key="beacon" mesh={meshApi} onBack={back} initialTab="Beacons"/>;}
 
-  function pack(){return <PackTool back={()=>go('home')} notify={setToast} checklist={checklist} toggleChecklist={title=>setChecklist(old=>old.includes(title)?old.filter(x=>x!==title):[...old,title])} nearbyShare={meshApi.available&&meshApi.state.peers.length>0?meshApi.sendCheckIn:undefined}/>;}
+  function pack(){return <PackTool initialSection={packSection.current} back={back} notify={setToast} checklist={checklist} toggleChecklist={title=>setChecklist(old=>old.includes(title)?old.filter(x=>x!==title):[...old,title])} nearbyShare={meshApi.available&&meshApi.state.peers.length>0?meshApi.sendCheckIn:undefined}/>;}
 
   function profile(){return <>
-    <BackHeader title="Profile" back={()=>go('home')} action={<IconButton icon={Settings} label="Help and settings" onClick={()=>setDialog('help')}/>}/>
+    <BackHeader title="Profile" back={back} action={<IconButton icon={Settings} label="Help and settings" onClick={()=>openDialog('help')}/>}/>
     <section className="profile-revamp" aria-label="Your profile">
       <div className="profile-revamp-top">
         <div className="profile-revamp-avatar"><UserRound size={32} strokeWidth={1.5}/></div>
-        <div className="profile-revamp-person"><span>YOUR ACCOUNT</span><h2>{name}</h2><p>{phone?`${country} ${phone}`:'Guest account'}</p></div>
-        <button type="button" className="profile-revamp-edit" onClick={()=>setDialog('profile')} aria-label="Edit profile"><Settings size={18}/></button>
+        <div className="profile-revamp-person"><span>YOUR ACCOUNT</span><h2>{name}</h2><p>Guest account</p></div>
+        <button type="button" className="profile-revamp-edit" onClick={()=>openDialog('profile')} aria-label="Edit profile"><Settings size={18}/></button>
       </div>
       <div className="profile-revamp-divider"/>
       <div className="profile-revamp-bottom"><span><ShieldCheck size={19}/> Your safety essentials, together</span><button type="button" onClick={()=>go('pack')}>View pack <ArrowRight size={16}/></button></div>
@@ -318,7 +340,7 @@ export default function App(){
     <section className="profile-section profile-essential-section"><Heading title="Quick access"/>
       <div className="profile-shortcuts profile-shortcuts-final">
         <button type="button" onClick={()=>go('replan')}><span><Map size={27} strokeWidth={1.65}/></span>My trips</button>
-        <button type="button" onClick={()=>go('pack')}><span><Phone size={27} strokeWidth={1.65}/></span>Contacts</button>
+        <button type="button" onClick={()=>{packSection.current='contacts';go('pack')}}><span><Phone size={27} strokeWidth={1.65}/></span>Contacts</button>
         <button type="button" onClick={()=>go('pack')}><span><FolderOpen size={27} strokeWidth={1.65}/></span>Offline pack</button>
       </div>
     </section>
@@ -329,20 +351,20 @@ export default function App(){
     </section>
     <section className="profile-section"><Heading title="Preferences"/>
       <div className="list-panel profile-settings-list">
-        <AppRow icon={Languages} title="Language" subtitle={({en:'English',hi:'Hindi',ta:'Tamil',fr:'French',es:'Spanish'} as Record<string,string>)[read('language','en')]||'English'} onClick={()=>go('guide')}/>
-        <AppRow icon={Bell} title="Notifications" subtitle="Manage alerts" onClick={()=>setDialog('alerts')}/>
-        <AppRow icon={LockKeyhole} title="Privacy & sharing" subtitle="Location sharing is off" onClick={()=>setDialog('help')}/>
+        <AppRow icon={Languages} title="Language" subtitle={languageNames[read('language','en')]||'English'} onClick={()=>go('language')}/>
+        <AppRow icon={LockKeyhole} title="Privacy & sharing" subtitle="Review consent and local storage" onClick={()=>go('privacy')}/>
       </div>
     </section>
     <section className="profile-section"><Heading title="More"/>
       <div className="list-panel profile-settings-list">
-        <AppRow icon={RefreshCw} title="Replay loading" onClick={replay}/>
-        <AppRow icon={CircleHelp} title="Help & information" onClick={()=>setDialog('help')}/>
+        <AppRow icon={CircleHelp} title="Help & information" onClick={()=>openDialog('help')}/>
       </div>
     </section>
-    <button type="button" className="signout" onClick={()=>{setAuthenticated(false);setPage('home');setPhone('');setName('Traveler');setToast('')}}>Back to welcome screen</button>
+    <button type="button" className="signout" onClick={()=>{setAuthenticated(false);setPage('home');navigationDepth.current=0;window.history.replaceState({safehaven:true,page:'home',scroll:0,depth:0,dialog:null},'');setName('Traveler');setToast('')}}>Back to welcome screen</button>
   </>}
-  const content=()=>({home,explore,risk,replan,guide:guidePage,mesh,beacon,pack,profile}[page]());
+  function languagePage(){return <><BackHeader title="Language settings" back={back}/><section className="content-section"><h2>Preferred language</h2><p>Used for safety guidance and report explanations. The rest of the interface currently remains in English.</p><label className="tool-field">Language<select aria-label="Preferred language" value={read('language',language)} onChange={event=>{setLanguage(event.target.value);setToast('Language preference saved');}}>{Object.entries(languageNames).map(([code,title])=><option key={code} value={code}>{title}</option>)}</select></label><p className="tool-muted">Hindi and Tamil have prepared translations. French and Spanish require the online AI service. Translations are unreviewed; English source text stays available.</p><button className="secondary-button" onClick={()=>go('guide')}>Preview safety guidance <ArrowRight size={17}/></button></section></>}
+  function privacy(){return <><BackHeader title="Privacy & sharing" back={back}/><section className="content-section"><h2>Your choices</h2><p>Contacts, plans, saved guidance and language preferences are stored on this device. Editing your display name lasts for this session.</p><p>Private group check-ins require consent and an online service. Nearby check-ins require a connected phone and separate consent. Beacons share your location only when you publish one.</p><p>Stopping RescueMesh disconnects peers and clears its in-memory SOS queue and beacons. Leaving a private group removes your membership from that group.</p><button className="secondary-button" onClick={()=>go('pack')}>Manage group sharing</button><button className="secondary-button" onClick={()=>go('mesh')}>Manage nearby connections</button></section></>}
+  const content=()=>({home,explore,risk,replan,guide:guidePage,mesh,beacon,pack,profile,language:languagePage,privacy}[page]());
   return <div className="preview-stage">
     <aside className="desktop-side"><Brand/><h1>Thoughtful design.<br/><span>Ready for the journey.</span></h1><p>Discover places, prepare for the unexpected, and keep your plans in one place.</p><div className="desktop-help"><Smartphone size={21}/><span>Use Chrome device mode for a phone-sized preview.<br/><b>F12 → Ctrl + Shift + M</b></span></div><p className="desktop-disclaimer">Emergency information is source-dependent. Always check local authorities.</p></aside>
     <main className={`phone-shell ${!authenticated?'phone-onboarding':''}`} aria-label="SafeHaven application">
@@ -353,10 +375,10 @@ export default function App(){
       </div>
       {authenticated&&<nav className={`floating-dock ${compact?'dock-compact':''}`} aria-label="Main navigation">
         {([{id:'home',label:'Home',icon:Home},{id:'explore',label:'Explore',icon:Compass}] as const).map(t=>{const Icon=t.icon;return <button key={t.id} type="button" aria-label={t.label} aria-current={tab===t.id?'page':undefined} onClick={()=>go(t.id)} className={`dock-item ${tab===t.id?'dock-active':''}`}><span className="dock-active-bg" aria-hidden="true"/><Icon size={22} strokeWidth={2.1}/><span>{t.label}</span></button>})}
-        <motion.button type="button" className="dock-sos" aria-label="Emergency SOS" onClick={()=>{if(!meshApi.available){setDialog('sos');return;}setMeshTab('SOS');setSosOpenCount(count=>count+1);go('mesh')}} whileTap={{scale:.92}}><ShieldAlert size={21}/><small>SOS</small></motion.button>
+        <motion.button type="button" className="dock-sos" aria-label="Emergency SOS" onClick={()=>{if(!meshApi.available){openDialog('sos');return;}setMeshTab('SOS');setSosOpenCount(count=>count+1);go('mesh')}} whileTap={{scale:.92}}><ShieldAlert size={21}/><small>SOS</small></motion.button>
         {([{id:'mesh',label:'Mesh',icon:Radio},{id:'profile',label:'Profile',icon:UserRound}] as const).map(t=>{const Icon=t.icon;return <button key={t.id} type="button" aria-label={t.label} aria-current={tab===t.id?'page':undefined} onClick={()=>go(t.id)} className={`dock-item ${tab===t.id?'dock-active':''}`}><span className="dock-active-bg" aria-hidden="true"/><Icon size={22} strokeWidth={2.1}/><span>{t.label}</span></button>})}
       </nav>}
-      <Modal kind={dialog} close={()=>setDialog(null)} go={go} person={name} saveName={setName}/>
+      <Modal kind={dialog} close={closeDialog} go={go} person={name} saveName={setName}/>
       <AnimatePresence mode="wait">{toast&&<NotificationToast key={toast} message={toast}/>}</AnimatePresence>
     </main>
   </div>

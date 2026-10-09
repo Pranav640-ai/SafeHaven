@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import {AnimatePresence, motion} from 'motion/react';
 import {ArrowLeft, CheckCircle2, ChevronRight, CircleHelp, MapPin, MessageCircle,
   RadioTower, Send, ShieldAlert, ShieldCheck, Users, WifiOff, X} from 'lucide-react';
@@ -15,10 +15,15 @@ export function RescueMeshScreen({mesh,onBack,initialTab='Chats'}:
   const [confirmSOS,setConfirmSOS]=useState(false);
   const [sosText,setSosText]=useState('I need assistance. Please relay my SOS to someone who can help.');
   const [busy,setBusy]=useState(false);
+  const [now,setNow]=useState(Date.now());
+  useEffect(()=>{const timer=window.setInterval(()=>setNow(Date.now()),1000);return()=>window.clearInterval(timer);},[]);
   const run = (fn:()=>Promise<unknown>)=>{setBusy(true);void fn().catch(()=>{}).finally(()=>setBusy(false));};
   const connected=mesh.state.peers.length;
+  const title=initialTab==='Beacons'?'Safety beacon':'RescueMesh';
+  if(!mesh.available)return <div className="mesh-live"><header className="back-header"><button type="button" className="icon-button" aria-label="Back" onClick={onBack}><ArrowLeft size={20}/></button><h1>{title}</h1></header><div className="mesh-live-intro"><RadioTower size={28}/><div><h2>Connect through the Android app</h2><p>Nearby chat, SOS relay and location beacons require SafeHaven installed on Android phones. Open the app on both phones and start Nearby discovery.</p></div></div><p className="mesh-live-hint">The website can save your safety pack and display guidance. It cannot discover or message nearby phones.</p></div>;
+
   return <div className="mesh-live">
-    <header className="back-header"><button type="button" className="icon-button" aria-label="Back" onClick={onBack}><ArrowLeft size={20}/></button><h1>RescueMesh</h1><span className="mesh-live-indicator">{connected} nearby</span></header>
+    <header className="back-header"><button type="button" className="icon-button" aria-label="Back" onClick={onBack}><ArrowLeft size={20}/></button><h1>{title}</h1><span className="mesh-live-indicator">{connected} nearby</span></header>
     <div className="mesh-live-intro"><div className="mesh-live-icon"><RadioTower size={28}/></div><div><h2>Stay connected, even offline.</h2><p>{mesh.available ? mesh.state.running ? 'Nearby discovery is active on this Android phone.' : 'Connect directly to participating Android phones.' : 'This feature needs the SafeHaven Android app.'}</p></div></div>
     {mesh.error&&<p className="mesh-live-alert" role="alert">{mesh.error}</p>}
     {mesh.notice&&<p className="mesh-live-notice" role="status">{mesh.notice}</p>}
@@ -50,8 +55,8 @@ export function RescueMeshScreen({mesh,onBack,initialTab='Chats'}:
       <button type="button" className="primary-button mesh-live-cta" disabled={!mesh.available||busy||!beaconText.trim()} onClick={()=>run(()=>mesh.publishBeacon(beaconText,minutes))}>Share my location temporarily</button>
       {mesh.ownBeacon&&<button type="button" className="secondary-button mesh-live-cta" disabled={busy} onClick={()=>run(()=>mesh.withdrawBeacon())}>Stop sharing beacon</button>}
       {mesh.available&&mesh.state.beacons.length>0&&<button type="button" className="secondary-button mesh-live-cta" disabled={busy} onClick={()=>run(()=>mesh.locate())}>Show approximate distance & bearing</button>}
-      {mesh.state.beacons.filter(b=>b.expiresAt>Date.now()).map(b=><BeaconItem key={b.beaconId} item={b} position={mesh.position}/>)}
-      {!mesh.state.beacons.length&&<div className="mesh-live-empty"><MapPin size={32}/><h4>No active community beacons</h4><p>A beacon appears here only after a nearby participant shares one.</p></div>}
+      {mesh.state.beacons.filter(b=>b.expiresAt>now).map(b=><BeaconItem key={b.beaconId} item={b} position={mesh.position}/>)}
+      {!mesh.state.beacons.some(b=>b.expiresAt>now)&&<div className="mesh-live-empty"><MapPin size={32}/><h4>No active community beacons</h4><p>A beacon appears here only after a nearby participant shares one.</p></div>}
       <p className="mesh-live-hint">A beacon is not an officially approved shelter. Direction is a straight-line bearing, never a guarantee of a safe route.</p>
     </>}
     {tab==='SOS'&&<>
@@ -61,8 +66,7 @@ export function RescueMeshScreen({mesh,onBack,initialTab='Chats'}:
       <button type="button" className="primary-button mesh-live-cta mesh-live-danger" disabled={!mesh.available||busy||!confirmSOS||!sosText.trim()} onClick={()=>run(async()=>{await mesh.sendSOS(sosText);setConfirmSOS(false)})}><ShieldAlert size={20}/> Queue / relay SOS</button>
       <p className="mesh-live-hint">Queued on this phone: {mesh.state.queuedSOS}. An SOS is acknowledged only when a peer confirms receipt.</p>
       {mesh.state.queuedSOS>0&&<button type="button" className="secondary-button mesh-live-cta" disabled={busy} onClick={()=>run(()=>mesh.cancelQueuedSOS())}>Cancel pending SOS ({mesh.state.queuedSOS})</button>}
-      {mesh.messages.filter(m=>m.type==='sos').map(m=><div key={m.id} className="mesh-live-peer"><ShieldAlert size={20}/><span><strong>{m.received?`From ${m.fromName}`:'Your SOS'}</strong><small>{m.received?'Received':m.status||'Not confirmed'}</small></span></div>)}
-      <button className="mesh-live-guide" type="button" onClick={onBack}>Return to safety features <ChevronRight size={16}/></button>
+      {mesh.messages.filter(m=>m.type==='sos').map(m=><div key={m.id} className="mesh-live-peer"><ShieldAlert size={20}/><span><strong>{m.received?`From ${m.fromName}`:'Your SOS'}</strong><p>{m.body}</p><small>{m.received?'Received':m.status||'Not confirmed'}</small></span></div>)}
     </>}
     </motion.section></AnimatePresence>
   </div>;

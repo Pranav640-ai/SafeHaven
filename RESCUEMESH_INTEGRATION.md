@@ -13,10 +13,12 @@ The consolidated `ui` branch connects the shared React interface to a Kotlin Cap
 
 If Gradle reports Java/Kotlin plugin compatibility errors, confirm Android Studio JDK 21 and generated Capacitor 7 Gradle versions. The installer expects standard Capacitor 7 Groovy Gradle files; for custom Kotlin DSL configurations follow the handoff rather than forcing the script.
 
+See [MESH_TEST_GUIDE.md](MESH_TEST_GUIDE.md) for the current detailed device-by-device procedure.
+
 ### Connection test
 
 - Open `RescueMesh → Nearby` on both phones and start discovery (grant permissions).
-- Confirm both show the *same six-digit authentication code* for the pairing, then tap **Codes match** on each. Never accept if different.
+- Confirm both show the *same authentication code* for the pairing, then tap **Codes match** on each. Never accept if different.
 - Once status is **Connected**, send a message from phone A; verify it appears on B, and A's message status changes to **Peer acknowledged**.
 - Turn off mobile data and Wi-Fi internet. Nearby uses Bluetooth/Wi-Fi peer radios; keep required radios enabled. Repeat.
 - For relay, use 3 devices A↔B and B↔C with no A↔C direct link. Verify payload reaches C; test TTL / duplicate behavior.
@@ -42,4 +44,4 @@ The install script adds Bluetooth (legacy and Android 12+), **BLUETOOTH_ADVERTIS
 
 ## Consolidation verification (2026-10-10)
 
-The consolidated `ui` frontend passed `npm run build` (TypeScript and Vite). Native setup scripts passed Node syntax checks. This workspace has no Android SDK, so the final Android build is left to the `ui` GitHub Actions workflow. Physical two/three-phone networking tests remain required; compilation alone does not prove delivery.
+The consolidated `ui` frontend passed `npm run build` (TypeScript and Vite). Native setup scripts passed Node syntax checks. This workspace now has Android Studio and an SDK, and a debug APK has been built locally. Physical two/three-phone networking tests remain required; compilation alone does not prove delivery.

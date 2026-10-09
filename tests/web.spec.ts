@@ -105,3 +105,113 @@ test('private group consent, status synchronization and leaving work', async ({ 
     await page.getByRole('button', { name: 'Leave group and remove my shared status' }).click();
     await expect(page.getByLabel('New group name')).toBeVisible();
 });
+
+
+test('page Back and browser Back follow the last page and restore scroll', async ({ page }) => {
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Explore as guest' }).click();
+    await page.getByRole('button', { name: 'Explore', exact: true }).click();
+    await page.getByRole('button', { name: /Safety essentials/ }).click();
+    await expect(page.getByRole('heading', { name: 'Emergency guide', exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Back', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Explore', exact: true })).toBeVisible();
+    await page.goBack();
+    await expect(page.getByText('A better way to be prepared.')).toBeVisible();
+    await page.getByRole('button', { name: /Safety pack Things to keep/ }).scrollIntoViewIfNeeded();
+    const scroll = page.locator('.phone-scroll');
+    const before = await scroll.evaluate(el => el.scrollTop);
+    await page.getByRole('button', { name: /Safety pack Things to keep/ }).click();
+    await expect(page.getByRole('heading', { name: 'Safety pack', exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Back', exact: true }).click();
+    await expect.poll(() => scroll.evaluate(el => el.scrollTop)).toBeGreaterThan(before - 10);
+});
+
+test('language settings, contacts shortcut and privacy routes work', async ({ page }) => {
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Explore as guest' }).click();
+    await page.getByRole('button', { name: 'Profile', exact: true }).click();
+    await page.getByRole('button', { name: /Language English/ }).click();
+    await expect(page.getByRole('heading', { name: 'Language settings' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Emergency guide' })).toHaveCount(0);
+    await page.getByLabel('Preferred language').selectOption('hi');
+    await page.getByRole('button', { name: 'Preview safety guidance' }).click();
+    await expect(page.getByLabel('Preferred language')).toHaveValue('hi');
+    await page.getByRole('button', { name: 'Back', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Language settings' })).toBeVisible();
+    await page.getByRole('button', { name: 'Go back', exact: true }).click();
+    await expect(page.getByRole('button', { name: /Language Hindi/ })).toBeVisible();
+    await expect(page.getByRole('button', { name: /Notifications|Replay loading/ })).toHaveCount(0);
+    await page.getByRole('button', { name: 'Contacts', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Emergency contacts', exact: true })).toBeInViewport();
+    await page.getByRole('button', { name: 'Back', exact: true }).click();
+    await page.getByRole('button', { name: /Privacy & sharing/ }).click();
+    await expect(page.getByRole('heading', { name: 'Privacy & sharing', exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Manage nearby connections' }).click();
+    await expect(page.getByRole('heading', { name: 'RescueMesh', exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Start Nearby discovery' })).toHaveCount(0);
+    await page.getByRole('button', { name: 'Back', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Privacy & sharing', exact: true })).toBeVisible();
+});
+
+test('dialogs close with Back and SOS guidance returns to its origin', async ({ page }) => {
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Explore as guest' }).click();
+    await page.getByRole('button', { name: 'Profile', exact: true }).click();
+    await page.getByRole('button', { name: 'Edit profile', exact: true }).click();
+    await page.getByLabel('Display name', { exact: true }).fill('Navigator');
+    await page.getByRole('button', { name: 'Save changes' }).click();
+    await expect(page.getByRole('heading', { name: 'Navigator', exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Emergency SOS', exact: true }).click();
+    await page.goBack();
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    await expect(page.getByRole('heading', { name: 'Profile', exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Emergency SOS', exact: true }).click();
+    await page.getByRole('button', { name: 'View emergency guidance' }).click();
+    await expect(page.getByRole('heading', { name: 'Emergency guide', exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Back', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Profile', exact: true })).toBeVisible();
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+});
+
+
+test('all home feature routes, destination links and profile shortcuts open their screens', async ({ page }) => {
+    const errors: string[] = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Explore as guest' }).click();
+    for (const [label, title] of [
+        ['Risk insights Warnings & reports', 'Risk intelligence'],
+        ['Trip replanner Safer alternatives', 'Trip replanner'],
+        ['Emergency guide Steps that help', 'Emergency guide'],
+        ['RescueMesh Stay connected', 'RescueMesh'],
+        ['Safety beacon Meeting points', 'Safety beacon'],
+        ['Safety pack Things to keep', 'Safety pack'],
+    ]) {
+        await page.getByRole('button', { name: label, exact: true }).click();
+        await expect(page.getByRole('heading', { name: title, exact: true })).toBeVisible();
+        await page.getByRole('button', { name: 'Back', exact: true }).click();
+        await expect(page.getByText('A better way to be prepared.')).toBeVisible();
+    }
+    await page.getByRole('button', { name: /Quick check-in/ }).click();
+    await expect(page.getByRole('heading', { name: 'Private group check-in', exact: true })).toBeInViewport();
+    await page.getByRole('button', { name: 'Back', exact: true }).click();
+    await page.getByRole('button', { name: 'Explore', exact: true }).click();
+    await page.getByRole('button', { name: /Mountain escape Manali/ }).click();
+    await expect(page.getByRole('heading', { name: 'Risk intelligence', exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Back', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Explore', exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Profile', exact: true }).click();
+    for (const [label, title] of [['My trips','Trip replanner'],['Offline pack','Safety pack'],['Continue checklist','Safety pack'],['View pack','Safety pack']]) {
+        await page.getByRole('button', { name: label, exact: true }).click();
+        await expect(page.getByRole('heading', { name: title, exact: true })).toBeVisible();
+        await page.getByRole('button', { name: 'Back', exact: true }).click();
+        await expect(page.getByRole('heading', { name: 'Profile', exact: true })).toBeVisible();
+    }
+    await page.getByRole('button', { name: 'Help & information', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'About SafeHaven' })).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    await page.getByRole('button', { name: 'Back to welcome screen', exact: true }).click();
+    await expect(page.getByRole('button', { name: 'Explore as guest' })).toBeVisible();
+    expect(errors).toEqual([]);
+});
