@@ -1,54 +1,54 @@
 /* Scoped RescueMesh controls. Reuses the SafeHaven sapphire + porcelain theme. */
-.mesh-live{padding-bottom:110px;color:#203851}
+.mesh-live{padding-bottom:110px;color:#29483e}
 .mesh-live .back-header{margin-bottom:20px}
-.mesh-live-indicator{font:500 12px 'Nunito',sans-serif;background:#e4edf7;color:#3a5982;padding:8px 11px;border-radius:999px}
-.mesh-live-intro{display:flex;align-items:center;gap:15px;border:1px solid rgba(80,113,164,.22);background:linear-gradient(125deg,rgba(222,235,250,.89),rgba(190,213,236,.68));border-radius:23px;padding:19px;box-shadow:0 12px 34px rgba(37,70,118,.09)}
-.mesh-live-icon{flex:none;width:56px;height:56px;border-radius:19px;display:grid;place-items:center;background:#284e85;color:white;box-shadow:0 8px 22px rgba(31,64,109,.21)}
-.mesh-live-intro h2{font:500 21px/1.2 'Raleway',sans-serif;margin:0 0 7px;color:#1a3657}
-.mesh-live-intro p{font:500 12px/1.55 'Nunito',sans-serif;color:#516a85;margin:0}
+.mesh-live-indicator{font:500 12px 'Nunito',sans-serif;background:#fafaf7;color:#477566;padding:8px 11px;border-radius:999px}
+.mesh-live-intro{display:flex;align-items:center;gap:15px;border:1px solid rgba(95,149,131,.22);background:linear-gradient(125deg,rgba(249,249,246,.89),rgba(229,230,219,.68));border-radius:23px;padding:19px;box-shadow:0 12px 34px rgba(51,104,86,.09)}
+.mesh-live-icon{flex:none;width:56px;height:56px;border-radius:19px;display:grid;place-items:center;background:#387561;color:white;box-shadow:0 8px 22px rgba(45,95,78,.21)}
+.mesh-live-intro h2{font:500 21px/1.2 'Raleway',sans-serif;margin:0 0 7px;color:#254c3f}
+.mesh-live-intro p{font:500 12px/1.55 'Nunito',sans-serif;color:#5a7c71;margin:0}
 .mesh-live-alert,.mesh-live-notice{margin:14px 0;padding:12px;border-radius:14px;font:500 12px/1.5 'Nunito',sans-serif}
 .mesh-live-alert{background:#ffeaeb;color:#982e40;border:1px solid #eebbc0}
-.mesh-live-notice{background:#ddebfa;color:#315881;border:1px solid #c6d8ed}
+.mesh-live-notice{background:#f8f8f6;color:#3f7362;border:1px solid #e9eae0}
 .mesh-live .mesh-tabs{margin:22px 0 20px}
 .mesh-live-section{padding-bottom:12px;min-height:200px}
 .mesh-live-sectionhead{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:13px}
-.mesh-live-sectionhead h3{margin:0;color:#263c59;font:500 20px 'Raleway',sans-serif}
-.mesh-live-sectionhead span{font:500 11px 'Nunito',sans-serif;color:#637b96}
-.mesh-live-chat{display:flex;flex-direction:column;min-height:245px;max-height:450px;overflow-y:auto;overscroll-behavior:contain;padding:14px;border-radius:20px;background:rgba(228,237,248,.58);border:1px solid rgba(73,109,159,.13);gap:12px}
-.mesh-live-empty{text-align:center;margin:auto;padding:25px 12px;color:#5a7190}
-.mesh-live-empty svg{color:#416ca6;margin:0 auto 12px}
-.mesh-live-empty h4{color:#294566;font:500 16px 'Raleway',sans-serif;margin:0 0 8px}
+.mesh-live-sectionhead h3{margin:0;color:#2f5045;font:500 20px 'Raleway',sans-serif}
+.mesh-live-sectionhead span{font:500 11px 'Nunito',sans-serif;color:#6c8d82}
+.mesh-live-chat{display:flex;flex-direction:column;min-height:245px;max-height:450px;overflow-y:auto;overscroll-behavior:contain;padding:14px;border-radius:20px;background:rgba(250,250,247,.58);border:1px solid rgba(88,144,125,.13);gap:12px}
+.mesh-live-empty{text-align:center;margin:auto;padding:25px 12px;color:#63877b}
+.mesh-live-empty svg{color:#53947e;margin:0 auto 12px}
+.mesh-live-empty h4{color:#345b4e;font:500 16px 'Raleway',sans-serif;margin:0 0 8px}
 .mesh-live-empty p{max-width:280px;margin:0 auto;font:500 12px/1.6 'Nunito',sans-serif}
-.mesh-live-bubble{display:flex;flex-direction:column;width:fit-content;max-width:92%;border-radius:15px;padding:11px 14px;background:#f5f8fc;border:1px solid #d9e2ed}
-.mesh-live-bubble.sent{align-self:flex-end;background:#305789;color:white;border-color:transparent}
+.mesh-live-bubble{display:flex;flex-direction:column;width:fit-content;max-width:92%;border-radius:15px;padding:11px 14px;background:#fafaf7;border:1px solid #f1f1ec}
+.mesh-live-bubble.sent{align-self:flex-end;background:#407966;color:white;border-color:transparent}
 .mesh-live-bubble strong{font:500 11px 'Nunito',sans-serif}
 .mesh-live-bubble p{margin:4px 0;font:500 13px/1.5 'Nunito',sans-serif;overflow-wrap:anywhere}
 .mesh-live-bubble small{font:500 10px 'Nunito',sans-serif;opacity:.75}
-.mesh-live-compose{display:flex;align-items:center;gap:8px;margin-top:13px;background:#f4f8fd;border-radius:17px;border:1px solid #cbdaeb;padding:6px}
-.mesh-live-compose input{flex:1;min-width:0;background:transparent;border:0;padding:10px;color:#243d5a;font:500 13px 'Nunito',sans-serif;outline:none}
-.mesh-live-compose button{width:42px;height:42px;border:0;border-radius:13px;background:#2e5589;color:white;display:grid;place-items:center}
-.mesh-live-compose button:disabled{background:#bdcddd;color:#6c849f}
-.mesh-live-field{display:flex;flex-direction:column;gap:7px;margin:17px 0;color:#3d5472;font:500 12px 'Nunito',sans-serif}
-.mesh-live-field input,.mesh-live-field textarea,.mesh-live-field select{width:100%;border:1px solid #c6d7e8;background:rgba(249,252,255,.84);border-radius:15px;padding:13px 14px;outline-color:#6e95bf;color:#263f5d;font:500 13px/1.5 'Nunito',sans-serif}
+.mesh-live-compose{display:flex;align-items:center;gap:8px;margin-top:13px;background:#fafaf7;border-radius:17px;border:1px solid #eaebe2;padding:6px}
+.mesh-live-compose input{flex:1;min-width:0;background:transparent;border:0;padding:10px;color:#2d5145;font:500 13px 'Nunito',sans-serif;outline:none}
+.mesh-live-compose button{width:42px;height:42px;border:0;border-radius:13px;background:#3e7965;color:white;display:grid;place-items:center}
+.mesh-live-compose button:disabled{background:#dedfd2;color:#829e89}
+.mesh-live-field{display:flex;flex-direction:column;gap:7px;margin:17px 0;color:#46695d;font:500 12px 'Nunito',sans-serif}
+.mesh-live-field input,.mesh-live-field textarea,.mesh-live-field select{width:100%;border:1px solid #e7e8dd;background:rgba(250,250,247,.84);border-radius:15px;padding:13px 14px;outline-color:#8cb596;color:#305347;font:500 13px/1.5 'Nunito',sans-serif}
 .mesh-live-field textarea{resize:vertical}
 .mesh-live-cta{width:100%;margin:10px 0;justify-content:center}
-.mesh-live-hint{font:500 12px/1.55 'Nunito',sans-serif;color:#5f7289;margin:12px 0}
-.mesh-live-peer,.mesh-live-peer-request,.mesh-live-beacon{display:flex;gap:13px;align-items:flex-start;padding:15px;margin-top:10px;border-radius:18px;background:rgba(239,246,254,.7);border:1px solid #d0dfed}
-.mesh-live-peer>svg,.mesh-live-beacon>svg{color:#386fa9;flex:none}
+.mesh-live-hint{font:500 12px/1.55 'Nunito',sans-serif;color:#668279;margin:12px 0}
+.mesh-live-peer,.mesh-live-peer-request,.mesh-live-beacon{display:flex;gap:13px;align-items:flex-start;padding:15px;margin-top:10px;border-radius:18px;background:rgba(250,250,247,.7);border:1px solid #edeee6}
+.mesh-live-peer>svg,.mesh-live-beacon>svg{color:#4c957d;flex:none}
 .mesh-live-peer span,.mesh-live-beacon>div{display:flex;flex-direction:column;gap:5px;min-width:0}
-.mesh-live-peer strong,.mesh-live-beacon strong,.mesh-live-peer-request strong{font:500 13px 'Nunito',sans-serif;color:#203b5b}
-.mesh-live-peer small,.mesh-live-beacon small,.mesh-live-peer-request p{font:500 11px/1.55 'Nunito',sans-serif;color:#617997;margin:0}
+.mesh-live-peer strong,.mesh-live-beacon strong,.mesh-live-peer-request strong{font:500 13px 'Nunito',sans-serif;color:#2a5144}
+.mesh-live-peer small,.mesh-live-beacon small,.mesh-live-peer-request p{font:500 11px/1.55 'Nunito',sans-serif;color:#6a8e82;margin:0}
 .mesh-live-peer-request{display:block}
-.mesh-live-peer-request b{font:500 20px 'Nunito',sans-serif;letter-spacing:3px;color:#294c7c}
+.mesh-live-peer-request b{font:500 20px 'Nunito',sans-serif;letter-spacing:3px;color:#386d5b}
 .mesh-live-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
-.mesh-live-actions button{display:inline-flex;align-items:center;gap:6px;background:#e1eafb;color:#234771;border:1px solid #c4d5ea;border-radius:12px;padding:10px 12px;font:500 11px 'Nunito',sans-serif}
-.mesh-live-actions button:first-child{background:#335d90;color:#fff}
-.mesh-live-beacon p{font:500 11px 'Nunito',sans-serif;color:#345d8a;margin:3px 0 0}
+.mesh-live-actions button{display:inline-flex;align-items:center;gap:6px;background:#fafaf7;color:#316352;border:1px solid #e7e8dd;border-radius:12px;padding:10px 12px;font:500 11px 'Nunito',sans-serif}
+.mesh-live-actions button:first-child{background:#43806c;color:#fff}
+.mesh-live-beacon p{font:500 11px 'Nunito',sans-serif;color:#437b68;margin:3px 0 0}
 .mesh-live-sos{border-radius:19px;padding:19px;color:#842a39;background:#fae9ec;border:1px solid #e9b7c0}
 .mesh-live-sos h3{font:500 19px 'Raleway',sans-serif;margin:9px 0}
 .mesh-live-sos p{font:500 12px/1.5 'Nunito',sans-serif;margin:0}
-.mesh-live-confirm{display:flex;align-items:start;gap:11px;margin:17px 0;font:500 12px/1.5 'Nunito',sans-serif;color:#3f536c}
-.mesh-live-confirm input{width:19px;height:19px;flex:none;accent-color:#325b91}
+.mesh-live-confirm{display:flex;align-items:start;gap:11px;margin:17px 0;font:500 12px/1.5 'Nunito',sans-serif;color:#47645a}
+.mesh-live-confirm input{width:19px;height:19px;flex:none;accent-color:#43806c}
 .mesh-live-danger{background:#b73549!important;color:white!important}
-.mesh-live-guide{width:100%;margin-top:15px;border:0;background:transparent;color:#3d6498;display:flex;align-items:center;gap:7px;justify-content:center;font:500 12px 'Nunito',sans-serif;padding:10px}
+.mesh-live-guide{width:100%;margin-top:15px;border:0;background:transparent;color:#4d8874;display:flex;align-items:center;gap:7px;justify-content:center;font:500 12px 'Nunito',sans-serif;padding:10px}
 @media(max-width:340px){.mesh-live-intro{padding:14px;gap:11px}.mesh-live-icon{width:44px;height:44px}.mesh-live-intro h2{font-size:17px}.mesh-live-actions button{padding:8px}}

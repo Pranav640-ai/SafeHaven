@@ -173,6 +173,7 @@ export default function App(){
   const [destinationMood,setDestinationMood]=useState('All');
   const [meshTab,setMeshTab]=useState<'Chats'|'Nearby'|'Beacons'|'SOS'>('Chats');
   const meshApi=useRescueMesh();
+  const [sosOpenCount,setSosOpenCount]=useState(0);
   const [meshScanning,setMeshScanning]=useState(false);
   const [tripNote,setTripNote]=useState('');
   const [noteOpen,setNoteOpen]=useState(false);
@@ -302,7 +303,7 @@ export default function App(){
     <button className="simple-cta guide-next" type="button" onClick={()=>go('pack')}><Bookmark size={21}/><span>View safety pack</span><ArrowRight size={18}/></button>
   </>}
 
-  function mesh(){return <RescueMeshScreen key={meshTab} mesh={meshApi} onBack={()=>go('home')} initialTab={meshTab}/>;}
+  function mesh(){return <RescueMeshScreen key={`${meshTab}-${sosOpenCount}`} mesh={meshApi} onBack={()=>go('home')} initialTab={meshTab}/>;}
   function beacon(){return <RescueMeshScreen key="beacon" mesh={meshApi} onBack={()=>go('mesh')} initialTab="Beacons"/>;}
 
   function pack(){const tasks=[{title:'Emergency contacts',detail:'Add people to reach in an emergency',icon:Phone},{title:'Safety guidance',detail:'Review essential instructions',icon:BookOpen},{title:'Trip details',detail:'Keep your itinerary accessible',icon:Map},{title:'Group check-in',detail:'Decide who can see your status',icon:Users}];return <><BackHeader title="Safety pack" back={()=>go('home')} action={<IconButton icon={CircleHelp} label="About safety pack" onClick={()=>setDialog('help')}/>}/>
@@ -362,7 +363,7 @@ export default function App(){
       </div>
       {authenticated&&<nav className={`floating-dock ${compact?'dock-compact':''}`} aria-label="Main navigation">
         {([{id:'home',label:'Home',icon:Home},{id:'explore',label:'Explore',icon:Compass}] as const).map(t=>{const Icon=t.icon;return <button key={t.id} type="button" aria-label={t.label} aria-current={tab===t.id?'page':undefined} onClick={()=>go(t.id)} className={`dock-item ${tab===t.id?'dock-active':''}`}><span className="dock-active-bg" aria-hidden="true"/><Icon size={22} strokeWidth={2.1}/><span>{t.label}</span></button>})}
-        <motion.button type="button" className="dock-sos" aria-label="Emergency SOS" onClick={()=>{setMeshTab('SOS');go('mesh')}} whileTap={{scale:.92}}><ShieldAlert size={21}/><small>SOS</small></motion.button>
+        <motion.button type="button" className="dock-sos" aria-label="Emergency SOS" onClick={()=>{if(!meshApi.available){setDialog('sos');return;}setMeshTab('SOS');setSosOpenCount(count=>count+1);go('mesh')}} whileTap={{scale:.92}}><ShieldAlert size={21}/><small>SOS</small></motion.button>
         {([{id:'mesh',label:'Mesh',icon:Radio},{id:'profile',label:'Profile',icon:UserRound}] as const).map(t=>{const Icon=t.icon;return <button key={t.id} type="button" aria-label={t.label} aria-current={tab===t.id?'page':undefined} onClick={()=>go(t.id)} className={`dock-item ${tab===t.id?'dock-active':''}`}><span className="dock-active-bg" aria-hidden="true"/><Icon size={22} strokeWidth={2.1}/><span>{t.label}</span></button>})}
       </nav>}
       <Modal kind={dialog} close={()=>setDialog(null)} go={go} person={name} saveName={setName}/>
