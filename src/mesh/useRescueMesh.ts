@@ -89,7 +89,7 @@ export function useRescueMesh() {
   const start = async (deviceName: string) => attempt(async () => {
     const result = await native.start({deviceName});setState(result);return result;
   });
-  const stop = async () => attempt(async () => {const s=await native.stop();setState(s);setRequests([]);setOwnBeacon(null);return s;});
+  const stop = async () => attempt(async () => {const s=await native.stop();setState(s);setRequests([]);setOwnBeacon(null);setMessages(list=>list.map(m=>m.type==='sos'&&m.status==='Queued on this phone until app closes'?{...m,status:'Cancelled — network stopped'}:m));return s;});
   const approve = (id: string) => attempt(async () => {await native.accept({id});setRequests(p=>p.filter(x=>x.id!==id));});
   const reject = (id: string) => attempt(async () => {await native.rejectPeer({id});setRequests(p=>p.filter(x=>x.id!==id));});
   const sendChat = (text: string) => attempt(async () => {
@@ -105,7 +105,7 @@ export function useRescueMesh() {
       status:receipt.status==='queued-in-memory'?'Queued on this phone until app closes':'Offered to nearby peers'}]);
     return receipt;
   });
-  const cancelQueuedSOS = () => attempt(async () => {const r=await native.cancelQueuedSOS();await native.getState().then(setState);return r;});
+  const cancelQueuedSOS = () => attempt(async () => {const r=await native.cancelQueuedSOS();await native.getState().then(setState);setMessages(list=>list.map(m=>m.type==='sos'&&m.status==='Queued on this phone until app closes'?{...m,status:'Cancelled — not sent'}:m));return r;});
   const sendCheckIn = (status: 'safe'|'needHelp') => attempt(async () => {
     const receipt=await native.sendCheckIn({status});
     setNotice('Check-in offered to nearby peers. Await an acknowledgement.');
