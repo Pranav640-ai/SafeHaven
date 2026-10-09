@@ -77,7 +77,7 @@ test('prepared multilingual guidance preserves source and SOS access', async ({ 
     await expect(page.locator('.steps')).toHaveAttribute('lang', 'ta');
     await expect(page.getByRole('link', { name: 'Ready.gov · Floods' })).toHaveAttribute('href', 'https://www.ready.gov/floods');
     await page.getByRole('button', { name: 'Emergency SOS', exact: true }).click();
-    await expect(page.getByRole('dialog')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Emergency SOS', exact: true })).toBeVisible();
 });
 for (const width of [320, 375, 430, 768]) {
     test(`mobile layout has no horizontal overflow at ${width}px`, async ({ page }) => {
@@ -148,7 +148,8 @@ test('language settings, contacts shortcut and privacy routes work', async ({ pa
     await expect(page.getByRole('heading', { name: 'Privacy & sharing', exact: true })).toBeVisible();
     await page.getByRole('button', { name: 'Manage nearby connections' }).click();
     await expect(page.getByRole('heading', { name: 'RescueMesh', exact: true })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Start Nearby discovery' })).toHaveCount(0);
+    await page.getByRole('tab', { name: 'Nearby', exact: true }).click();
+    await expect(page.getByRole('button', { name: 'Start Nearby discovery' })).toBeDisabled();
     await page.getByRole('button', { name: 'Back', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'Privacy & sharing', exact: true })).toBeVisible();
 });
@@ -168,6 +169,8 @@ test('dialogs close with Back and SOS guidance returns to its origin', async ({ 
     await page.getByRole('button', { name: 'Emergency SOS', exact: true }).click();
     await page.getByRole('button', { name: 'View emergency guidance' }).click();
     await expect(page.getByRole('heading', { name: 'Emergency guide', exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Back', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Emergency SOS', exact: true })).toBeVisible();
     await page.getByRole('button', { name: 'Back', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'Profile', exact: true })).toBeVisible();
     await expect(page.getByRole('dialog')).toHaveCount(0);
@@ -214,4 +217,32 @@ test('all home feature routes, destination links and profile shortcuts open thei
     await page.getByRole('button', { name: 'Back to welcome screen', exact: true }).click();
     await expect(page.getByRole('button', { name: 'Explore as guest' })).toBeVisible();
     expect(errors).toEqual([]);
+});
+
+
+test('SOS has its own route and Mesh previews visible disabled controls', async ({ page }) => {
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Explore as guest' }).click();
+    const nav=page.getByRole('navigation', {name:'Main navigation'});
+    await nav.getByRole('button', { name: 'Emergency SOS', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Emergency SOS', exact: true })).toBeVisible();
+    await expect(nav.getByRole('button', { name: 'Emergency SOS', exact: true })).toHaveAttribute('aria-current','page');
+    await expect(nav.getByRole('button', { name: 'Mesh', exact: true })).not.toHaveAttribute('aria-current','page');
+    await expect(page.getByRole('button', { name: 'Queue SOS on this phone' })).toBeDisabled();
+    await nav.getByRole('button', { name: 'Mesh', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'RescueMesh', exact: true })).toBeVisible();
+    await expect(page.getByRole('tab', { name: 'Chats', exact: true })).toHaveAttribute('aria-selected','true');
+    await expect(page.getByRole('textbox', {name:'Message',exact:true})).toBeVisible();
+    await expect(page.getByRole('textbox', {name:'Message',exact:true})).toBeDisabled();
+    await expect(page.getByRole('button', {name:'Send message'})).toBeDisabled();
+    await page.getByRole('tab', { name: 'Nearby', exact: true }).click();
+    await expect(page.getByRole('button', {name:'Start Nearby discovery'})).toBeVisible();
+    await expect(page.getByRole('button', {name:'Start Nearby discovery'})).toBeDisabled();
+    await page.getByRole('tab', { name: 'Beacons', exact: true }).click();
+    await expect(page.getByRole('button', {name:'Share my location temporarily'})).toBeDisabled();
+    await expect(page.getByRole('button', {name:'Show approximate distance & bearing'})).toBeDisabled();
+    await page.getByRole('tab', { name: 'SOS', exact: true }).click();
+    await expect(page.getByRole('button', {name:'Queue SOS on this phone'})).toBeDisabled();
+    await page.getByRole('button', {name:'View emergency guidance'}).click();
+    await expect(page.getByRole('heading', {name:'Emergency guide',exact:true})).toBeVisible();
 });

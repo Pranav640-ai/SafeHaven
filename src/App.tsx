@@ -19,7 +19,7 @@ import {
   Users, WifiOff, X, Zap, FileText, Save, Leaf, Mountain, Waves, Trees, BatteryCharging, Crosshair, Wifi, Signal, LifeBuoy, UserRound, CalendarCheck2, FolderOpen, type LucideIcon,
 } from 'lucide-react';
 
-type Page = 'home' | 'explore' | 'risk' | 'replan' | 'guide' | 'mesh' | 'beacon' | 'pack' | 'profile' | 'language' | 'privacy';
+type Page = 'home' | 'explore' | 'risk' | 'replan' | 'guide' | 'mesh' | 'beacon' | 'pack' | 'profile' | 'language' | 'privacy' | 'sos';
 type GuideKind = 'Flood' | 'Extreme heat' | 'Earthquake';
 type Dialog = 'sos' | 'profile' | 'help' | null;
 
@@ -175,9 +175,7 @@ export default function App(){
   const packSection=useRef<'contacts'|'group'|null>(null);
   const [selectedDestination,setSelectedDestination]=useState('Manali');
   const [destinationMood,setDestinationMood]=useState('All');
-  const [meshTab,setMeshTab]=useState<'Chats'|'Nearby'|'Beacons'|'SOS'>('Chats');
   const meshApi=useRescueMesh();
-  const [sosOpenCount,setSosOpenCount]=useState(0);
   const [tripNote,setTripNote]=useSaved('trip-note','');
   const [noteOpen,setNoteOpen]=useState(false);
   const [noteSaved,setNoteSaved]=useState(false);
@@ -232,11 +230,18 @@ export default function App(){
   useEffect(()=>{
     const key=(event:KeyboardEvent)=>{if(event.key==='Escape' && dialog)closeDialog();};
     window.addEventListener('keydown',key);
-    const listener=Capacitor.isNativePlatform()?NativeApp.addListener('backButton',()=>{
-      if(dialog || navigationDepth.current>0 || page!=='home')back();else void NativeApp.exitApp();
-    }):null;
-    return()=>{window.removeEventListener('keydown',key);if(listener)void listener.then(handle=>handle.remove());};
+    return()=>window.removeEventListener('keydown',key);
   },[dialog,page]);
+  const nativeBackAction=useRef<()=>void>(()=>{});
+  nativeBackAction.current=()=>{
+    if(dialog || navigationDepth.current>0 || page!=='home')back();else void NativeApp.exitApp();
+  };
+  useEffect(()=>{
+    if(!Capacitor.isNativePlatform())return;
+    // Keep one native listener; its action reads the current page/dialog through the ref.
+    const listener=NativeApp.addListener('backButton',()=>nativeBackAction.current());
+    return()=>{void listener.then(handle=>handle.remove());};
+  },[]);
   const handleScroll=(event:UIEvent<HTMLDivElement>)=>{const y=event.currentTarget.scrollTop;const diff=y-lastTop.current;if(y<66)setCompact(false);else if(diff>15)setCompact(true);else if(diff< -16)setCompact(false);lastTop.current=y;};
 
   const tab:Page = ['language','privacy'].includes(page)?'profile':['risk','replan','guide','beacon','pack'].includes(page)?'explore':page;
@@ -321,8 +326,9 @@ export default function App(){
 
   function guidePage(){return <GuidanceTool back={back} notify={setToast}/>;}
 
-  function mesh(){return <RescueMeshScreen key={`${meshTab}-${sosOpenCount}`} mesh={meshApi} onBack={back} initialTab={meshTab}/>;}
-  function beacon(){return <RescueMeshScreen key="beacon" mesh={meshApi} onBack={back} initialTab="Beacons"/>;}
+  function mesh(){return <RescueMeshScreen mesh={meshApi} onBack={back} onGuide={()=>go('guide')}/>;}
+  function sos(){return <RescueMeshScreen mesh={meshApi} onBack={back} initialTab="SOS" onGuide={()=>go('guide')} standaloneSOS/>;}
+  function beacon(){return <RescueMeshScreen key="beacon" mesh={meshApi} onBack={back} initialTab="Beacons" onGuide={()=>go('guide')}/>;}
 
   function pack(){return <PackTool initialSection={packSection.current} back={back} notify={setToast} checklist={checklist} toggleChecklist={title=>setChecklist(old=>old.includes(title)?old.filter(x=>x!==title):[...old,title])} nearbyShare={meshApi.available&&meshApi.state.peers.length>0?meshApi.sendCheckIn:undefined}/>;}
 
@@ -364,7 +370,7 @@ export default function App(){
   </>}
   function languagePage(){return <><BackHeader title="Language settings" back={back}/><section className="content-section"><h2>Preferred language</h2><p>Used for safety guidance and report explanations. The rest of the interface currently remains in English.</p><label className="tool-field">Language<select aria-label="Preferred language" value={read('language',language)} onChange={event=>{setLanguage(event.target.value);setToast('Language preference saved');}}>{Object.entries(languageNames).map(([code,title])=><option key={code} value={code}>{title}</option>)}</select></label><p className="tool-muted">Hindi and Tamil have prepared translations. French and Spanish require the online AI service. Translations are unreviewed; English source text stays available.</p><button className="secondary-button" onClick={()=>go('guide')}>Preview safety guidance <ArrowRight size={17}/></button></section></>}
   function privacy(){return <><BackHeader title="Privacy & sharing" back={back}/><section className="content-section"><h2>Your choices</h2><p>Contacts, plans, saved guidance and language preferences are stored on this device. Editing your display name lasts for this session.</p><p>Private group check-ins require consent and an online service. Nearby check-ins require a connected phone and separate consent. Beacons share your location only when you publish one.</p><p>Stopping RescueMesh disconnects peers and clears its in-memory SOS queue and beacons. Leaving a private group removes your membership from that group.</p><button className="secondary-button" onClick={()=>go('pack')}>Manage group sharing</button><button className="secondary-button" onClick={()=>go('mesh')}>Manage nearby connections</button></section></>}
-  const content=()=>({home,explore,risk,replan,guide:guidePage,mesh,beacon,pack,profile,language:languagePage,privacy}[page]());
+  const content=()=>({home,explore,risk,replan,guide:guidePage,mesh,beacon,pack,profile,language:languagePage,privacy,sos}[page]());
   return <div className="preview-stage">
     <aside className="desktop-side"><Brand/><h1>Thoughtful design.<br/><span>Ready for the journey.</span></h1><p>Discover places, prepare for the unexpected, and keep your plans in one place.</p><div className="desktop-help"><Smartphone size={21}/><span>Use Chrome device mode for a phone-sized preview.<br/><b>F12 → Ctrl + Shift + M</b></span></div><p className="desktop-disclaimer">Emergency information is source-dependent. Always check local authorities.</p></aside>
     <main className={`phone-shell ${!authenticated?'phone-onboarding':''}`} aria-label="SafeHaven application">
@@ -375,7 +381,7 @@ export default function App(){
       </div>
       {authenticated&&<nav className={`floating-dock ${compact?'dock-compact':''}`} aria-label="Main navigation">
         {([{id:'home',label:'Home',icon:Home},{id:'explore',label:'Explore',icon:Compass}] as const).map(t=>{const Icon=t.icon;return <button key={t.id} type="button" aria-label={t.label} aria-current={tab===t.id?'page':undefined} onClick={()=>go(t.id)} className={`dock-item ${tab===t.id?'dock-active':''}`}><span className="dock-active-bg" aria-hidden="true"/><Icon size={22} strokeWidth={2.1}/><span>{t.label}</span></button>})}
-        <motion.button type="button" className="dock-sos" aria-label="Emergency SOS" onClick={()=>{if(!meshApi.available){openDialog('sos');return;}setMeshTab('SOS');setSosOpenCount(count=>count+1);go('mesh')}} whileTap={{scale:.92}}><ShieldAlert size={21}/><small>SOS</small></motion.button>
+        <motion.button type="button" className="dock-sos" aria-label="Emergency SOS" aria-current={page==='sos'?'page':undefined} onClick={()=>go('sos')} whileTap={{scale:.92}}><ShieldAlert size={21}/><small>SOS</small></motion.button>
         {([{id:'mesh',label:'Mesh',icon:Radio},{id:'profile',label:'Profile',icon:UserRound}] as const).map(t=>{const Icon=t.icon;return <button key={t.id} type="button" aria-label={t.label} aria-current={tab===t.id?'page':undefined} onClick={()=>go(t.id)} className={`dock-item ${tab===t.id?'dock-active':''}`}><span className="dock-active-bg" aria-hidden="true"/><Icon size={22} strokeWidth={2.1}/><span>{t.label}</span></button>})}
       </nav>}
       <Modal kind={dialog} close={closeDialog} go={go} person={name} saveName={setName}/>

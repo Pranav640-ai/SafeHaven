@@ -12,7 +12,7 @@ The former `feature/rescuemesh-android-bridge` and `handoff/risk-ui-onboarding-c
 
 `main` retains the original incomplete standalone Kotlin experiments for audit; their corrected implementation is in `native/android/` on `ui`. Do not merge those obsolete sources into the integrated app. Draft PR #1 is the earlier bridge-to-main proposal; it does not define the canonical development branch.
 
-Detailed developer handoff: **[CODEX_HANDOFF.md](CODEX_HANDOFF.md)**. Android implementation: **[RESCUEMESH_INTEGRATION.md](RESCUEMESH_INTEGRATION.md)**. Detailed device tests and expected results: **[MESH_TEST_GUIDE.md](MESH_TEST_GUIDE.md)**.
+Latest implementation/Google sign-in handoff: **[FINAL_HANDOFF.md](FINAL_HANDOFF.md)**. Historical developer context: **[CODEX_HANDOFF.md](CODEX_HANDOFF.md)**. Android implementation: **[RESCUEMESH_INTEGRATION.md](RESCUEMESH_INTEGRATION.md)**. Detailed device tests and expected results: **[MESH_TEST_GUIDE.md](MESH_TEST_GUIDE.md)**.
 
 ## Product scope — integrated web modules
 
@@ -20,7 +20,7 @@ The `ui` branch now includes a FastAPI backend and working web flows for Open-Me
 
 **Read [IMPLEMENTATION.md](IMPLEMENTATION.md)** for setup, API contracts, provider credentials, deployment configuration, tests and exact limitations. Set private AI/news keys in `backend/.env`; `VITE_API_BASE_URL` is only a public API origin.
 
-Risk data is not a guaranteed safety assessment. GDACS uses approximate event-centre proximity; local official warnings and access restrictions are not comprehensively covered. AI translations are unreviewed and retain English comparison. Android RescueMesh is implemented but physical-device verification is deferred.
+Risk data is not a guaranteed safety assessment. GDACS uses approximate event-centre proximity; local official warnings and access restrictions are not comprehensively covered. AI translations are unreviewed and retain English comparison. Android RescueMesh is implemented. Native emulator SOS queue/cancel passed; pairing/delivery verification was blocked by unresponsive Android emulators. Physical-device acceptance remains required; see FINAL_HANDOFF.md for exact evidence.
 
 ## Technology
 

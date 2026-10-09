@@ -38,8 +38,8 @@ patch(appGradle, x => {
   return x;
 });
 const required = [
-  ['android.permission.ACCESS_WIFI_STATE','android:maxSdkVersion="31"'],
-  ['android.permission.CHANGE_WIFI_STATE','android:maxSdkVersion="31"'],
+  ['android.permission.ACCESS_WIFI_STATE',''],
+  ['android.permission.CHANGE_WIFI_STATE',''],
   ['android.permission.BLUETOOTH','android:maxSdkVersion="30"'],
   ['android.permission.BLUETOOTH_ADMIN','android:maxSdkVersion="30"'],
   ['android.permission.ACCESS_COARSE_LOCATION',''], // GPS consent may grant approximate location
@@ -51,6 +51,11 @@ const required = [
   ['android.permission.ACCESS_LOCAL_NETWORK',''], // relevant to newer Android targets
 ];
 patch(manifest, xml => {
+  // Nearby 19.3.0 checks these normal Wi-Fi permissions on Android 15 too.
+  // Repair previous generated manifests as well as fresh projects.
+  xml = xml.replace(/<uses-permission\b[^>]*android:name="android.permission.(?:ACCESS|CHANGE)_WIFI_STATE"[^>]*\/>/g,
+    element => element.replace(/\s+android:maxSdkVersion="[^"]*"/g, ''));
+
   for (const [permission, attributes] of required) {
     if (!xml.includes(`android:name="${permission}"`)) {
       const element = `<uses-permission android:name="${permission}" ${attributes} />`;

@@ -2,9 +2,11 @@
 
 **As of 2026-10-10.** This file is an actionable handoff, not a claim of a completed or field-proven emergency system.
 
+For the latest navigation/mesh changes, Google sign-in task and final verification, read **[FINAL_HANDOFF.md](FINAL_HANDOFF.md)**. Older sections below retain historical context.
+
 ## Web implementation update
 
-Steps 6–13 now have backend/frontend implementations; see [IMPLEMENTATION.md](IMPLEMENTATION.md) for current behavior, setup and deployment limits. The user explicitly deferred mesh verification. The readiness matrix below records the earlier pre-backend handoff; use the implementation guide for current web status. Hosting and credential-backed providers require account/key setup before live validation.
+Steps 6–13 now have backend/frontend implementations; see [IMPLEMENTATION.md](IMPLEMENTATION.md) for current behavior, setup and deployment limits. Mesh testing has now been requested; follow the current FINAL_HANDOFF.md and MESH_TEST_GUIDE.md. The readiness matrix below records the earlier pre-backend handoff; use the implementation guide for current web status. Hosting and credential-backed providers require account/key setup before live validation.
 
 ## Mandatory first action
 

@@ -13,6 +13,8 @@ npm run android:open
 
 The normal sync bundles the current UI and removes the emulator live-preview server URL. **Do not use `npm run android:emulator` for the offline acceptance test**: that preview needs the laptop's Vite server. Mesh itself does not need Vite, the backend or a Gemini key.
 
+For automatic preliminary checks after building the APK, start two emulators and run `npm run test:mesh`. It grants emulator test permissions and performs real native pairing/message operations; physical and first-use permission tests below remain required.
+
 In Android Studio, open this project's `android` folder, allow Gradle sync, select device A in the device dropdown and click Run. Repeat with device B. If using physical phones, enable Developer options and USB debugging, connect USB and approve the debugging prompt. Both devices must have Google Play services. Use JDK 21 (installed here at `C:\Users\asus\.jdks\jbr-21.0.11`). In Android Studio, Settings → Build, Execution, Deployment → Build Tools → Gradle → Gradle JDK must select that JDK 21 path. The Studio bundled JBR is Java 25 and is too new for this Gradle version.
 
 For your two virtual devices, start both from Device Manager and install by selecting each in turn. Android Emulator 36.5+ supports shared multi-instance Wi-Fi and simulated Bluetooth on supported system images. Use Google Play enabled images, API 31+ and the latest emulator package. Simulator discovery success is useful preliminary evidence; repeat the acceptance tests on two physical Android phones to check actual radios, range and permissions.
@@ -60,8 +62,8 @@ $meshAdb='C:\Users\asus\AppData\Local\Android\Sdk\platform-tools\adb.exe'
 
 Only use messages clearly prefixed `TEST — no emergency`.
 
-1. While connected, tap the central **SOS** button. It must open **RescueMesh → SOS** directly.
-2. Type `TEST — no emergency — SOS A 001`. The send button must stay disabled until you check the delivery/queue acknowledgement box. Then tap **Queue / relay SOS**.
+1. While connected, tap the central **SOS** button. It must open the standalone **Emergency SOS** page and highlight only SOS in the dock.
+2. Type `TEST — no emergency — SOS A 001`. The send button must stay disabled until you check the delivery/queue acknowledgement box. Then tap **Relay SOS to nearby phones** (or **Queue SOS on this phone** when disconnected).
 3. Pass: B's SOS tab shows the sender and full exact message; A changes from offered to **Peer acknowledged**. No emergency telephone call is made.
 4. Stop discovery on both so there are no peers. On A queue `TEST — no emergency — queued SOS A 002`. Pass: the queue count becomes 1 and the status says **Queued on this phone until app closes**, not delivered.
 5. Tap **Cancel pending SOS**. Pass: count becomes 0 and status becomes **Cancelled — not sent**. Pair again: B must not receive that cancelled test.
@@ -103,7 +105,7 @@ Two devices demonstrate a direct peer link, not multi-hop forwarding.
 - Profile → Language opens **Language settings**, choosing a language saves it, Preview safety guidance opens the guide, and Back returns to Language settings.
 - Profile → Contacts opens the contact section. Back returns to Profile.
 - Android system Back behaves like the visible page Back; an open dialog closes first. At the initial Home screen, system Back exits the app.
-- SOS opens the Android relay screen; browser SOS opens guidance access with an explicit no-send notice.
+- SOS opens its own relay screen. In browsers the relay fields/buttons are visible but disabled; View emergency guidance remains available. The Mesh tabs also stay visible as disabled previews.
 - Repeat after screen rotation and a disconnect. Record failures instead of treating a successful APK build as proof of radio delivery.
 
 Record: APK commit/build date, device models/API levels, physical vs emulator, emulator version, permissions, connection topology, test message IDs/text, observed sender statuses, recipient screenshots and pass/fail per section. Keep test messages free of real emergency/personal data.
@@ -112,6 +114,7 @@ Record: APK commit/build date, device models/API levels, physical vs emulator, e
 
 - Android required message: you opened the website, not the installed APK.
 - Blank app / cannot connect to 10.0.2.2: it is still a live preview build. Run normal `npm run android:sync`, rebuild and reinstall.
+- `MISSING_PERMISSION_ACCESS_WIFI_STATE`: run current `npm run android:sync`, rebuild and reinstall. The current installer repairs an older manifest that limited Wi-Fi state permissions to API 31; the bundled Nearby SDK needs them on Android 15 too.
 - Permission error: Settings → Apps → SafeHaven → Permissions; enable the requested Nearby devices/Bluetooth/location permissions. Then stop/restart discovery. Nearby requires the permissions appropriate to the device's Android version.
 - No discovery: verify same APK/service, Google Play services, radios, required system Location, foreground apps and matching supported emulator networking settings. Restart discovery on both before escalating.
 - Acknowledgement missing: inspect the recipient first, confirm pairing and link state, and capture the error. Offered is not confirmed delivery.
@@ -126,6 +129,12 @@ $meshAdb='C:\Users\asus\AppData\Local\Android\Sdk\platform-tools\adb.exe'
 ```
 
 Review logs for sensitive data before sharing. Report the failed step, device/API, peer list, exact visible error and log excerpt.
+
+## Local automated run result (2026-10-10)
+
+The two Pixel Android 15 emulators installed the APK and passed native SOS queue/cancel. The first attempt exposed a Wi-Fi permission cap in the installer, now fixed and verified granted. Pairing/delivery did not complete: System UI ANR took Android window focus and swallowed Back events; reboot/cold boot retries then stalled. The test VMs were stopped without wiping data. Use responsive emulators or physical phones for the remaining tests; do not call the mesh field-verified.
+
+For an ANR/stalled VM, use Device Manager's Cold Boot and inspect its graphics/resources/system image. Software rendering is a supported diagnostic alternative, not a guaranteed fix: [graphics acceleration](https://developer.android.com/studio/run/emulator-acceleration), [cold-boot command options](https://developer.android.com/studio/run/emulator-commandline). It was attempted here and did not complete boot.
 
 ## Official references
 

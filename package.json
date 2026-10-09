@@ -12,7 +12,8 @@
     "android:open": "npx cap open android",
     "api": "node scripts/start-api.mjs",
     "test:web": "playwright test",
-    "android:emulator": "node scripts/android-emulator.mjs"
+    "android:emulator": "node scripts/android-emulator.mjs",
+    "test:mesh": "node scripts/test-mesh-emulators.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^7.6.9",
