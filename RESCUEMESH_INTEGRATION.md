@@ -4,14 +4,14 @@ This feature branch connects the shared React interface to a Kotlin Capacitor pl
 
 ## Installation (Windows, macOS, Linux)
 
-1. Install Node 22+, Android Studio (SDK, build tools and JDK 17), and Google Play services on physical Android phones.
+1. Install Node 22+, Android Studio (SDK, build tools and JDK 21), and Google Play services on physical Android phones.
 2. Check out this branch; run `npm install`.
 3. Run `npm run android:init` once. This builds Vite, creates the normal Capacitor Android project if missing, installs the Kotlin bridge/dependency/permissions, and syncs web assets.
 4. `npm run android:open` and build/run on **two real Android phones**.
 5. After frontend changes, run `npm run android:sync`, then rebuild/reinstall the APK.
 6. Re-run `node scripts/install-rescuemesh.mjs` if the generated Android project is re-created or Native Gradle is overwritten. The installer is idempotent.
 
-If Gradle reports Java/Kotlin plugin compatibility errors, confirm Android Studio JDK 17 and generated Capacitor 7 Gradle versions. The installer expects standard Capacitor 7 Groovy Gradle files; for custom Kotlin DSL configurations follow the handoff rather than forcing the script.
+If Gradle reports Java/Kotlin plugin compatibility errors, confirm Android Studio JDK 21 and generated Capacitor 7 Gradle versions. The installer expects standard Capacitor 7 Groovy Gradle files; for custom Kotlin DSL configurations follow the handoff rather than forcing the script.
 
 ### Connection test
 
