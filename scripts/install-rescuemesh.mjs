@@ -38,7 +38,7 @@ const required = [
   ['android.permission.CHANGE_WIFI_STATE','android:maxSdkVersion="31"'],
   ['android.permission.BLUETOOTH','android:maxSdkVersion="30"'],
   ['android.permission.BLUETOOTH_ADMIN','android:maxSdkVersion="30"'],
-  ['android.permission.ACCESS_COARSE_LOCATION','android:maxSdkVersion="28"'],
+  ['android.permission.ACCESS_COARSE_LOCATION',''], // GPS consent may grant approximate location
   ['android.permission.ACCESS_FINE_LOCATION',''], // needed by opt-in GPS beacon too
   ['android.permission.BLUETOOTH_SCAN',''],
   ['android.permission.BLUETOOTH_CONNECT',''],
