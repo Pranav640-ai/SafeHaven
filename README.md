@@ -31,9 +31,9 @@ Run production checks with `npm run build`; test the result with `npm run previe
 
 - Near-black background (#121215), charcoal surfaces, violet/indigo accent, restrained blue/teal/amber/red feature colors.
 - Plus Jakarta Sans via Google Fonts with system fallback; fixed type scale and consistent editorial hierarchy.
-- Motion for page transitions, dock active-pill and bottom sheet; **Embla Carousel** for horizontal editorial cards; **React Loading Skeleton** for shimmer; **Lucide** icons. CSS handles native vertical scrolling and safe-area padding.
+- Motion for page transitions, button feedback and bottom sheet; **Embla Carousel** for horizontal editorial cards; **React Loading Skeleton** for shimmer; **Lucide** icons. CSS handles native vertical scrolling and safe-area padding.
 - Login and profile screens follow the *layout principles* of user-provided District screenshots, without copying District branding or proprietary assets.
-- One optional remotely served Unsplash photograph on the location card and one on a featured carousel; graceful gradient fallback if blocked. No AI-generated UI images, no embedded emojis and no generated full-screen assets.
+- Restored small, colorful emoji-based illustrations in the six Home cards and spotlight carousel, inspired by the earlier premium prototype. The Home risk banner uses a bundled generated landscape illustration (not a baked UI screen). Destination photography uses an optional Unsplash photo with a gradient fallback. Navigation and functional controls use Lucide SVG icons.
 
 ## What is *not* implemented
 
@@ -47,3 +47,7 @@ This prototype does **not** fetch weather, news, official alerts, locations, AI 
 - Entry: `src/main.tsx`
 
 Don't show "delivered", "verified", "safe route" or "official shelter" for unverified, offline or simulated data. Preserve the opt-in nature of Community Beacons and never imply that navigating toward one is safe.
+
+## UI polish v3
+
+The floating dock is CSS-centered with independent, locally clipped active-tab indicators to avoid overlapping bubbles and off-center icons on compact mobile widths. The previous UI commit remains recoverable via the `ui-before-artwork-dock-fix` branch.

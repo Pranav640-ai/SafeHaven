@@ -8,7 +8,7 @@ These are the acceptance rules for the front-end prototype, based on the supplie
 - [x] Take reference from the **arrangement** of District login (dark brand visual above restrained form) and profile (account card, wide useful banner, three shortcuts, grouped preference rows).
 - [x] Use a deliberate color system: near-black, charcoal, violet with controlled blue, rose, teal and amber accents.
 - [x] Avoid full AI-generated screen images, obvious AI-style decorative UI widgets and repeating unnecessary pill badges.
-- [x] Replace all emoji navigation and module imagery with one consistent Lucide icon family.
+- [x] Use Lucide for all interactive navigation and utility controls; colorful illustrated symbols can appear as noninteractive feature-card artwork.
 - [x] Keep user-facing copy short and specific; avoid exaggerated feature claims or vague AI marketing language.
 - [x] Preserve meaningful whitespace, readable line lengths and clear information priority rather than treating every element as a promotional card.
 - [x] Images are optional editorial accents; one remote non-AI photo each for the featured carousel and risk cover with CSS gradients as fallback.
@@ -18,7 +18,7 @@ These are the acceptance rules for the front-end prototype, based on the supplie
 - [x] Real reusable UI components: heading, back header, list row, feature card, bottom sheet, status note, carousel.
 - [x] Reuse established packages: Motion, Embla Carousel, React Loading Skeleton, Lucide React.
 - [x] Horizontal swipe with drag/snapping in the carousel; vertically scrolling content with native touch momentum.
-- [x] Floating bottom navigation with animated active pill, scroll-down compact state and scroll-up expanded state.
+- [x] Floating bottom navigation with centered icons, isolated selected-tab bubbles (no overlap), scroll-down compact state and scroll-up expanded state.
 - [x] Center SOS access stays visible when the navigation compacts.
 - [x] Subtle transition when changing pages; press states; animated bottom sheet.
 - [x] Simulated shimmer loading on page changes and replay from Profile, then revealed content.

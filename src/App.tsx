@@ -17,13 +17,13 @@ type Page = 'home' | 'explore' | 'risk' | 'replan' | 'guide' | 'mesh' | 'beacon'
 type GuideKind = 'Flood' | 'Extreme heat' | 'Earthquake';
 type Dialog = 'sos' | 'profile' | 'help' | 'alerts' | null;
 
-const features: { title: string; detail: string; icon: LucideIcon; accent: string; page: Page }[] = [
-  { title: 'Risk insights', detail: 'Alerts & reports', icon: ShieldAlert, accent: 'rose', page: 'risk' },
-  { title: 'Trip replanner', detail: 'Change plans', icon: Navigation, accent: 'blue', page: 'replan' },
-  { title: 'Emergency guide', detail: 'What to do', icon: BookOpen, accent: 'amber', page: 'guide' },
-  { title: 'RescueMesh', detail: 'Offline messaging', icon: Radio, accent: 'violet', page: 'mesh' },
-  { title: 'Safety beacon', detail: 'Nearby help', icon: MapPin, accent: 'teal', page: 'beacon' },
-  { title: 'Safety pack', detail: 'Your essentials', icon: Bookmark, accent: 'indigo', page: 'pack' },
+const features: { title: string; detail: string; icon: LucideIcon; art: string; accent: string; page: Page }[] = [
+  { title: 'Risk insights', detail: 'Alerts & reports', icon: ShieldAlert, art: '🌩️', accent: 'rose', page: 'risk' },
+  { title: 'Trip replanner', detail: 'Change plans', icon: Navigation, art: '🧭', accent: 'blue', page: 'replan' },
+  { title: 'Emergency guide', detail: 'What to do', icon: BookOpen, art: '🚨', accent: 'amber', page: 'guide' },
+  { title: 'RescueMesh', detail: 'Offline messaging', icon: Radio, art: '📡', accent: 'violet', page: 'mesh' },
+  { title: 'Safety beacon', detail: 'Nearby help', icon: MapPin, art: '📍', accent: 'teal', page: 'beacon' },
+  { title: 'Safety pack', detail: 'Your essentials', icon: Bookmark, art: '🎒', accent: 'indigo', page: 'pack' },
 ];
 
 const guides: Record<GuideKind, {icon:LucideIcon; lead:string; steps:string[]}> = {
@@ -71,7 +71,7 @@ function FeatureCard({feature, index, open}: {feature:typeof features[number];in
   const Icon = feature.icon;
   return <motion.button type="button" className={`feature-card tint-${feature.accent}`} onClick={open}
     initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} transition={{delay:index*.035,duration:.28}} whileTap={{scale:.96}}>
-    <span className="feature-art" aria-hidden="true"><span className="feature-halo"/><Icon size={36} strokeWidth={1.8}/></span>
+    <span className="feature-art" aria-hidden="true"><span className="feature-halo"/><span className="feature-illustration">{feature.art}</span><span className="feature-corner-icon"><Icon size={15} strokeWidth={2}/></span></span>
     <strong>{feature.title}</strong><span className="feature-detail">{feature.detail}</span>
   </motion.button>;
 }
@@ -84,11 +84,11 @@ function SkeletonScreen({ profile = false }: {profile?:boolean}) {
     <Skeleton height={38} width="52%" {...c}/><Skeleton height={145} borderRadius={20} {...c}/>
   </div>;
 }
-function Carousel({items,onOpen}: {items:{kicker:string;title:string;subtitle:string;icon:LucideIcon;tint:string;page:Page}[];onOpen:(page:Page)=>void}) {
+function Carousel({items,onOpen}: {items:{kicker:string;title:string;subtitle:string;icon:LucideIcon;art:string;tint:string;page:Page}[];onOpen:(page:Page)=>void}) {
   const [ref] = useEmblaCarousel({align:'start',containScroll:'trimSnaps'});
   return <div className="carousel-frame" ref={ref}><div className="carousel-track">{items.map(x=>{
     const Icon = x.icon;
-    return <div className="carousel-slide" key={x.title}><button type="button" onClick={()=>onOpen(x.page)} className={`carousel-card carousel-${x.tint}`}><span className="carousel-overline">{x.kicker}</span><span className="carousel-art" aria-hidden="true"><Icon size={53} strokeWidth={1.3}/></span><h3>{x.title}</h3><p>{x.subtitle}</p></button></div>;
+    return <div className="carousel-slide" key={x.title}><button type="button" onClick={()=>onOpen(x.page)} className={`carousel-card carousel-${x.tint}`}><span className="carousel-overline">{x.kicker}</span><span className="carousel-art" aria-hidden="true"><span className="carousel-art-illustration">{x.art}</span><Icon className="carousel-art-symbol" size={24} strokeWidth={1.8}/></span><h3>{x.title}</h3><p>{x.subtitle}</p></button></div>;
   })}</div></div>;
 }
 function AppRow({icon:Icon,title,subtitle,end,onClick,tone='default'}:{icon:LucideIcon;title:string;subtitle?:string;end?:ReactNode;onClick:()=>void;tone?:string}) {
@@ -158,15 +158,15 @@ export default function App(){
   function home(){return <>
     <header className="home-header"><button className="home-location" type="button" onClick={()=>go('explore')}><MapPin size={21}/><span><small>YOUR DESTINATION</small><strong>Explore a location <ChevronDown size={14}/></strong></span></button><div className="header-actions"><IconButton icon={Bell} onClick={()=>setDialog('alerts')} label="Notifications"/><button className="avatar-button" type="button" onClick={()=>go('profile')} aria-label="Open profile"><span>{name.charAt(0).toUpperCase()}</span></button></div></header>
     <div className="home-welcome"><p>Welcome to SafeHaven</p><h1>Travel with a plan.</h1></div>
-    <button type="button" className="hero-risk" onClick={()=>go('risk')}><div className="hero-risk-bg"/><div className="hero-risk-top"><span className="hero-shield"><ShieldCheck size={24}/></span><span className="hero-label">DESTINATION SAFETY</span><ArrowRight size={20}/></div><h2>Know before<br/>you go.</h2><p>Check weather, reports and local guidance for your next stop.</p><span className="hero-link">Explore risk insights <ChevronRight size={16}/></span></button>
+    <button type="button" className="hero-risk" onClick={()=>go('risk')}><img className="hero-risk-photo" src="/visuals/sunset-trail.webp" alt="" loading="eager"/><div className="hero-risk-bg"/><div className="hero-risk-top"><span className="hero-shield"><ShieldCheck size={24}/></span><span className="hero-label">DESTINATION SAFETY</span><ArrowRight size={20}/></div><h2>Know before<br/>you go.</h2><p>Check weather, reports and local guidance for your next stop.</p><span className="hero-link">Explore risk insights <ChevronRight size={16}/></span></button>
     <DemoNote>Live safety alerts are not connected. All reports shown are examples.</DemoNote>
     <Heading title="What would you like to do?"/>
     <div className="feature-grid">{features.map((f,i)=><FeatureCard key={f.title} feature={f} index={i} open={()=>go(f.page)}/>)}</div>
     <section className="home-section"><Heading title="For your next trip" right={<button className="section-link" onClick={()=>go('explore')}>See all <ChevronRight size={15}/></button>}/>
       <Carousel onOpen={go} items={[
-        {kicker:'DESTINATION CHECK',title:'Before you leave',subtitle:'Review known conditions',icon:MapPin,tint:'indigo',page:'risk'},
-        {kicker:'YOUR ITINERARY',title:'Plans can change',subtitle:'Compare alternatives',icon:Navigation,tint:'violet',page:'replan'},
-        {kicker:'STAY IN TOUCH',title:'Keep your group close',subtitle:'Explore offline chat',icon:Radio,tint:'teal',page:'mesh'},
+        {kicker:'DESTINATION CHECK',title:'Before you leave',subtitle:'Review known conditions',icon:MapPin,art:'🌍',tint:'indigo',page:'risk'},
+        {kicker:'YOUR ITINERARY',title:'Plans can change',subtitle:'Compare alternatives',icon:Navigation,art:'🧭',tint:'violet',page:'replan'},
+        {kicker:'STAY IN TOUCH',title:'Keep your group close',subtitle:'Explore offline chat',icon:Radio,art:'📡',tint:'teal',page:'mesh'},
       ]}/>
 
     </section>
@@ -241,11 +241,11 @@ export default function App(){
           {loading?<SkeletonScreen profile={page==='profile'}/>:content()}
         </motion.div></AnimatePresence>}
       </div>
-      {authenticated&&<motion.nav className={`floating-dock ${compact?'dock-compact':''}`} aria-label="Main navigation" layout transition={{type:'spring',stiffness:370,damping:34}}>
-        {([{id:'home',label:'Home',icon:Home},{id:'explore',label:'Explore',icon:Compass}] as const).map(t=>{const Icon=t.icon;return <button key={t.id} type="button" aria-label={t.label} aria-current={tab===t.id?'page':undefined} onClick={()=>go(t.id)} className={`dock-item ${tab===t.id?'dock-active':''}`}>{tab===t.id&&<motion.span className="dock-active-bg" layoutId="active-tab" transition={{type:'spring',stiffness:400,damping:33}}/>}<Icon size={22} strokeWidth={2.1}/><span>{t.label}</span></button>})}
+      {authenticated&&<nav className={`floating-dock ${compact?'dock-compact':''}`} aria-label="Main navigation">
+        {([{id:'home',label:'Home',icon:Home},{id:'explore',label:'Explore',icon:Compass}] as const).map(t=>{const Icon=t.icon;return <button key={t.id} type="button" aria-label={t.label} aria-current={tab===t.id?'page':undefined} onClick={()=>go(t.id)} className={`dock-item ${tab===t.id?'dock-active':''}`}><span className="dock-active-bg" aria-hidden="true"/><Icon size={22} strokeWidth={2.1}/><span>{t.label}</span></button>})}
         <motion.button type="button" className="dock-sos" aria-label="Emergency SOS demo" onClick={()=>setDialog('sos')} whileTap={{scale:.92}}><ShieldAlert size={21}/><small>SOS</small></motion.button>
-        {([{id:'mesh',label:'Mesh',icon:Radio},{id:'profile',label:'Profile',icon:Menu}] as const).map(t=>{const Icon=t.icon;return <button key={t.id} type="button" aria-label={t.label} aria-current={tab===t.id?'page':undefined} onClick={()=>go(t.id)} className={`dock-item ${tab===t.id?'dock-active':''}`}>{tab===t.id&&<motion.span className="dock-active-bg" layoutId="active-tab" transition={{type:'spring',stiffness:400,damping:33}}/>}<Icon size={22} strokeWidth={2.1}/><span>{t.label}</span></button>})}
-      </motion.nav>}
+        {([{id:'mesh',label:'Mesh',icon:Radio},{id:'profile',label:'Profile',icon:Menu}] as const).map(t=>{const Icon=t.icon;return <button key={t.id} type="button" aria-label={t.label} aria-current={tab===t.id?'page':undefined} onClick={()=>go(t.id)} className={`dock-item ${tab===t.id?'dock-active':''}`}><span className="dock-active-bg" aria-hidden="true"/><Icon size={22} strokeWidth={2.1}/><span>{t.label}</span></button>})}
+      </nav>}
       <Modal kind={dialog} close={()=>setDialog(null)} go={go} person={name} saveName={setName}/>
       <AnimatePresence>{toast&&<motion.div role="status" className="toast-message" initial={{opacity:0,y:13}} animate={{opacity:1,y:0}} exit={{opacity:0,y:8}}>{toast}</motion.div>}</AnimatePresence>
     </main>
