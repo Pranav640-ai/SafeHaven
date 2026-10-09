@@ -29,6 +29,7 @@ interface NativeRescueMesh {
   rejectPeer(options: {id: string}): Promise<void>;
   sendChat(options: {text: string}): Promise<SendReceipt>;
   sendSOS(options: {text: string}): Promise<SendReceipt>;
+  cancelQueuedSOS(): Promise<{cancelled:number}>;
   sendCheckIn(options: {status: 'safe' | 'needHelp'}): Promise<SendReceipt>;
   publishBeacon(options: {text: string; latitude: number; longitude: number; minutes: number}): Promise<SendReceipt>;
   withdrawBeacon(): Promise<SendReceipt>;
@@ -88,7 +89,7 @@ export function useRescueMesh() {
   const start = async (deviceName: string) => attempt(async () => {
     const result = await native.start({deviceName});setState(result);return result;
   });
-  const stop = async () => attempt(async () => {const s=await native.stop();setState(s);setRequests([]);return s;});
+  const stop = async () => attempt(async () => {const s=await native.stop();setState(s);setRequests([]);setOwnBeacon(null);return s;});
   const approve = (id: string) => attempt(async () => {await native.accept({id});setRequests(p=>p.filter(x=>x.id!==id));});
   const reject = (id: string) => attempt(async () => {await native.rejectPeer({id});setRequests(p=>p.filter(x=>x.id!==id));});
   const sendChat = (text: string) => attempt(async () => {
@@ -104,15 +105,19 @@ export function useRescueMesh() {
       status:receipt.status==='queued-in-memory'?'Queued on this phone until app closes':'Offered to nearby peers'}]);
     return receipt;
   });
+  const cancelQueuedSOS = () => attempt(async () => {const r=await native.cancelQueuedSOS();await native.getState().then(setState);return r;});
   const sendCheckIn = (status: 'safe'|'needHelp') => attempt(async () => {
     const receipt=await native.sendCheckIn({status});
     setNotice('Check-in offered to nearby peers. Await an acknowledgement.');
     return receipt;
   });
-  const publishBeacon = (text: string, minutes=30) => attempt(async () => {
+  const locate = () => attempt(async () => {
     const location = await Geolocation.getCurrentPosition({enableHighAccuracy:true,timeout:15000});
-    const latitude=location.coords.latitude, longitude=location.coords.longitude;
-    setPosition({latitude,longitude});
+    const next={latitude:location.coords.latitude,longitude:location.coords.longitude};
+    setPosition(next);return next;
+  });
+  const publishBeacon = (text: string, minutes=30) => attempt(async () => {
+    const {latitude,longitude}=await locate();
     const receipt=await native.publishBeacon({text,latitude,longitude,minutes});
     setOwnBeacon(receipt.id);
     await native.getState().then(setState);
@@ -125,6 +130,6 @@ export function useRescueMesh() {
     return receipt;
   });
   return {available,state,requests,messages,error,notice,position,ownBeacon,
-    refresh,start,stop,approve,reject,sendChat,sendSOS,sendCheckIn,publishBeacon,withdrawBeacon};
+    refresh,start,stop,approve,reject,sendChat,sendSOS,cancelQueuedSOS,sendCheckIn,publishBeacon,withdrawBeacon,locate};
 }
 export type MeshController = ReturnType<typeof useRescueMesh>;
