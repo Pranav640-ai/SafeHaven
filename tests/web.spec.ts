@@ -1,4 +1,36 @@
 import { test, expect } from '@playwright/test';
+
+test('Home stories accept native horizontal touch swipes and vertical scrolling', async ({ browser }) => {
+    const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+    const page = await context.newPage();
+    await page.goto(process.env.TEST_BASE_URL || 'http://127.0.0.1:8000');
+    await page.getByRole('button', { name: 'Explore as guest' }).click();
+    const row = page.getByLabel('Featured stories');
+    await row.scrollIntoViewIfNeeded();
+    const card = row.locator('.carousel-card').first();
+    const box = await card.boundingBox();
+    expect(box).toBeTruthy();
+    const cdp = await context.newCDPSession(page);
+    const x = box!.x + box!.width * .82;
+    const y = box!.y + box!.height * .5;
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y }] });
+    for (let step = 1; step <= 12; step++) {
+        await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: x - step * 16, y }] });
+    }
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    await expect.poll(() => row.evaluate(el => el.scrollLeft)).toBeGreaterThan(40);
+    const scroll = page.locator('.phone-scroll');
+    const before = await scroll.evaluate(el => el.scrollTop);
+    const bounds = await row.boundingBox();
+    const touchY = Math.max(120, Math.min(700, bounds!.y + 100));
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: 210, y: touchY }] });
+    for (let step = 1; step <= 12; step++) {
+        await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: 210, y: touchY + step * 12 }] });
+    }
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    await expect.poll(() => scroll.evaluate(el => el.scrollTop)).toBeLessThan(before - 30);
+    await context.close();
+});
 test('itinerary edits persist and saved pack reopens offline', async ({ page, context }) => {
     const errors: string[] = [];
     page.on('pageerror', e => errors.push(e.message));

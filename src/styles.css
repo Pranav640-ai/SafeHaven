@@ -363,7 +363,7 @@ html,body,#root {background:#0b110f;color:#f2faf5}
 .native-swipe-row:active{cursor:grabbing}
 .native-swipe-row::-webkit-scrollbar{display:none}
 .native-carousel-item{flex:0 0 min(78%,312px);min-width:0}
-.native-carousel-item .carousel-card{height:196px;min-height:196px}
+.native-carousel-item .carousel-card{height:196px;min-height:196px;touch-action:pan-x pan-y pinch-zoom}
 .native-carousel-item .carousel-card:focus-visible{outline-offset:-3px}
 .native-swipe-row button{user-select:none;-webkit-user-select:none}
 
