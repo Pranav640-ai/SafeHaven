@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=League+Spartan:wght@500;600;700;800&family=Libre+Caslon+Display&display=swap');
 @import 'tailwindcss';
 
 :root{font-family:'Plus Jakarta Sans',Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#f6f5fa;background:#101013;font-synthesis:none;text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased}
@@ -118,3 +118,153 @@
  .dock-item>span:not(.dock-active-bg){font-size:9px}
 }
 @media(prefers-reduced-motion:reduce){.feature-illustration,.carousel-art-illustration{animation:none}.floating-dock,.dock-item,.dock-active-bg,.dock-item>span:not(.dock-active-bg){transition:none}}
+
+/* v4 · mobile interaction + palette refresh, based on real consumer-app layouts.
+   Two font families only: League Spartan for display, DM Sans for interface copy.
+   Libre Caslon Display is reserved for the occasional editorial accent. */
+
+:root{
+  font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  color:#f5f6fa;background:#101216;
+  --bg:#101216;--panel:#1d2129;--panel-2:#252a34;--border:#363c48;
+  --muted:#9fa6b3;--soft:#c6cdd8;--white:#f5f6fa;
+  --violet:#9c9bff;--electric:#6276ff;--subtle-shadow:0 9px 30px #00000026;
+}
+html,body,#root{background:#101216}
+button,input,select{font-family:inherit}
+h1,h2,h3,.brand,.feature-card strong,.carousel-card h3,.profile-identity strong{
+  font-family:'League Spartan','DM Sans',sans-serif;
+  letter-spacing:-.018em;
+}
+.home-welcome h1,.login-art-copy h1{letter-spacing:-.028em}
+.section-heading h2{font-size:22px;line-height:1.2}
+.back-header h1{font-size:24px}
+/* Preserve native momentum and mobile edge release. Never use vertical scroll snap here. */
+.phone-scroll{overflow-y:auto;overflow-x:hidden;overscroll-behavior-y:auto;
+  scroll-snap-type:none!important;scroll-behavior:auto!important;touch-action:pan-y pinch-zoom;
+  -webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.phone-onboarding .phone-scroll{overscroll-behavior-y:auto;touch-action:pan-y pinch-zoom}
+.phone-shell{background:var(--bg);border-color:#383d47}
+.screen-content{overflow:visible;min-width:0;padding-bottom:calc(135px + env(safe-area-inset-bottom));}
+.preview-stage{background:radial-gradient(ellipse at 68% 8%,#1a2a45 0,transparent 47%),#101216}
+.desktop-side h1 span{color:#89a5ff}
+.desktop-help{background:#1b2431;border-color:#354459;color:#cbd6e9}
+.brand-symbol{background:linear-gradient(140deg,#65cbd2,#5679e9);box-shadow:0 9px 25px #356ed74d}
+.brand-ai{color:#8faaff}
+.home-location>svg,.section-link{color:#9db3ff}
+.home-header{margin-bottom:20px}
+.home-welcome h1{font-size:29px}
+.home-welcome p{color:#a8b4c6}
+.primary-button{background:linear-gradient(105deg,#477cfa,#6764f9);box-shadow:0 7px 24px #3157d143}
+.primary-button:hover{filter:brightness(1.08)}
+.icon-button:active{background:#ffffff17}
+.login-art{background:radial-gradient(ellipse at 48% 57%,#253c73 0,#1b2a4e 43%,#12151d 82%)}
+.main-point{background:linear-gradient(140deg,#69c9d3,#6d7eff);box-shadow:0 0 64px #5b9afa62,inset 0 2px #ffffff70}
+.side-point{background:linear-gradient(140deg,#f8a39e,#b96cc9)}
+.left-point{background:linear-gradient(140deg,#73ccf0,#5a7af4)}
+.login-panel{background:#15191f}
+.login-art-copy em{color:#b2c8ff;font-family:'Libre Caslon Display',Georgia,serif;font-size:1.05em;font-weight:400}
+.login-panel .field-label{color:#d5ddec}
+.phone-field input,.form-input,.country-select-wrap{background:#202630;border-color:#3e4857}
+.guest-button{background:#252b34;border-color:#3e4857}
+.profile-summary{background:linear-gradient(120deg,#262d47,#20212a)}
+.profile-promo{background:linear-gradient(105deg,#253966,#282846)}
+.demo-note svg{color:#92aaff}
+/* Category tiles gain distinct tones while the page itself stays understated. */
+.feature-card{border-color:#ffffff1a;background:#20242c}
+.feature-card strong{font-size:13px;line-height:1.15}
+.feature-detail{font-size:10px;color:#d2d7e0c7}
+.feature-illustration{animation-duration:5.4s}
+.feature-halo{opacity:.14}
+.feature-card:hover{border-color:#8ca9ef78}
+.tint-rose{color:#ff839c;background:linear-gradient(140deg,#4a2337,#241a29 85%)}
+.tint-blue{color:#8dc4ff;background:linear-gradient(140deg,#1d4261,#172434 85%)}
+.tint-amber{color:#f5c586;background:linear-gradient(140deg,#483b25,#292421 85%)}
+.tint-violet{color:#c0a4ff;background:linear-gradient(140deg,#3a2f60,#242039 85%)}
+.tint-teal{color:#6ae5d0;background:linear-gradient(140deg,#1a4b4d,#172b31 85%)}
+.tint-indigo{color:#adbcff;background:linear-gradient(140deg,#2a3862,#20253b 85%)}
+.hero-risk{border-color:#536cbb66;background:#20375f}
+.hero-risk-bg{background:linear-gradient(90deg,#121e36e8 0%,#1a2946c8 46%,#1c2d5646 100%),linear-gradient(0deg,#0d182dcc,transparent 68%)}
+.hero-shield{background:linear-gradient(145deg,#58cbbf,#45a2d9)}
+.risk-summary-symbol,.checkin-symbol{color:#80dcca}
+/* Home utility section: interactive features, not just navigation shortcuts. */
+.home-quick-section{margin-top:29px}
+.home-action-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.home-action{min-width:0;min-height:128px;border:1px solid #353e4e;border-radius:19px;background:#1e252f;
+  display:flex;position:relative;flex-direction:column;align-items:flex-start;justify-content:flex-end;text-align:left;
+  gap:7px;padding:14px;transition:background .2s,border-color .2s}
+.home-action:hover{border-color:#617aa8}
+.home-action-done{background:#202d36;border-color:#428d98}
+.home-action-icon{display:grid;place-items:center;width:39px;height:39px;border-radius:13px;
+  background:#1e4550;color:#74e1d1;margin-bottom:auto}
+.home-action-guide{color:#a9b7ff;background:#303763}
+.home-action>span:nth-child(2){display:flex;flex-direction:column;min-width:0;gap:3px}
+.home-action strong{font-family:'League Spartan',sans-serif;font-size:15px;font-weight:700}
+.home-action small{font-size:10px;line-height:1.4;color:#aab4c3}
+.home-action>svg{position:absolute;right:13px;top:19px;color:#b7c2d6}
+.home-guide-inline{overflow:hidden}
+.home-guide-inner{margin-top:11px;border:1px solid #3b4f5f;border-radius:18px;background:#192630;padding:15px}
+.home-guide-types{display:flex;gap:7px;flex-wrap:wrap}
+.home-guide-types button{min-height:34px;border-radius:999px;padding:5px 12px;background:#2a333e;color:#ced8e6;font-size:11px}
+.home-guide-types button.is-active{background:#6f82f0;color:white}
+.home-guide-inner p{font-size:13px;line-height:1.6;color:#f0f5fa;margin:13px 0 6px}
+.home-guide-inner small{font-size:10px;color:#b0bfcb}
+.home-prep{margin-top:12px;padding:17px 16px 15px;background:#1b2028;border:1px solid #303947;border-radius:19px}
+.home-prep>div:first-child{display:flex;align-items:baseline;justify-content:space-between;gap:5px;margin-bottom:12px}
+.home-prep strong{font-family:'League Spartan',sans-serif;font-size:17px}
+.home-prep>div:first-child span{font-size:11px;color:#9eabc2}
+.home-prep-tasks{display:flex;flex-direction:column;gap:2px}
+.home-prep-tasks button{width:100%;display:flex;align-items:center;gap:11px;padding:10px 0;text-align:left;
+  background:transparent;color:#e0e6ed;font-size:12px;border-bottom:1px solid #ffffff0d;min-height:41px}
+.home-prep-tasks button:last-child{border-bottom:0}
+.home-prep-tasks button>span{flex:0 0 19px;width:19px;height:19px;display:grid;place-items:center;border:1px solid #75829c;border-radius:6px}
+.home-prep-tasks button.done>span{background:#397b75;color:white;border-color:#397b75}
+.home-prep-tasks button.done{color:#afbdbb}
+.home-prep>p{font-size:10px;color:#8c9cac;line-height:1.4;margin-top:10px}
+/* Horizontal touch carousel: real drag momentum, no CSS snap glue, visible peeking slide. */
+.carousel-unit{margin-top:-8px}
+.carousel-controls{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 7px}
+.carousel-controls>span{font-size:10px;color:#94a4ba}
+.carousel-controls>div{display:flex;gap:6px}
+.carousel-controls button{background:#272e3a;border:1px solid #394459;color:#d6e1f0;border-radius:50%;
+  height:34px;width:34px;display:grid;place-items:center;touch-action:manipulation}
+.carousel-controls button:disabled{opacity:.35}
+.carousel-frame{overflow:hidden;touch-action:pan-y pinch-zoom;overscroll-behavior-x:contain;cursor:grab;margin:0 -23px;padding:0 23px}
+.carousel-frame:active{cursor:grabbing}
+.carousel-track{display:flex;gap:12px;touch-action:pan-y pinch-zoom;user-select:none;-webkit-user-select:none;}
+.carousel-slide{flex:0 0 min(80%,310px);min-width:0}
+.carousel-card{min-height:188px;overflow:hidden;touch-action:pan-y pinch-zoom;border-color:#64739b44;}
+.carousel-indigo{background:linear-gradient(90deg,#132b47df 0%,#364f8485 100%),url('https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=850&q=75') center/cover,#334f87}
+.carousel-violet{background:linear-gradient(128deg,#29305e,#594f8c)}
+.carousel-teal{background:linear-gradient(128deg,#1e4458,#247d79)}
+.carousel-card h3{font-size:23px}
+/* Horizontal filter strips scroll themselves rather than triggering parent navigation/scroll. */
+.tab-strip,.guide-picker{overflow-x:auto!important;overflow-y:hidden!important;
+  scroll-snap-type:none!important;overscroll-behavior-x:auto!important;-webkit-overflow-scrolling:touch;
+  touch-action:pan-x pan-y pinch-zoom;scrollbar-width:none;max-width:calc(100% + 46px)}
+.tab-strip>button,.guide-picker>button{flex-shrink:0}
+/* Ensure the dock is centered, its active bubble never crosses SOS, and gestures work underneath. */
+.floating-dock{z-index:10;box-sizing:border-box;max-width:calc(100% - 24px);will-change:width}
+.dock-item{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.dock-item>svg,.dock-item>span:not(.dock-active-bg){position:relative;z-index:1}
+.dock-active-bg{position:absolute;inset:2px!important;border-radius:999px;background:#444f62!important}
+.dock-sos{background:linear-gradient(145deg,#fa6479,#da365e);border:1px solid #ff9fac91}
+.dock-compact{max-width:calc(100% - 44px)}
+/* Phone viewport and safe areas for physical devices / Capacitor later. */
+@media(max-width:719px){
+  .phone-shell{height:100dvh;min-height:100dvh;width:100vw;max-width:100vw;}
+  .phone-scroll{height:100dvh;min-height:100%;}
+  .screen-content{padding-bottom:calc(138px + env(safe-area-inset-bottom));}
+  .home-action-grid{gap:9px}
+  .carousel-frame{margin-right:-23px;}
+}
+@media(max-width:360px){
+  .home-action{padding:12px}
+  .home-action strong{font-size:14px}
+  .home-action small{font-size:10px}
+  .carousel-frame{margin-left:-16px;margin-right:-16px;padding-left:16px;padding-right:16px}
+}
+@media(prefers-reduced-motion:reduce){
+  .feature-illustration,.carousel-art-illustration{animation:none}
+  .home-action,.dock-item,.floating-dock{transition:none}
+}
