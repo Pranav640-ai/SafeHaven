@@ -47,3 +47,4 @@ These are the acceptance rules for the front-end prototype, based on the supplie
 ## Remaining integration responsibilities
 
 Wire API content and official source provenance; make real authentication optional; implement Android/Kotlin Nearby Connections and independently validate direct links before relays; implement consent-based beacon lifecycle and location expiration; test Android APK on two or three real devices. None are implied to work in this UI prototype.
+- [x] Parent phone scroll container uses `touch-action: auto`, avoiding the vertical-only gesture restriction that blocked inner horizontal strips.
