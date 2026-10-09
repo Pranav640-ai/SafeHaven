@@ -49,6 +49,7 @@ export function RescueMeshScreen({mesh,onBack,initialTab='Chats'}:
       <label className="mesh-live-field">Automatically expire after<select value={minutes} onChange={e=>setMinutes(Number(e.target.value))}><option value={15}>15 minutes</option><option value={30}>30 minutes</option><option value={60}>1 hour</option><option value={120}>2 hours</option></select></label>
       <button type="button" className="primary-button mesh-live-cta" disabled={!mesh.available||busy||!beaconText.trim()} onClick={()=>run(()=>mesh.publishBeacon(beaconText,minutes))}>Share my location temporarily</button>
       {mesh.ownBeacon&&<button type="button" className="secondary-button mesh-live-cta" disabled={busy} onClick={()=>run(()=>mesh.withdrawBeacon())}>Stop sharing beacon</button>}
+      {mesh.available&&mesh.state.beacons.length>0&&<button type="button" className="secondary-button mesh-live-cta" disabled={busy} onClick={()=>run(()=>mesh.locate())}>Show approximate distance & bearing</button>}
       {mesh.state.beacons.filter(b=>b.expiresAt>Date.now()).map(b=><BeaconItem key={b.beaconId} item={b} position={mesh.position}/>)}
       {!mesh.state.beacons.length&&<div className="mesh-live-empty"><MapPin size={32}/><h4>No active community beacons</h4><p>A beacon appears here only after a nearby participant shares one.</p></div>}
       <p className="mesh-live-hint">A beacon is not an officially approved shelter. Direction is a straight-line bearing, never a guarantee of a safe route.</p>
@@ -59,6 +60,7 @@ export function RescueMeshScreen({mesh,onBack,initialTab='Chats'}:
       <label className="mesh-live-confirm"><input type="checkbox" checked={confirmSOS} onChange={e=>setConfirmSOS(e.target.checked)}/><span>I understand delivery is not guaranteed, and an offline queue is lost when the app closes.</span></label>
       <button type="button" className="primary-button mesh-live-cta mesh-live-danger" disabled={!mesh.available||busy||!confirmSOS||!sosText.trim()} onClick={()=>run(async()=>{await mesh.sendSOS(sosText);setConfirmSOS(false)})}><ShieldAlert size={20}/> Queue / relay SOS</button>
       <p className="mesh-live-hint">Queued on this phone: {mesh.state.queuedSOS}. An SOS is acknowledged only when a peer confirms receipt.</p>
+      {mesh.state.queuedSOS>0&&<button type="button" className="secondary-button mesh-live-cta" disabled={busy} onClick={()=>run(()=>mesh.cancelQueuedSOS())}>Cancel pending SOS ({mesh.state.queuedSOS})</button>}
       {mesh.messages.filter(m=>m.type==='sos').map(m=><div key={m.id} className="mesh-live-peer"><ShieldAlert size={20}/><span><strong>{m.received?`From ${m.fromName}`:'Your SOS'}</strong><small>{m.received?'Received':m.status||'Not confirmed'}</small></span></div>)}
       <button className="mesh-live-guide" type="button" onClick={onBack}>Return to safety features <ChevronRight size={16}/></button>
     </>}
