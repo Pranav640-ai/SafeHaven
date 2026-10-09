@@ -108,7 +108,103 @@ class RescueMeshManager(
             "Relay Message Sent"
         )
     }
-
+    fun createSOS(
+        emergencyText: String
+    ) {
+    
+        val sos = SOSMessage(
+            id = java.util.UUID.randomUUID().toString(),
+            senderId = deviceName,
+            emergencyText = emergencyText,
+            timestamp = System.currentTimeMillis(),
+            status = "QUEUED"
+        )
+    
+        if (connectedEndpoints.isEmpty()) {
+    
+            SOSQueue.addSOS(sos)
+    
+            Log.d(
+                TAG,
+                "SOS Queued"
+            )
+    
+            return
+        }
+    
+        forwardSOS(sos)
+    }
+    private fun forwardSOS(
+        sos: SOSMessage
+    ) {
+    
+        val json =
+            gson.toJson(sos)
+    
+        val payload =
+            Payload.fromBytes(
+                json.toByteArray()
+            )
+    
+        connectedEndpoints.forEach {
+    
+            connectionsClient.sendPayload(
+                it,
+                payload
+            )
+        }
+    
+        sos.status = "FORWARDED"
+    
+        Log.d(
+            TAG,
+            "SOS Forwarded"
+        )
+    }
+    private fun forwardSOS(
+        sos: SOSMessage
+    ) {
+    
+        val json =
+            gson.toJson(sos)
+    
+        val payload =
+            Payload.fromBytes(
+                json.toByteArray()
+            )
+    
+        connectedEndpoints.forEach {
+    
+            connectionsClient.sendPayload(
+                it,
+                payload
+            )
+        }
+    
+        sos.status = "FORWARDED"
+    
+        Log.d(
+            TAG,
+            "SOS Forwarded"
+        )
+    }
+    private fun sendQueuedSOS() {
+    
+        val queue =
+            SOSQueue.getAllSOS()
+    
+        queue.toList().forEach {
+    
+            forwardSOS(it)
+    
+            SOSQueue.removeSOS(it)
+        }
+    
+        Log.d(
+            TAG,
+            "Queued SOS Sent"
+        )
+    }
     fun stopAllConnections() {
 
         connectionsClient.stopAdvertising()
@@ -179,7 +275,7 @@ class RescueMeshManager(
                     connectedEndpoints.add(
                         endpointId
                     )
-
+                    sendQueuedSOS()
                     Log.d(
                         TAG,
                         "Connected: $endpointId"
@@ -212,33 +308,55 @@ class RescueMeshManager(
     private val payloadCallback =
         object : PayloadCallback() {
 
-            override fun onPayloadReceived(
-                endpointId: String,
-                payload: Payload
-            ) {
-
-                val bytes =
-                    payload.asBytes()
-                        ?: return
-
-                val json =
-                    String(bytes)
-
-                try {
-
-                    val relayMessage =
-                        gson.fromJson(
-                            json,
-                            RelayMessage::class.java
-                        )
-
-                    handleRelayMessage(
-                        relayMessage
-                    )
-
-                } catch (e: Exception) {
-
-                    Log.d(
-                        TAG,
-                        "Normal Message: $json"
-     
+         override fun onPayloadReceived(
+        endpointId: String,
+        payload: Payload
+    ) {
+    
+        val bytes =
+            payload.asBytes()
+                ?: return
+    
+        val json =
+            String(bytes)
+    
+        try {
+    
+            val sos =
+                gson.fromJson(
+                    json,
+                    SOSMessage::class.java
+                )
+    
+            Log.d(
+                TAG,
+                "SOS Received: ${sos.emergencyText}"
+            )
+    
+            return
+    
+        } catch (_: Exception) {
+        }
+    
+        try {
+    
+            val relay =
+                gson.fromJson(
+                    json,
+                    RelayMessage::class.java
+                )
+    
+            handleRelayMessage(
+                relay
+            )
+    
+            return
+    
+        } catch (_: Exception) {
+        }
+    
+        Log.d(
+            TAG,
+            "Normal Message: $json"
+        )
+    }
