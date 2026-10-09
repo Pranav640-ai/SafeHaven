@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=League+Spartan:wght@500;600;700;800&family=Libre+Caslon+Display&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Nunito:wght@400;500;600;700;800&family=Raleway:wght@400;500;600;700;800&display=swap');
 @import 'tailwindcss';
 
 :root{font-family:'Plus Jakarta Sans',Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#f6f5fa;background:#101013;font-synthesis:none;text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased}
@@ -423,3 +423,225 @@ html,body,#root {background:#0b110f;color:#f2faf5}
 /* Critical: a pan-y-only ancestor blocks horizontal gestures on nested scrollers.
    Keep the phone canvas gesture-neutral; native child scrollers select their axis. */
 .phone-scroll, .phone-onboarding .phone-scroll {touch-action:auto!important}
+
+
+/* v6 · Porcelain / tidal blue / sand: deliberate light-mode glass design.
+   Real interface text stays opaque and high-contrast over translucent surfaces. */
+:root {
+  font-family:'Nunito', ui-sans-serif,system-ui,sans-serif;
+  color:#263e49;background:#eaf0ef;
+  --bg:#eef2f1;--panel:rgba(255,255,255,.76);--panel-2:#e4edee;
+  --border:#c4d6d9;--muted:#627982;--soft:#526974;--white:#263e49;
+  --violet:#527e9b;--electric:#326e90;--accent:#397b9a;--accent-deep:#275872;
+  --subtle-shadow:0 12px 36px #385f7020;
+}
+html,body,#root{background:#e9efef;color:#263e49}
+button,input,select,textarea{font-family:'Nunito',ui-sans-serif,system-ui,sans-serif}
+:where(h1,h2,h3,.back-header h1,.section-heading h2,.mesh-intro h2,.explore-intro h2,.feature-card strong){font-family:'Raleway',ui-sans-serif,sans-serif;letter-spacing:-.035em}
+:where(.login-art-copy em,.explore-editorial h3,.home-welcome h1){font-family:'Abril Fatface',Georgia,serif;font-weight:400;letter-spacing:-.017em}
+:where(button,input,select,textarea):focus-visible{outline:2px solid #31769a;outline-offset:3px}
+.preview-stage{background:radial-gradient(ellipse at 78% 3%,#bedbdc 0%,transparent 45%),radial-gradient(ellipse at 0 85%,#f7e5d6,transparent 44%),#eaf0ef}
+.desktop-side h1,.desktop-side h1 span{color:#263f4f}.desktop-side>p,.desktop-side .desktop-disclaimer{color:#536a76}
+.desktop-help{background:#ffffff9e;border-color:#c6d7d8;color:#31576d;backdrop-filter:blur(18px)}
+.desktop-help svg,.desktop-side .brand-ai{color:#397b99}.desktop-help b{color:#275675}
+.phone-shell{color:#253e4a;background:#eef2f1;border:1px solid #afc4c9;box-shadow:0 24px 72px #254a5b34,0 3px 15px #496c6b17}
+.phone-shell::before{content:'';position:absolute;inset:0;pointer-events:none;z-index:0;background:
+  radial-gradient(ellipse 92% 30% at 42% -8%,#8cc6d9a8 0,#c1dce392 39%,transparent 100%),
+  radial-gradient(ellipse 68% 24% at 112% 37%,#a9c9c3a0,transparent 100%),
+  radial-gradient(ellipse 92% 34% at -21% 76%,#f4dabeac,transparent 100%),
+  linear-gradient(165deg,#f3f5f3 0%,#edf2f1 53%,#e6eeec 100%)}
+.phone-shell::after{content:'';pointer-events:none;position:absolute;inset:0;z-index:0;opacity:.55;
+  background-image:linear-gradient(#537c860e 1px,transparent 1px),linear-gradient(90deg,#537c860e 1px,transparent 1px);
+  background-size:29px 29px;mask-image:linear-gradient(to bottom,#000 0%,#0009 49%,transparent 87%);
+  -webkit-mask-image:linear-gradient(to bottom,#000 0%,#0009 49%,transparent 87%)}
+.phone-scroll{position:relative;z-index:1;background:transparent;overscroll-behavior-y:auto;touch-action:auto!important}
+.screen-content{color:#263e49}.back-header h1,.section-heading h2{color:#263e49}
+.icon-button{color:#34596c}.icon-button:hover,.app-row:hover,.checklist-row:hover{background:#8aaeb11d}
+.section-heading p,.explore-intro p,.home-welcome p,.demo-note,.feature-detail,.row-body small,.row-end,.app-row .row-chevron{color:#617983}
+.demo-note svg,.home-location>svg,.section-link{color:#377896}
+.section-link{font-weight:800}.brand{font-family:'Raleway',sans-serif;color:#2b4b5e;letter-spacing:-.07em}
+.brand-symbol{background:linear-gradient(140deg,#477f9c,#234e77);color:#fff;box-shadow:0 7px 24px #2d729b3d}
+.brand-ai{color:#4a859e}
+.home-location strong,.home-welcome h1{color:#274553}.home-location small{color:#67818b}
+.avatar-button{background:#d8e7e9;border-color:#a2bcc5;color:#315e73}
+.primary-button{background:linear-gradient(110deg,#407e9d,#285978);color:#fff;box-shadow:0 8px 22px #416b8030}
+.secondary-button{background:#e0eced;color:#285775;border:1px solid #abc7cf}
+/* Satin glass surfaces. Leave danger panels and photographic heroes with strong contrast. */
+.list-panel,.chat-panel,.metric-two>div,.empty-feature,.checkin-block,.profile-shortcuts button,
+.home-action,.home-prep,.home-guide-inner,.home-note-card,.mesh-status,.mesh-empty,
+.explore-tools button,.mesh-beacon-feature,.guest-button,.search-field,.quick-access button{
+  background:linear-gradient(148deg,#ffffffdd,#eff6f3af);
+  border:1px solid #ffffffc9;box-shadow:0 4px 22px #54707c14,inset 0 1px #fff;
+  -webkit-backdrop-filter:blur(18px) saturate(125%);backdrop-filter:blur(18px) saturate(125%);
+}
+.list-panel,.chat-panel{border-color:#c8d9dc}
+.app-row+.app-row,.checklist-row+.checklist-row{border-top-color:#d5e1e2}
+.row-icon,.checklist-icon{background:#dceaf0;color:#2b718e}
+.row-blue{background:#d4e7f5;color:#346b9d}.row-teal{background:#d8ede7;color:#32796f}
+.row-violet{background:#e8e3f0;color:#6d6195}.row-amber{background:#f4e7d4;color:#a97930}
+.row-rose{background:#f8e4e3;color:#b95768}
+/* Hazy/photo-led hero retains white foreground for readable text. */
+.hero-risk{background:#315875;border-color:#b0c9d2;box-shadow:0 10px 28px #3a637b27}
+.hero-risk-photo{filter:saturate(.92) hue-rotate(-8deg)}
+.hero-risk-bg{background:linear-gradient(95deg,#193a59ed 0%,#214b6fba 49%,#274a6670 100%),linear-gradient(0deg,#173a52bb,transparent 72%)}
+.hero-shield{background:linear-gradient(140deg,#88c2d4,#417ea0);box-shadow:0 6px 18px #184e7438}
+.hero-risk h2,.hero-risk p,.hero-risk .hero-label,.hero-risk .hero-link,.hero-risk-top>svg{color:#fff}
+/* Multi-toned cards: emphasis on icons and readable labels, not neon glow. */
+.feature-card{border:1px solid #ffffffc9;box-shadow:0 7px 22px #56747c18,inset 0 1px #fff;min-height:152px}
+.feature-card:before{opacity:.08}
+.feature-card:hover{border-color:#a6c1cf;filter:brightness(1.018)}
+.tint-rose{color:#b86883;background:linear-gradient(150deg,#fbe5e8,#fff8f8)}
+.tint-blue{color:#427cad;background:linear-gradient(150deg,#dceafb,#f4f8fb)}
+.tint-amber{color:#a87c43;background:linear-gradient(150deg,#f7e7d2,#fdf9f1)}
+.tint-violet{color:#7970ac;background:linear-gradient(150deg,#e8e6f8,#f9f7ff)}
+.tint-teal{color:#397e83;background:linear-gradient(150deg,#d9eeed,#f4faf8)}
+.tint-indigo{color:#667eb4;background:linear-gradient(150deg,#e0e9f5,#fafbff)}
+.feature-card strong{color:#273f4b;font-size:11px}.feature-detail{color:#57707a}
+.feature-corner-icon{background:#ffffffb8;color:#315878;border-color:#ffffffd9;box-shadow:0 5px 13px #506d751d}
+.feature-illustration{filter:drop-shadow(0 6px 8px #25495e28)}
+/* Home inline tools */
+.home-action-icon,.home-note-head>span{color:#2c718e;background:#d5e8ed}
+.home-action-done{background:#e3f0ed;border-color:#a1cfc4}
+.home-action-guide{background:#eee5d9;color:#9e713d}
+.home-prep-tasks button,.home-guide-types button{color:#385767;background:#f5f8f7;border-color:#cadadd}
+.home-prep-tasks button.done>span,.home-guide-types button.is-active{background:#457d97;border-color:#457d97;color:#fff}
+.home-prep p,.home-note-head small,.home-guide-inline small{color:#627985}
+.home-note-card textarea,.note-display{color:#2b4755;background:#ffffffa8;border:1px solid #c4d8dc}
+.home-note-card textarea::placeholder{color:#7b8d93}
+.note-save{background:#376f92;color:#fff}
+/* A dark editorial trip carousel remains visually differentiated. */
+.carousel-indigo{background:linear-gradient(90deg,#224d6aca,#2e587c80),url('https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=850&q=75') center/cover,#2c607d}
+.carousel-violet{background:linear-gradient(135deg,#5b719b,#96a1bf)}
+.carousel-teal{background:linear-gradient(135deg,#397a8e,#77a3a6)}
+.native-carousel-item .carousel-card{color:#fff}.carousel-card h3,.carousel-card p{color:#fff}
+/* Gesture bounce is implemented in SwipeRow with Motion; keep native scrolling. */
+.swipe-block{min-width:0}.swipe-viewport{overflow:hidden;margin:0 -23px;isolation:isolate}
+.native-swipe-row{margin:0;padding:4px 23px 18px;scroll-snap-type:none!important;scroll-behavior:auto;touch-action:pan-x pan-y;-webkit-overflow-scrolling:touch;overscroll-behavior-x:auto;scrollbar-width:none;will-change:transform}
+.swipe-toolbar{display:none!important}
+/* Explore: understated editorial headline and crisp photographs. */
+.eyebrow{color:#3a7992}.explore-intro h2{color:#274653;font-family:'Raleway',sans-serif}
+.explore-search,.search-field{background:#ffffffb6;border:1px solid #cbdde0;color:#2d4f5d}
+.search-field svg{color:#497b90}.search-field input,.phone-field input,.form-input{color:#294857}
+.search-field input::placeholder{color:#879ca4}
+.explore-editorial{border-color:#ffffff9c;background:#517a97;box-shadow:0 14px 30px #4f748125}
+.explore-editorial-shade{background:linear-gradient(0deg,#1b3e50e8,transparent 76%),linear-gradient(120deg,#315e8055,transparent 60%)}
+.explore-editorial>div:last-child h3,.explore-editorial p{color:#fff}
+.explore-overline{background:#e7f4f5bf;color:#254c62;border:1px solid #fff9;backdrop-filter:blur(13px)}
+.explore-moods button{background:#ffffffa8;border:1px solid #c9d8d9;color:#4b6978;backdrop-filter:blur(11px)}
+.explore-moods button.selected{background:#346c89;color:#fff;border-color:#346c89}
+.destination-tile{border:1px solid #fff9;box-shadow:0 10px 25px #3d677336}
+.destination-tile-copy>span,.destination-tile-copy strong,.destination-tile-copy small{color:#fff}
+.explore-tools button{color:#2c4c5a}
+.explore-tools button>span{background:#d5e9ed;color:#367992}
+.explore-tools small{color:#597885}.explore-tools button>svg:last-child{color:#50859b}
+/* Input/search/selection flows */
+.tab-strip{border-bottom-color:#cddadd}.tab-strip button,.guide-picker button,.segmented button{color:#74858e}
+.tab-strip button.selected,.guide-picker button.selected,.segmented button.selected{color:#285f7c}
+.tab-strip button.selected:after{background:#3d7e9c}
+.destination-cover{color:#fff}.destination-cover h2,.destination-overline,.destination-cover p{color:#fff}
+.risk-summary{background:#fff5e7;border-color:#edddc4;color:#4e5360}
+.risk-summary-symbol{color:#a37a3f;background:#f4e4c8}.risk-summary small{color:#986b36}
+.risk-summary p{color:#647581}
+.metric-two span,.metric-two svg{color:#4d7c90}.empty-feature{color:#65828c}
+.empty-feature h3{color:#2b4b59}.empty-feature p{color:#6a8390}
+.replan-banner,.pack-hero,.guide-cover{border:1px solid #c2d9dd;background:linear-gradient(134deg,#2e5979,#6795a9);color:#fff}
+.replan-banner :is(h2,h3,p,span),.pack-hero :is(h2,h3,p,span),.guide-cover :is(h2,h3,p,span){color:#fff}
+.guide-picker button,.segmented button{background:#e0e9e9;border-color:#bed1d2}
+.guide-step,.guide-step p{color:#395361}
+/* Mesh: blue glass status card instead of fluorescent radar. */
+.mesh-intro{background:linear-gradient(125deg,#dbeaedc9,#f9faf6d7);border:1px solid #ffffffd9;box-shadow:0 10px 25px #4a6f8122;min-height:152px;color:#284c5e}
+.mesh-intro h2{color:#254d62}.mesh-intro p{color:#547685}
+.mesh-intro .eyebrow{color:#4a8094}
+.mesh-orbits{color:#4a819c;border-color:#7299ad65;opacity:.7}
+.mesh-orbits span{border-color:#86b4be80}.mesh-orbits span:first-child{background:#b8d8dc88}
+.mesh-status{background:#ffffffc9;border-color:#c4d7da;box-shadow:0 6px 17px #6e92991b}
+.mesh-status strong{color:#294b5d}.mesh-status p{color:#64808b}
+.mesh-status-icon{background:#dbe8ec;color:#387896}
+.mesh-state{color:#456e85}
+.mesh-tabs{background:#e0eae9ad;border:1px solid #c0d5d7;backdrop-filter:blur(16px)}
+.mesh-tabs button{color:#5d7c8c}.mesh-tabs button.selected{background:linear-gradient(145deg,#4a84a3,#2c627f);color:#fff;box-shadow:0 5px 18px #335d7138}
+.mesh-empty h3,.mesh-beacon-feature h3{color:#294b5a}.mesh-empty p,.mesh-beacon-feature p{color:#597784}
+.mesh-empty-art{color:#3f7e96;background:radial-gradient(circle,#badce5,#e5f1f2);border-color:#a4c6d0;box-shadow:0 0 0 15px #c1dfe34d,0 0 0 29px #d2e5e73c}
+.mesh-beacon-feature>svg{color:#3c849b}.mesh-beacon-feature button{background:#336b88;color:white}
+.mesh-sos-card{background:#f9ece9;border:1px solid #e5bbb9;color:#84424b}
+.mesh-sos-card>svg{color:#c1535a}.mesh-sos-card p{color:#985c61}
+.chat-panel{color:#31505d}.chat-top{border-bottom-color:#d1e1e2}.chat-top small{color:#708895}
+.chat-avatar{background:#dbe9f0;color:#456d92}
+.bubble.incoming{background:#e6edef;color:#2d4c5c}
+.bubble.outgoing{background:#3c7492;color:#fff}
+.message-compose{border-top-color:#d5e2e4}.message-compose input{background:#eef4f4;color:#345867}
+.message-compose button{background:#387f9e;color:white}
+.beacon-heading p,.beacon-info{color:#577584}
+.beacon-cover{background:radial-gradient(circle at 50% 50%,#83b8c3,#376b84 73%);border-color:#bdd8dc;color:white}
+.beacon-overline{color:#f2ffff}
+.beacon-map-point{background:linear-gradient(145deg,#78c6cc,#397e9e)}
+.draft-beacon{background:#e7f3f0;border-color:#b9d5cb}.draft-beacon p,.draft-beacon div>span{color:#4c7876}
+.draft-beacon button{color:#2f6e88;background:#fff9}
+/* Onboarding: dark blue scenic top with porcelain form, as in District's split composition. */
+.login-screen{background:#f3f4f2}
+.login-art{background:radial-gradient(ellipse at 52% 72%,#8fb5cb,#456b93 47%,#2b4564 91%)}
+.login-art::after{background:linear-gradient(180deg,transparent 47%,#2b4762c9 100%)}
+.login-art .brand,.login-art .brand-ai{color:#fff}.login-top .brand-symbol{background:#ffffff35;border:1px solid #ffffff70;box-shadow:none}
+.main-point{background:linear-gradient(130deg,#d6e9ec,#69a2bd);box-shadow:0 0 50px #d6f3ff75,inset 0 2px #fff8;color:#275877}
+.side-point{background:linear-gradient(145deg,#f3d6be,#c5a98d)}.left-point{background:linear-gradient(145deg,#bbd9d8,#65959e)}
+.orbit{border-color:#fff6}.login-art-copy>span{color:#ebf7fa}
+.login-art-copy h1{color:#fff;font-family:'Raleway',sans-serif;font-weight:800}
+.login-art-copy em{color:#f8e8d6;font-family:'Abril Fatface',Georgia,serif;font-weight:400;letter-spacing:0}
+.login-panel{background:#f9fbf9eF;color:#2a4654;box-shadow:0 -7px 35px #1c426028}
+.login-panel h2{color:#294959}.login-panel>p:not(.login-legal){color:#71838b}
+.login-skip{background:#ffffff35;color:#fff}
+.field-label{color:#375563}
+.phone-field input,.form-input,.country-select-wrap{background:#ffffffdc;border:1px solid #c9d8da;color:#26495d}
+.phone-field input::placeholder,.form-input::placeholder{color:#90a1aa}
+.country-select-wrap select{color:#31586c}.country-select-wrap select option{background:#fff}
+.phone-field input:focus,.form-input:focus{border-color:#4f92a9}
+.guest-button{background:#e5eff0;border:1px solid #bed2d6;color:#365e74}
+.or-divider{color:#81929a}.or-divider span{background:#cbd7db}
+.login-panel .login-legal{color:#768790}
+/* Profile's hierarchy stays intact, but surfaces are light. */
+.profile-summary{background:linear-gradient(120deg,#e5edf3d9,#ecf1eedb);border:1px solid #ffffffd7;color:#2d4c5b;box-shadow:0 9px 26px #5073851e}
+.profile-ring{background:#d5e3ed;border-color:#6e9fb7;border-left-color:#c7d6d9;border-bottom-color:#aac8d3}
+.profile-ring>span{background:#b2cad8;color:#325b74}
+.profile-identity strong,.profile-bottom{color:#2d4c5c}.profile-identity small{color:#617b88}
+.profile-divider{background:#bbd1d7}.profile-bottom svg{color:#4d8aa4}
+.profile-promo{background:linear-gradient(112deg,#3a7590,#275d7d);border-color:#437f97;color:#fff}
+.profile-promo>span{background:#ffffff2d;color:#fff}.profile-promo>svg{color:#fff}
+.profile-shortcuts button{color:#345968}.profile-shortcuts button span{color:#4b7f96}
+.signout{color:#315c7a}
+/* Safety pack */
+.checkmark{border-color:#a5bec4;color:#fff}.checkmark.is-checked{background:#397d94;border-color:#397d94}
+.pack-hero-mark{background:#ffffff31;color:white}
+.checkin-symbol{background:#d7e8e9;color:#397a93}.checkin-block p{color:#607785}
+/* Dock floats over content as frosted porcelain, anchored to same center. */
+.floating-dock{background:linear-gradient(175deg,#fffffff0,#e4efefec);border:1px solid #ffffffdf;box-shadow:0 10px 30px #466b7b3b,inset 0 1px #fff;backdrop-filter:blur(25px) saturate(140%);-webkit-backdrop-filter:blur(25px) saturate(140%)}
+.dock-item{color:#6a8190}.dock-item.dock-active{color:#225879}
+.dock-active-bg{background:#cfe4e9b8}
+.dock-sos{background:linear-gradient(135deg,#ee6671,#c93d55);border-color:#f5b3b8;box-shadow:0 5px 19px #cf657844;color:#fff}
+.bottom-sheet{background:#f6f9f8;color:#2b4a59;border-color:#c8dcdf}
+.bottom-sheet p{color:#607b88}
+.sheet-handle{background:#b5cdd2}
+.toast-message{background:#f7fbfaf5;border:1px solid #abcbd3;color:#33596f;box-shadow:0 8px 23px #4d69792e}
+/* Loading skeletons share the same neutral palette as final surfaces. */
+.loading-scene{color:#477283}
+@media(max-width:719px){.preview-stage{background:#eef2f1}.phone-shell{border:0;border-radius:0}.phone-scroll{overscroll-behavior-y:auto}}
+@media(max-width:360px){.swipe-viewport{margin:0 -16px}.native-swipe-row{padding-left:16px;padding-right:16px}}
+@media(prefers-reduced-motion:reduce){.native-swipe-row{will-change:auto}.feature-illustration,.carousel-art-illustration{animation:none}}
+/* Detail screens follow the same porcelain surface language. */
+.simple-cta,.segmented,.day-card,.why-card,.guide-picker button,.steps{
+  background:linear-gradient(150deg,#ffffffdf,#eff5f1c7);border:1px solid #cfdddf;color:#2b4a5a;
+  box-shadow:0 5px 18px #68858c13;backdrop-filter:blur(15px)
+}
+.simple-cta>svg:first-child,.why-card svg,.guide-picker button svg{color:#407d99}
+.simple-cta>svg:last-child{color:#7896a4}
+.segmented .selected,.guide-picker button.selected{background:#356d8d;color:#fff;border-color:#356d8d}
+.guide-picker button.selected svg,.guide-picker button.selected small{color:#fff}
+.guide-picker button small,.day-card-label,.day-card p,.why-card p,.page-lead{color:#597481}
+.day-track span{background:#4a829d}.day-track i{background:#bdd1d7}
+.plan-change{color:#257a69}.why-card strong{color:#2e5364}
+.steps{overflow:hidden}.step p{color:#304c5b}.step span{background:#d9e8ed;color:#366e8b}
+.guide-cover-symbol{background:#ffffff3d;color:#fff}
+.guide-cover>span,.guide-cover p{color:#f2fbff}
+.sos-icon{color:#b84056;background:#fae6e8}
+.caution-inline{background:#fff0ee;border:1px solid #e4bdc2;color:#9a3c4e}
+.quiet-button{color:#4b7187}
+:where(.home-action,.home-note-card,.profile-summary,.mesh-status,.mesh-empty,.list-panel,.steps,.day-card):hover{border-color:#bed2d7}
