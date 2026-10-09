@@ -2,6 +2,9 @@ import { useEffect, useRef, useState, type ReactNode, type UIEvent } from 'react
 import { AnimatePresence, animate, motion, useMotionValue, useReducedMotion } from 'motion/react';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
+import { RescueMeshScreen } from './mesh/RescueMeshScreen';
+import { useRescueMesh } from './mesh/useRescueMesh';
+import './mesh/mesh.css';
 import {
   AlertCircle, AlertTriangle, ArrowLeft, ArrowRight, Bell, Bookmark,
   BookOpen, Check, CheckCheck, ChevronDown, ChevronRight, CircleHelp,
@@ -169,6 +172,7 @@ export default function App(){
   const [selectedDestination,setSelectedDestination]=useState('Manali');
   const [destinationMood,setDestinationMood]=useState('All');
   const [meshTab,setMeshTab]=useState<'Chats'|'Nearby'|'Beacons'|'SOS'>('Chats');
+  const meshApi=useRescueMesh();
   const [meshScanning,setMeshScanning]=useState(false);
   const [tripNote,setTripNote]=useState('');
   const [noteOpen,setNoteOpen]=useState(false);
@@ -298,32 +302,14 @@ export default function App(){
     <button className="simple-cta guide-next" type="button" onClick={()=>go('pack')}><Bookmark size={21}/><span>View safety pack</span><ArrowRight size={18}/></button>
   </>}
 
-  function mesh(){return <><BackHeader title="RescueMesh" back={()=>go('home')} action={<IconButton icon={CircleHelp} label="About RescueMesh" onClick={()=>setDialog('help')}/>}/>
-    <section className="mesh-intro mesh-intro-v6" aria-label="Offline network overview">
-      <div className="mesh-v6-head"><span className="mesh-v6-symbol"><Radio size={25}/></span><span className="mesh-v6-offline"><WifiOff size={14}/> Not connected</span></div>
-      <h2>Your offline network.</h2>
-      <p>Find participating Android phones nearby. Messaging is unavailable until the native mesh is connected.</p>
-      <button className="mesh-v6-open" type="button" onClick={()=>setMeshTab('Nearby')}>View nearby devices <ArrowRight size={17}/></button>
-    </section>
-    <div className="mesh-tabs" role="tablist" aria-label="RescueMesh sections">{(['Chats','Nearby','Beacons','SOS'] as const).map(t=><button role="tab" type="button" key={t} aria-selected={meshTab===t} className={meshTab===t?'selected':''} onClick={()=>setMeshTab(t)}>{t}</button>)}</div>
-    <AnimatePresence mode="wait" initial={false}><motion.div key={meshTab} className="mesh-tab-content" initial={{opacity:0,x:9}} animate={{opacity:1,x:0}} exit={{opacity:0,x:-9}} transition={{duration:.19}}>
-    {meshTab==='Chats'&&<><Heading title="Travel group" sub="Messages stay on this device"/><div className="chat-panel"><div className="chat-top"><span className="chat-avatar"><Users size={23}/></span><div><strong>Group conversation</strong><small>No connected peers</small></div></div><div className="chat-content"><div className="bubble incoming">Is everyone at the meeting point?<small>Group chat sample</small></div><div className="bubble outgoing">I'm checking the route now.<small>Group chat sample</small></div>{demoMessages.map((m,i)=><div className="bubble outgoing" key={`${i}-${m}`}>{m}<small>Not sent</small></div>)}</div><form className="message-compose" onSubmit={e=>{e.preventDefault();if(message.trim()){setDemoMessages(a=>[...a,message.trim()]);setMessage('');setToast('Message saved locally — not sent');}}}><input aria-label="Message" value={message} maxLength={150} placeholder="Type a message…" onChange={e=>setMessage(e.target.value)}/><button type="submit" aria-label="Save draft message" disabled={!message.trim()}><Send size={18}/></button></form></div></>}
-    {meshTab==='Nearby'&&<><Heading title="Nearby devices" sub="Available after Android setup"/><div className="mesh-empty"><div className="mesh-empty-art"><Radio size={35}/></div><h3>{meshScanning?'Looking for connections…':'No devices connected'}</h3><p>{meshScanning?'No devices can be discovered in the browser.':'Mesh discovery works between participating Android phones with permissions enabled.'}</p><button className="secondary-button" type="button" disabled={meshScanning} onClick={()=>{setMeshScanning(true);window.setTimeout(()=>setMeshScanning(false),1300)}}><RefreshCw size={16} className={meshScanning?'spin-icon':''}/> {meshScanning?'Checking view':'Check nearby'}</button></div></>}
-    {meshTab==='Beacons'&&<><Heading title="Community safety beacons" sub="Opt-in places shared by people nearby"/><div className="mesh-beacon-feature"><MapPin size={27}/><h3>Need a meeting point?</h3><p>A person can share a temporary, self-reported location. These are never official shelters or verified safe routes.</p><button type="button" onClick={()=>go('beacon')}>Set a meeting point <ArrowRight size={17}/></button></div><DemoNote>No active beacons are available. Nothing has been shared.</DemoNote></>}
-    {meshTab==='SOS'&&<><Heading title="SOS and relay" sub="Emergency messages when connectivity returns"/><div className="mesh-sos-card"><ShieldAlert size={31}/><div><strong>Emergency sending unavailable</strong><p>Queueing, relaying and acknowledgements will require the native Android bridge.</p></div></div><button className="secondary-button" type="button" onClick={()=>setDialog('sos')}><LifeBuoy size={18}/> View SOS <ArrowRight size={17}/></button><DemoNote>SOS is not sent or queued.</DemoNote></>}
-    </motion.div></AnimatePresence>
-  </>}
-
-  function beacon(){return <><BackHeader title="Community beacon" back={()=>go('mesh')}/><div className="beacon-cover"><span className="beacon-map-halo one"/><span className="beacon-map-halo two"/><span className="beacon-map-halo three"/><span className="beacon-map-point"><MapPin size={27}/></span><span className="beacon-overline">COMMUNITY SAFETY</span></div><div className="beacon-heading"><h2>Share a temporary meeting point</h2><p>Only when you choose. Others may see your approximate location over RescueMesh once supported.</p></div>
-    <DemoNote>Community locations are self-reported and unverified, not official shelters.</DemoNote><div className="beacon-form"><label className="field-label" htmlFor="beacon-text">Meeting point description</label><input className="form-input" id="beacon-text" maxLength={80} value={beaconText} onChange={e=>setBeaconText(e.target.value)} /><div className="beacon-info"><Clock3 size={19}/><span>Real beacons will have an expiry time and an off switch.</span></div><button type="button" className="primary-button" onClick={()=>{setBeaconDraft(true);setToast('Beacon draft created — not shared')}}>{beaconDraft?'Update local preview':'Preview beacon'}<ArrowRight size={18}/></button></div>
-    {beaconDraft&&<div className="draft-beacon"><div><span><MapPin size={16}/> Local draft</span><strong>{beaconText}</strong><p>Unverified · No location shared</p></div><button type="button" onClick={()=>setBeaconDraft(false)}>Remove draft</button></div>}
-    <div className="why-card"><AlertTriangle size={19}/><p>Beacon directions can show an approximate distance and bearing when native sensors are integrated. They cannot guarantee a safe route.</p></div>
-  </>}
+  function mesh(){return <RescueMeshScreen key={meshTab} mesh={meshApi} onBack={()=>go('home')} initialTab={meshTab}/>;}
+  function beacon(){return <RescueMeshScreen key="beacon" mesh={meshApi} onBack={()=>go('mesh')} initialTab="Beacons"/>;}
 
   function pack(){const tasks=[{title:'Emergency contacts',detail:'Add people to reach in an emergency',icon:Phone},{title:'Safety guidance',detail:'Review essential instructions',icon:BookOpen},{title:'Trip details',detail:'Keep your itinerary accessible',icon:Map},{title:'Group check-in',detail:'Decide who can see your status',icon:Users}];return <><BackHeader title="Safety pack" back={()=>go('home')} action={<IconButton icon={CircleHelp} label="About safety pack" onClick={()=>setDialog('help')}/>}/>
     <div className="pack-hero"><span className="pack-hero-mark"><Bookmark size={28}/></span><div><span>YOUR ESSENTIALS</span><h2>Prepared, wherever you go.</h2><p>Review key information before the connection drops.</p></div></div><DemoNote>Offline downloads are not connected yet.</DemoNote>
     <Heading title="Before you go" sub="Items to review"/><div className="list-panel checklist-panel">{tasks.map(t=>{const Icon=t.icon;const done=checklist.includes(t.title);return <button type="button" className="checklist-row" key={t.title} onClick={()=>setChecklist(p=>done?p.filter(x=>x!==t.title):[...p,t.title])}><span className="checklist-icon"><Icon size={21}/></span><span className="row-body"><strong>{t.title}</strong><small>{t.detail}</small></span><span className={`checkmark ${done?'is-checked':''}`}>{done&&<Check size={14}/>}</span></button>})}</div>
     <section className="content-section"><Heading title="Group check-in"/><div className="checkin-block"><span className="checkin-symbol"><Users size={23}/></span><h3>{checkedIn?'Marked safe locally':'Let your group know'}</h3><p>{checkedIn?'This status has not been shared with anyone.':'Review your check-in before sharing becomes available.'}</p><button className="secondary-button" type="button" onClick={()=>{setCheckedIn(x=>!x);setToast('Status changed locally — not shared')}}>{checkedIn?'Reset preview':'Mark myself safe'} <ArrowRight size={17}/></button></div></section>
+    {meshApi.available && meshApi.state.peers.length>0 && <button type="button" className="secondary-button" onClick={()=>{void meshApi.sendCheckIn('safe').then(()=>setToast('Check-in offered to nearby phones')).catch(()=>setToast('Check-in not sent'))}}><Users size={18}/> Share safe status via RescueMesh</button>}
     <section className="content-section"><Heading title="Saved content"/><div className="list-panel"><AppRow icon={BookOpen} tone="violet" title="Emergency guide" subtitle="General safety instructions" onClick={()=>go('guide')}/><AppRow icon={Download} tone="blue" title="Offline downloads" subtitle="Not available yet" onClick={()=>setToast('Offline downloading is not connected')}/></div></section>
   </>}
 
@@ -376,7 +362,7 @@ export default function App(){
       </div>
       {authenticated&&<nav className={`floating-dock ${compact?'dock-compact':''}`} aria-label="Main navigation">
         {([{id:'home',label:'Home',icon:Home},{id:'explore',label:'Explore',icon:Compass}] as const).map(t=>{const Icon=t.icon;return <button key={t.id} type="button" aria-label={t.label} aria-current={tab===t.id?'page':undefined} onClick={()=>go(t.id)} className={`dock-item ${tab===t.id?'dock-active':''}`}><span className="dock-active-bg" aria-hidden="true"/><Icon size={22} strokeWidth={2.1}/><span>{t.label}</span></button>})}
-        <motion.button type="button" className="dock-sos" aria-label="Emergency SOS" onClick={()=>setDialog('sos')} whileTap={{scale:.92}}><ShieldAlert size={21}/><small>SOS</small></motion.button>
+        <motion.button type="button" className="dock-sos" aria-label="Emergency SOS" onClick={()=>{setMeshTab('SOS');go('mesh')}} whileTap={{scale:.92}}><ShieldAlert size={21}/><small>SOS</small></motion.button>
         {([{id:'mesh',label:'Mesh',icon:Radio},{id:'profile',label:'Profile',icon:UserRound}] as const).map(t=>{const Icon=t.icon;return <button key={t.id} type="button" aria-label={t.label} aria-current={tab===t.id?'page':undefined} onClick={()=>go(t.id)} className={`dock-item ${tab===t.id?'dock-active':''}`}><span className="dock-active-bg" aria-hidden="true"/><Icon size={22} strokeWidth={2.1}/><span>{t.label}</span></button>})}
       </nav>}
       <Modal kind={dialog} close={()=>setDialog(null)} go={go} person={name} saveName={setName}/>
