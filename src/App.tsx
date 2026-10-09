@@ -157,6 +157,32 @@ function Modal({kind,close,go,person,saveName}: {kind:Dialog;close:()=>void;go:(
   </motion.div>}</AnimatePresence>;
 }
 
+function MorphToast({message}:{message:string}) {
+  const anchor=useRef<HTMLDivElement>(null);
+  const [width,setWidth]=useState(300);
+  const reduced=useReducedMotion();
+  useEffect(()=>{
+    const el=anchor.current;if(!el)return;
+    const resize=()=>setWidth(Math.min(340,el.clientWidth));resize();
+    const observer=new ResizeObserver(resize);observer.observe(el);
+    return()=>observer.disconnect();
+  },[]);
+  return <div className="toast-anchor" ref={anchor} role="status" aria-live="polite">
+    <span className="sr-only">{message}</span>
+    <motion.div className="morph-toast" aria-hidden="true"
+      initial={reduced?{width,opacity:0}:{width:48,opacity:0,scale:.75,y:12}}
+      animate={{width,opacity:1,scale:1,y:0}}
+      exit="exit"
+      transition={reduced?{duration:.15}:{width:{duration:.42,delay:.18,ease:[.22,1,.36,1]},opacity:{duration:.2},scale:{duration:.3},y:{duration:.3}}}
+      style={{borderRadius:24}}
+      variants={{exit:{width:reduced?width:48,opacity:reduced?0:[1,1,0],scale:reduced?1:[1,1,.75],y:reduced?0:[0,0,8],transition:{width:{duration:.3,delay:.08},opacity:{duration:.5,times:[0,.72,1]},scale:{duration:.5,times:[0,.72,1]},y:{duration:.5,times:[0,.72,1]}}}}}
+    >
+      <motion.span className="toast-orb" initial={{opacity:1}} animate={{opacity:0}} exit={{opacity:1}} transition={{delay:.18,duration:.16}}/>
+      <motion.span className="toast-copy" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0,transition:{delay:0,duration:.1}}} transition={{delay:reduced?0:.42,duration:.15}}>{message}</motion.span>
+    </motion.div>
+  </div>;
+}
+
 export default function App(){
   const [authenticated,setAuthenticated]=useState(false);
   const [phone,setPhone]=useState('');
@@ -195,7 +221,7 @@ export default function App(){
   const reduceMotion=useReducedMotion();
 
   useEffect(()=>{if(!authenticated)return;setLoading(true);const t=window.setTimeout(()=>setLoading(false),page==='home'?640:420);return()=>window.clearTimeout(t)},[page,authenticated]);
-  useEffect(()=>{if(!toast)return;const t=window.setTimeout(()=>setToast(''),2700);return()=>window.clearTimeout(t)},[toast]);
+  useEffect(()=>{if(!toast)return;const t=window.setTimeout(()=>setToast(''),3800);return()=>window.clearTimeout(t)},[toast]);
   const openDestination=(name:string)=>{setSelectedDestination(name);go('risk')};
   const go=(p:Page)=>{setPage(p);setCompact(false);lastTop.current=0;if(scrollRef.current) scrollRef.current.scrollTo({top:0,behavior:'instant'})};
   const handleScroll=(event:UIEvent<HTMLDivElement>)=>{const y=event.currentTarget.scrollTop;const diff=y-lastTop.current;if(y<66)setCompact(false);else if(diff>15)setCompact(true);else if(diff< -16)setCompact(false);lastTop.current=y;};
@@ -367,7 +393,7 @@ export default function App(){
         {([{id:'mesh',label:'Mesh',icon:Radio},{id:'profile',label:'Profile',icon:UserRound}] as const).map(t=>{const Icon=t.icon;return <button key={t.id} type="button" aria-label={t.label} aria-current={tab===t.id?'page':undefined} onClick={()=>go(t.id)} className={`dock-item ${tab===t.id?'dock-active':''}`}><span className="dock-active-bg" aria-hidden="true"/><Icon size={22} strokeWidth={2.1}/><span>{t.label}</span></button>})}
       </nav>}
       <Modal kind={dialog} close={()=>setDialog(null)} go={go} person={name} saveName={setName}/>
-      <AnimatePresence>{toast&&<motion.div role="status" className="toast-message" initial={{opacity:0,y:13}} animate={{opacity:1,y:0}} exit={{opacity:0,y:8}}>{toast}</motion.div>}</AnimatePresence>
+      <AnimatePresence mode="wait">{toast&&<MorphToast key={toast} message={toast}/>}</AnimatePresence>
     </main>
   </div>
 }
