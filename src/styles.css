@@ -419,3 +419,7 @@ html,body,#root {background:#0b110f;color:#f2faf5}
 
 @media(max-width:450px){.destination-tile{flex-basis:58%}.phone-shell::after{opacity:.12}.explore-intro h2{font-size:30px}.mesh-intro h2{font-size:25px}}
 @media(prefers-reduced-motion:reduce){.spin-icon{animation:none}.destination-photo{transition:none}}
+
+/* Critical: a pan-y-only ancestor blocks horizontal gestures on nested scrollers.
+   Keep the phone canvas gesture-neutral; native child scrollers select their axis. */
+.phone-scroll, .phone-onboarding .phone-scroll {touch-action:auto!important}
