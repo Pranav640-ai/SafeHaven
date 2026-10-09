@@ -6,10 +6,10 @@ import {
   AlertCircle, AlertTriangle, ArrowLeft, ArrowRight, Bell, Bookmark,
   BookOpen, Check, CheckCheck, ChevronDown, ChevronRight, CircleHelp,
   Clock3, CloudRain, Compass, Download, Globe2, Heart, Home,
-  Languages, LocateFixed, LockKeyhole, Map, MapPin, Menu, MessageCircle,
+  Languages, LocateFixed, LockKeyhole, Map, MapPin, MessageCircle,
   Navigation, Phone, Plus, Radio, RefreshCw, Search, Send, Settings,
   Shield, ShieldAlert, ShieldCheck, Smartphone, Sun, ThermometerSun,
-  Users, WifiOff, X, Zap, FileText, Save, Leaf, Mountain, Waves, Trees, BatteryCharging, Crosshair, Wifi, Signal, LifeBuoy, type LucideIcon,
+  Users, WifiOff, X, Zap, FileText, Save, Leaf, Mountain, Waves, Trees, BatteryCharging, Crosshair, Wifi, Signal, LifeBuoy, UserRound, CalendarCheck2, FolderOpen, type LucideIcon,
 } from 'lucide-react';
 
 type Page = 'home' | 'explore' | 'risk' | 'replan' | 'guide' | 'mesh' | 'beacon' | 'pack' | 'profile';
@@ -17,12 +17,12 @@ type GuideKind = 'Flood' | 'Extreme heat' | 'Earthquake';
 type Dialog = 'sos' | 'profile' | 'help' | 'alerts' | null;
 
 const features: { title: string; detail: string; icon: LucideIcon; art: string; accent: string; page: Page }[] = [
-  { title: 'Risk insights', detail: 'Alerts & reports', icon: ShieldAlert, art: '🌩️', accent: 'rose', page: 'risk' },
-  { title: 'Trip replanner', detail: 'Change plans', icon: Navigation, art: '🧭', accent: 'blue', page: 'replan' },
-  { title: 'Emergency guide', detail: 'What to do', icon: BookOpen, art: '🚨', accent: 'amber', page: 'guide' },
-  { title: 'RescueMesh', detail: 'Offline messaging', icon: Radio, art: '📡', accent: 'violet', page: 'mesh' },
-  { title: 'Safety beacon', detail: 'Nearby help', icon: MapPin, art: '📍', accent: 'teal', page: 'beacon' },
-  { title: 'Safety pack', detail: 'Your essentials', icon: Bookmark, art: '🎒', accent: 'indigo', page: 'pack' },
+  { title: 'Risk insights', detail: 'Warnings & reports', icon: ShieldAlert, art: '', accent: 'rose', page: 'risk' },
+  { title: 'Trip replanner', detail: 'Safer alternatives', icon: Navigation, art: '', accent: 'blue', page: 'replan' },
+  { title: 'Emergency guide', detail: 'Steps that help', icon: BookOpen, art: '', accent: 'amber', page: 'guide' },
+  { title: 'RescueMesh', detail: 'Stay connected', icon: Radio, art: '', accent: 'violet', page: 'mesh' },
+  { title: 'Safety beacon', detail: 'Meeting points', icon: MapPin, art: '', accent: 'teal', page: 'beacon' },
+  { title: 'Safety pack', detail: 'Things to keep', icon: Bookmark, art: '', accent: 'indigo', page: 'pack' },
 ];
 
 const guides: Record<GuideKind, {icon:LucideIcon; lead:string; steps:string[]}> = {
@@ -55,7 +55,7 @@ const destinations = [
 ];
 
 const reports = [
-  { icon: CloudRain, title: 'Heavy rainfall example', subtitle: 'Mountain district · Weather scenario', time: 'Sample', tone: 'amber' },
+  { icon: CloudRain, title: 'Heavy rainfall', subtitle: 'Mountain district · Weather scenario', time: 'Sample', tone: 'amber' },
   { icon: MapPin, title: 'Road access report', subtitle: 'Community report · Unverified', time: 'Sample', tone: 'violet' },
 ];
 
@@ -78,7 +78,7 @@ function FeatureCard({feature, index, open}: {feature:typeof features[number];in
   const Icon = feature.icon;
   return <motion.button type="button" className={`feature-card tint-${feature.accent}`} onClick={open}
     initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} transition={{delay:index*.035,duration:.28}} whileTap={{scale:.96}}>
-    <span className="feature-art" aria-hidden="true"><span className="feature-halo"/><span className="feature-illustration">{feature.art}</span><span className="feature-corner-icon"><Icon size={15} strokeWidth={2}/></span></span>
+    <span className="feature-art" aria-hidden="true"><span className="feature-halo"/><span className="feature-illustration"><Icon size={43} strokeWidth={1.55}/></span><span className="feature-corner-icon"><Icon size={15} strokeWidth={2}/></span></span>
     <strong>{feature.title}</strong><span className="feature-detail">{feature.detail}</span>
   </motion.button>;
 }
@@ -133,7 +133,7 @@ function SwipeRow({children, label}:{children:ReactNode;label:string}) {
 }
 function Carousel({items,onOpen}: {items:{kicker:string;title:string;subtitle:string;icon:LucideIcon;art:string;tint:string;page:Page}[];onOpen:(page:Page)=>void}) {
   return <SwipeRow label="Featured stories">{items.map(x=>{const Icon=x.icon;return <div className="native-carousel-item" key={x.title}>
-    <button type="button" onClick={()=>onOpen(x.page)} className={`carousel-card carousel-${x.tint}`}><span className="carousel-overline">{x.kicker}</span><span className="carousel-art" aria-hidden="true"><span className="carousel-art-illustration">{x.art}</span><Icon className="carousel-art-symbol" size={24}/></span><h3>{x.title}</h3><p>{x.subtitle}</p></button>
+    <button type="button" onClick={()=>onOpen(x.page)} className={`carousel-card carousel-${x.tint}`}><span className="carousel-overline">{x.kicker}</span><span className="carousel-art" aria-hidden="true"><span className="carousel-art-illustration"><Icon size={58} strokeWidth={1.35}/></span><Icon className="carousel-art-symbol" size={24}/></span><h3>{x.title}</h3><p>{x.subtitle}</p></button>
   </div>})}</SwipeRow>;
 }
 function AppRow({icon:Icon,title,subtitle,end,onClick,tone='default'}:{icon:LucideIcon;title:string;subtitle?:string;end?:ReactNode;onClick:()=>void;tone?:string}) {
@@ -146,10 +146,10 @@ function Modal({kind,close,go,person,saveName}: {kind:Dialog;close:()=>void;go:(
     <motion.section className="bottom-sheet" role="dialog" aria-modal="true" aria-label={`${kind} dialog`} onClick={e=>e.stopPropagation()}
       initial={{y:'100%'}} animate={{y:0}} exit={{y:'100%'}} transition={{type:'spring',stiffness:340,damping:34}}>
       <div className="sheet-handle"/><IconButton icon={X} onClick={close} label="Close dialog" className="sheet-close"/>
-      {kind==='sos'&&<><div className="sos-icon"><ShieldAlert size={39}/></div><h2>Emergency SOS</h2><p>This is a visual preview of the SOS experience. No message is sent and nobody is contacted.</p><div className="caution-inline"><AlertTriangle size={19}/> Emergency sending is not connected</div><button className="primary-button" type="button" onClick={()=>{close();go('guide')}}>View emergency guidance <ArrowRight size={18}/></button><button className="quiet-button" type="button" onClick={close}>Close preview</button></>}
+      {kind==='sos'&&<><div className="sos-icon"><ShieldAlert size={39}/></div><h2>Emergency SOS</h2><p>SOS is not connected yet. No message will be sent.</p><div className="caution-inline"><AlertTriangle size={19}/> Emergency sending is not connected</div><button className="primary-button" type="button" onClick={()=>{close();go('guide')}}>View emergency guidance <ArrowRight size={18}/></button><button className="quiet-button" type="button" onClick={close}>Close</button></>}
       {kind==='profile'&&<><h2>Edit display name</h2><p>This change stays in your browser session.</p><label className="field-label" htmlFor="profile-name">Display name</label><input className="form-input" id="profile-name" maxLength={32} value={draft} onChange={e=>setDraft(e.target.value)}/><button className="primary-button" type="button" onClick={()=>{saveName(draft.trim()||'Traveler');close()}}>Save changes</button></>}
-      {kind==='help'&&<><h2>About this preview</h2><p>SafeHaven currently demonstrates screens and interactions. It does not provide live alerts, emergency services, real mesh messaging, location tracking or offline downloads.</p><button className="primary-button" type="button" onClick={close}>Understood</button></>}
-      {kind==='alerts'&&<><h2>Notifications</h2><p>Live notifications are not connected yet.</p><div className="sheet-list"><AppRow icon={CloudRain} title="Heavy rainfall example" subtitle="Illustrative weather notification" tone="amber" onClick={()=>{close();go('risk')}}/></div><button className="quiet-button" type="button" onClick={close}>Close</button></>}
+      {kind==='help'&&<><h2>About SafeHaven</h2><p>Weather, SOS, mesh messaging and offline downloads will become available as their services are connected.</p><button className="primary-button" type="button" onClick={close}>Understood</button></>}
+      {kind==='alerts'&&<><h2>Notifications</h2><p>Notifications are not available yet.</p><div className="sheet-list"><AppRow icon={CloudRain} title="Heavy rainfall" subtitle="Sample weather notification" tone="amber" onClick={()=>{close();go('risk')}}/></div><button className="quiet-button" type="button" onClick={close}>Close</button></>}
     </motion.section>
   </motion.div>}</AnimatePresence>;
 }
@@ -194,9 +194,9 @@ export default function App(){
   const openDestination=(name:string)=>{setSelectedDestination(name);go('risk')};
   const go=(p:Page)=>{setPage(p);setCompact(false);lastTop.current=0;if(scrollRef.current) scrollRef.current.scrollTo({top:0,behavior:'instant'})};
   const handleScroll=(event:UIEvent<HTMLDivElement>)=>{const y=event.currentTarget.scrollTop;const diff=y-lastTop.current;if(y<66)setCompact(false);else if(diff>15)setCompact(true);else if(diff< -16)setCompact(false);lastTop.current=y;};
-  const replay=()=>{go('home');setLoading(true);window.setTimeout(()=>setLoading(false),1850);setToast('Previewing loading states')};
+  const replay=()=>{go('home');setLoading(true);window.setTimeout(()=>setLoading(false),1850);setToast('Loading updated')};
   const tab:Page = ['risk','replan','guide','beacon'].includes(page)?'explore':page;
-  const enter=(guest:boolean)=>{if(!guest && phone.replace(/\D/g,'').length<7){setToast('Enter a valid phone number or continue as guest');return;}setAuthenticated(true);setPage('home');setToast(guest?'Browsing in demo mode':'Signed in to demo mode — no SMS sent');};
+  const enter=(guest:boolean)=>{if(!guest && phone.replace(/\D/g,'').length<7){setToast('Enter a valid phone number or continue as guest');return;}setAuthenticated(true);setPage('home');setToast(guest?'Welcome to SafeHaven':'Mobile verification is not available yet');};
 
   function login(){return <div className="login-screen">
     <section className="login-art"><div className="login-top"><Brand/><button className="login-skip" type="button" onClick={()=>enter(true)}>Skip</button></div>
@@ -207,23 +207,23 @@ export default function App(){
       <label className="field-label" htmlFor="phone">Mobile number</label><div className="phone-field"><label className="country-select-wrap"><span className="sr-only">Country code</span><select value={country} onChange={e=>setCountry(e.target.value)} aria-label="Country code"><option value="+91">+91</option><option value="+973">+973</option><option value="+1">+1</option><option value="+44">+44</option></select><ChevronDown size={14}/></label><input id="phone" type="tel" autoComplete="tel-national" inputMode="tel" maxLength={16} placeholder="Enter your number" value={phone} onChange={e=>setPhone(e.target.value)}/></div>
       <button type="button" className="primary-button login-cta" onClick={()=>enter(false)}>Continue <ArrowRight size={18}/></button>
       <div className="or-divider"><span/>or<span/></div><button type="button" className="guest-button" onClick={()=>enter(true)}><Shield size={19}/> Explore as guest <ArrowRight size={17}/></button>
-      <p className="login-legal">Demo sign-in only. No OTP is sent or account created.<br/>By continuing, you acknowledge this is a UI prototype.</p>
+      <p className="login-legal">Phone verification is coming soon. You can continue as a guest.</p>
     </section>
   </div>}
 
   function home(){return <>
     <header className="home-header"><button className="home-location" type="button" onClick={()=>go('explore')}><MapPin size={21}/><span><small>YOUR DESTINATION</small><strong>Explore a location <ChevronDown size={14}/></strong></span></button><div className="header-actions"><IconButton icon={Bell} onClick={()=>setDialog('alerts')} label="Notifications"/><button className="avatar-button" type="button" onClick={()=>go('profile')} aria-label="Open profile"><span>{name.charAt(0).toUpperCase()}</span></button></div></header>
     <div className="home-welcome"><p>Welcome to SafeHaven</p><h1>A better way to be prepared.</h1></div>
-    <button type="button" className="hero-risk" onClick={()=>go('risk')}><img className="hero-risk-photo" src="/visuals/sunset-trail.webp" alt="" loading="eager"/><div className="hero-risk-bg"/><div className="hero-risk-top"><span className="hero-shield"><ShieldCheck size={24}/></span><span className="hero-label">DESTINATION SAFETY</span><ArrowRight size={20}/></div><h2>Know before<br/>you go.</h2><p>Check weather, reports and local guidance for your next stop.</p><span className="hero-link">Explore risk insights <ChevronRight size={16}/></span></button>
-    <DemoNote>Live safety alerts are not connected. All reports shown are examples.</DemoNote>
+    <button type="button" className="hero-risk" onClick={()=>go('risk')}><img className="hero-risk-photo" src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1100&q=82" onError={e=>{e.currentTarget.onerror=null;e.currentTarget.src="/visuals/sunset-trail.webp"}} alt="Mountain landscape" loading="eager"/><div className="hero-risk-bg"/><div className="hero-risk-top"><span className="hero-shield"><ShieldCheck size={24}/></span><span className="hero-label">DESTINATION SAFETY</span><ArrowRight size={20}/></div><h2>Know before<br/>you go.</h2><p>Check weather, reports and local guidance for your next stop.</p><span className="hero-link">Explore risk insights <ChevronRight size={16}/></span></button>
+    
     <Heading title="What would you like to do?"/>
     <div className="feature-grid">{features.map((f,i)=><FeatureCard key={f.title} feature={f} index={i} open={()=>go(f.page)}/>)}</div>
     <section className="home-quick-section" aria-label="Quick safety actions">
-      <Heading title="Quick actions" sub="Try these directly from Home"/>
+      <Heading title="Quick actions" />
       <div className="home-action-grid">
         <motion.button type="button" whileTap={{scale:.97}} className={`home-action ${checkedIn?'home-action-done':''}`} onClick={()=>{setCheckedIn(v=>!v);setToast('Check-in changed locally. Nothing was shared.')}}>
           <span className="home-action-icon"><CheckCheck size={25}/></span>
-          <span><strong>{checkedIn?'Checked in locally':'Quick check-in'}</strong><small>{checkedIn?'Tap to reset · not shared':'Mark safe · demo only'}</small></span>
+          <span><strong>{checkedIn?'Checked in locally':'Quick check-in'}</strong><small>{checkedIn?'Tap to reset · not shared':'Visible on this device only'}</small></span>
           <ChevronRight size={18}/>
         </motion.button>
         <motion.button type="button" whileTap={{scale:.97}} className={`home-action ${showQuickGuide?'home-action-done':''}`} aria-expanded={showQuickGuide} onClick={()=>setShowQuickGuide(v=>!v)}>
@@ -238,23 +238,23 @@ export default function App(){
       </motion.div>}</AnimatePresence>
       <div className="home-prep"><div><strong>Before you head out</strong><span>{homeChecklist.length} of 3 reviewed</span></div>
         <div className="home-prep-tasks">{['Check forecast','Save emergency contacts','Share plans with your group'].map(t=><button type="button" key={t} aria-pressed={homeChecklist.includes(t)} className={homeChecklist.includes(t)?'done':''} onClick={()=>setHomeChecklist(old=>old.includes(t)?old.filter(v=>v!==t):[...old,t])}><span>{homeChecklist.includes(t)?<Check size={15}/>:null}</span>{t}</button>)}</div>
-        <p>Checklist saved in this demo session only.</p>
+        <p>Your checklist is saved for this session.</p>
       </div>
     </section>
     <section className="home-note-area"><Heading title="Trip note" sub="Keep a reminder handy on this device" right={<button className="section-link" type="button" onClick={()=>setNoteOpen(v=>!v)}>{noteOpen?'Close':'Edit'} <ChevronRight size={15}/></button>}/>
-      <div className="home-note-card"><div className="home-note-head"><span><FileText size={20}/></span><div><strong>{noteSaved&&tripNote?'Your reminder':'A note for later'}</strong><small>Session only · not synced</small></div></div>
+      <div className="home-note-card"><div className="home-note-head"><span><FileText size={20}/></span><div><strong>{noteSaved&&tripNote?'Your reminder':'A note for later'}</strong><small>Saved on this device</small></div></div>
         {noteOpen?<><textarea maxLength={220} aria-label="Trip reminder" placeholder="For example: hotel address, bus stop, or who to call" value={tripNote} onChange={e=>{setTripNote(e.target.value);setNoteSaved(false)}} rows={3}/><button className="note-save" type="button" onClick={()=>{setNoteSaved(true);setNoteOpen(false);setToast('Reminder saved for this session')}}><Save size={16}/> Save note</button></>:<button className="note-display" type="button" onClick={()=>setNoteOpen(true)}>{tripNote||'Add a hotel address, contact or meeting point.'}<ArrowRight size={17}/></button>}
       </div>
     </section>
     <section className="home-section"><Heading title="For your next trip" right={<button className="section-link" onClick={()=>go('explore')}>See all <ChevronRight size={15}/></button>}/>
       <Carousel onOpen={go} items={[
-        {kicker:'DESTINATION CHECK',title:'Before you leave',subtitle:'Review known conditions',icon:MapPin,art:'🌍',tint:'indigo',page:'risk'},
-        {kicker:'YOUR ITINERARY',title:'Plans can change',subtitle:'Compare alternatives',icon:Navigation,art:'🧭',tint:'violet',page:'replan'},
-        {kicker:'STAY IN TOUCH',title:'Keep your group close',subtitle:'Explore offline chat',icon:Radio,art:'📡',tint:'teal',page:'mesh'},
+        {kicker:'DESTINATION CHECK',title:'Before you leave',subtitle:'Review known conditions',icon:MapPin,art:'',tint:'indigo',page:'risk'},
+        {kicker:'YOUR ITINERARY',title:'Plans can change',subtitle:'Compare alternatives',icon:Navigation,art:'',tint:'violet',page:'replan'},
+        {kicker:'STAY IN TOUCH',title:'Keep your group close',subtitle:'Explore offline chat',icon:Radio,art:'',tint:'teal',page:'mesh'},
       ]}/>
 
     </section>
-    <section className="home-section"><Heading title="Recent reports" sub="Examples of how updates will appear" right={<button className="section-link" onClick={()=>go('risk')}>View all <ChevronRight size={15}/></button>}/><div className="list-panel">{reports.map(r=><AppRow key={r.title} icon={r.icon} tone={r.tone} title={r.title} subtitle={r.subtitle} onClick={()=>go('risk')} end={<span className="row-end">Demo <ChevronRight size={16}/></span>}/>)}</div></section>
+    <section className="home-section"><Heading title="Recent reports" sub="Reports need verification" right={<button className="section-link" onClick={()=>go('risk')}>View all <ChevronRight size={15}/></button>}/><div className="list-panel">{reports.map(r=><AppRow key={r.title} icon={r.icon} tone={r.tone} title={r.title} subtitle={r.subtitle} onClick={()=>go('risk')} end={<span className="row-end">Sample <ChevronRight size={16}/></span>}/>)}</div></section>
   </>}
 
   function explore(){
@@ -266,29 +266,29 @@ export default function App(){
       <section className="explore-section"><Heading title="Find your kind of place"/><div className="explore-moods" role="group" aria-label="Filter destinations">{[
         {name:'All',icon:Compass},{name:'Mountains',icon:Mountain},{name:'Nature',icon:Trees},{name:'Coast',icon:Waves}
       ].map(x=>{const Icon=x.icon;return <button type="button" key={x.name} className={destinationMood===x.name?'selected':''} aria-pressed={destinationMood===x.name} onClick={()=>setDestinationMood(x.name)}><Icon size={17}/>{x.name}</button>})}</div></section>
-      <section className="explore-section explore-destinations"><Heading title={query?'Search results':'Popular destinations'} sub="Browse sample locations"/>
+      <section className="explore-section explore-destinations"><Heading title={query?'Search results':'Popular destinations'} sub="Explore destinations"/>
         {matched.length>0?<SwipeRow label="Destination cards">{matched.map((d,i)=><button key={d.name} type="button" className="destination-tile" onClick={()=>openDestination(d.name)}><span className={`destination-photo destination-photo-${i%5}`} style={{backgroundImage:`linear-gradient(180deg,transparent 25%,#09110fdb 100%),url('${d.image}')`}}/><span className="destination-tile-copy"><span>{d.label}</span><strong>{d.name}</strong><small>{d.region}<ArrowRight size={14}/></small></span></button>)}</SwipeRow>:<div className="empty-feature empty-compact"><Search size={26}/><h3>No matches here</h3><p>Try another region or category.</p></div>}
       </section>
       <section className="explore-section"><Heading title="Check before you go" sub="Useful tools for your next stop"/><div className="explore-tools"><button type="button" onClick={()=>go('risk')}><span><ShieldCheck size={22}/></span><strong>Risk overview</strong><small>Understand report sources</small><ArrowRight size={17}/></button><button type="button" onClick={()=>go('guide')}><span><BookOpen size={22}/></span><strong>Safety essentials</strong><small>Guidance for common hazards</small><ArrowRight size={17}/></button></div></section>
-      <DemoNote>Destinations and risk information are examples, not live recommendations.</DemoNote>
+      
     </>
   }
 
   function risk(){return <><BackHeader title="Risk intelligence" back={()=>go('home')} action={<IconButton icon={CircleHelp} label="About this preview" onClick={()=>setDialog('help')}/>}/>
-    <div className="destination-cover"><div className="destination-cover-art"/><span className="destination-overline">SAMPLE DESTINATION</span><h2>{selectedDestination}, India</h2><p><MapPin size={14}/> Destination preview</p></div>
+    <div className="destination-cover"><div className="destination-cover-art"/><span className="destination-overline">DESTINATION</span><h2>{selectedDestination}, India</h2><p><MapPin size={14}/> Destination overview</p></div>
     <div className="tab-strip tab-tight" role="tablist" aria-label="Risk views">{['Overview','Weather','Reports'].map(x=><button role="tab" aria-selected={riskTab===x} className={riskTab===x?'selected':''} key={x} onClick={()=>setRiskTab(x)}>{x}</button>)}</div>
-    <DemoNote>Demonstration only. No official warnings or real-time data are connected.</DemoNote>
-    {riskTab==='Overview'&&<><section className="risk-summary"><span className="risk-summary-symbol"><ShieldAlert size={27}/></span><span><small>EXAMPLE RISK SCENARIO</small><strong>Weather advisory preview</strong><p>Illustrates how a weather-related warning would be presented.</p></span></section><Heading title="What to check"/><div className="metric-two"><div><Sun size={22}/><span>Weather</span><strong>Not connected</strong></div><div><Shield size={22}/><span>Official alerts</span><strong>Not connected</strong></div></div></>}
+    <DemoNote>Sample conditions · live alerts not yet connected.</DemoNote>
+    {riskTab==='Overview'&&<><section className="risk-summary"><span className="risk-summary-symbol"><ShieldAlert size={27}/></span><span><small>WEATHER SNAPSHOT</small><strong>Weather information</strong><p>Check official sources for current advisories.</p></span></section><Heading title="What to check"/><div className="metric-two"><div><Sun size={22}/><span>Weather</span><strong>Not connected</strong></div><div><Shield size={22}/><span>Official alerts</span><strong>Not connected</strong></div></div></>}
     {riskTab==='Weather'&&<><Heading title="Weather outlook"/><div className="empty-feature"><CloudRain size={33}/><h3>Weather data isn't connected</h3><p>Live temperature and forecasts will be shown here when Open-Meteo is integrated.</p></div></>}
     {riskTab==='Reports'&&<><Heading title="Reported incidents"/><div className="list-panel">{reports.map(r=><AppRow key={r.title} icon={r.icon} title={r.title} subtitle={r.subtitle} tone={r.tone} onClick={()=>setDialog('help')}/>)}</div></>}
     <section className="content-section"><Heading title="Need guidance?"/><button type="button" className="simple-cta" onClick={()=>go('guide')}><BookOpen size={21}/><span>Open emergency guide</span><ArrowRight size={18}/></button></section>
   </>}
 
   function replan(){return <><BackHeader title="Trip replanner" back={()=>go('home')}/><div className="replan-banner"><span><Navigation size={24}/></span><small>ITINERARY PREVIEW</small><h2>Keep your plans flexible.</h2><p>See an example of a small itinerary adjustment.</p></div>
-    <DemoNote>These are example changes. No AI recommendation or live risk check was performed.</DemoNote><div className="segmented" role="tablist" aria-label="Itinerary version"><button type="button" role="tab" aria-selected={planMode==='original'} className={planMode==='original'?'selected':''} onClick={()=>setPlanMode('original')}>Original plan</button><button type="button" role="tab" aria-selected={planMode==='revised'} className={planMode==='revised'?'selected':''} onClick={()=>setPlanMode('revised')}>Revised plan</button></div>
+    <DemoNote>Sample plan only · weather and AI checks not connected.</DemoNote><div className="segmented" role="tablist" aria-label="Itinerary version"><button type="button" role="tab" aria-selected={planMode==='original'} className={planMode==='original'?'selected':''} onClick={()=>setPlanMode('original')}>Original plan</button><button type="button" role="tab" aria-selected={planMode==='revised'} className={planMode==='revised'?'selected':''} onClick={()=>setPlanMode('revised')}>Revised plan</button></div>
     <div className="itinerary-list">{itinerary.map((x,i)=><motion.div className="itinerary-day" key={x.day} layout><div className="day-track"><span>{x.day}</span><i/></div><div className="day-card"><span className="day-card-label">DAY {i+1} <span>·</span> {x.time}</span><h3>{x.title}</h3><p>{planMode==='original'?x.old:x.revised}</p>{planMode==='revised'&&x.changed&&<span className="plan-change"><Check size={14}/> Example alternative</span>}</div></motion.div>)}</div>
     <div className="why-card"><AlertCircle size={19}/><p><strong>What changed?</strong> On Day 2, the outdoor activity is swapped for an indoor stop. This is a sample comparison, not a safety assessment.</p></div>
-    <button type="button" className="primary-button" onClick={()=>{setPlanMode('revised');setToast('Example revised plan displayed')}}>Preview revised itinerary <ArrowRight size={18}/></button>
+    <button type="button" className="primary-button" onClick={()=>{setPlanMode('revised');setToast('Example revised plan displayed')}}>Show revised itinerary <ArrowRight size={18}/></button>
   </>}
 
   function guidePage(){const g=guides[guide];const Icon=g.icon;return <><BackHeader title="Emergency guide" back={()=>go('home')} action={<IconButton icon={Languages} label="Language information" onClick={()=>setToast('Translated guidance will be available after integration')}/>}/><p className="page-lead">Clear steps for difficult situations.</p><div className="guide-picker" role="tablist" aria-label="Emergency type">{(Object.keys(guides) as GuideKind[]).map(k=>{const ItemIcon=guides[k].icon;return <button type="button" role="tab" aria-selected={guide===k} className={guide===k?'selected':''} key={k} onClick={()=>setGuide(k)}><ItemIcon size={22}/><small>{k}</small></button>})}</div>
@@ -307,10 +307,10 @@ export default function App(){
     </section>
     <div className="mesh-tabs" role="tablist" aria-label="RescueMesh sections">{(['Chats','Nearby','Beacons','SOS'] as const).map(t=><button role="tab" type="button" key={t} aria-selected={meshTab===t} className={meshTab===t?'selected':''} onClick={()=>setMeshTab(t)}>{t}</button>)}</div>
     <AnimatePresence mode="wait" initial={false}><motion.div key={meshTab} className="mesh-tab-content" initial={{opacity:0,x:9}} animate={{opacity:1,x:0}} exit={{opacity:0,x:-9}} transition={{duration:.19}}>
-    {meshTab==='Chats'&&<><Heading title="Travel group" sub="Message preview · nothing transmitted"/><div className="chat-panel"><div className="chat-top"><span className="chat-avatar"><Users size={23}/></span><div><strong>Group conversation</strong><small>Offline demo · no connected peers</small></div></div><div className="chat-content"><div className="bubble incoming">Is everyone at the meeting point?<small>Example message</small></div><div className="bubble outgoing">I'm checking the route now.<small>Example reply</small></div>{demoMessages.map((m,i)=><div className="bubble outgoing" key={`${i}-${m}`}>{m}<small>Local preview · Not sent</small></div>)}</div><form className="message-compose" onSubmit={e=>{e.preventDefault();if(message.trim()){setDemoMessages(a=>[...a,message.trim()]);setMessage('');setToast('Local message preview — not sent');}}}><input aria-label="Demo message" value={message} maxLength={150} placeholder="Type a message…" onChange={e=>setMessage(e.target.value)}/><button type="submit" aria-label="Preview message" disabled={!message.trim()}><Send size={18}/></button></form></div></>}
-    {meshTab==='Nearby'&&<><Heading title="Nearby devices" sub="Available after Android setup"/><div className="mesh-empty"><div className="mesh-empty-art"><Radio size={35}/></div><h3>{meshScanning?'Looking for connections…':'No devices connected'}</h3><p>{meshScanning?'This is only a visual scan preview.':'Mesh discovery works between participating Android phones with permissions enabled.'}</p><button className="secondary-button" type="button" disabled={meshScanning} onClick={()=>{setMeshScanning(true);window.setTimeout(()=>setMeshScanning(false),1300)}}><RefreshCw size={16} className={meshScanning?'spin-icon':''}/> {meshScanning?'Scanning preview':'Preview scan'}</button></div></>}
-    {meshTab==='Beacons'&&<><Heading title="Community safety beacons" sub="Opt-in places shared by people nearby"/><div className="mesh-beacon-feature"><MapPin size={27}/><h3>Need a meeting point?</h3><p>A person can share a temporary, self-reported location. These are never official shelters or verified safe routes.</p><button type="button" onClick={()=>go('beacon')}>Create beacon preview <ArrowRight size={17}/></button></div><DemoNote>No active beacons are available. Nothing has been shared.</DemoNote></>}
-    {meshTab==='SOS'&&<><Heading title="SOS and relay" sub="Emergency messages when connectivity returns"/><div className="mesh-sos-card"><ShieldAlert size={31}/><div><strong>Emergency sending unavailable</strong><p>Queueing, relaying and acknowledgements will require the native Android bridge.</p></div></div><button className="secondary-button" type="button" onClick={()=>setDialog('sos')}><LifeBuoy size={18}/> View SOS demo <ArrowRight size={17}/></button><DemoNote>No SOS is queued, transmitted or delivered in this preview.</DemoNote></>}
+    {meshTab==='Chats'&&<><Heading title="Travel group" sub="Messages stay on this device"/><div className="chat-panel"><div className="chat-top"><span className="chat-avatar"><Users size={23}/></span><div><strong>Group conversation</strong><small>No connected peers</small></div></div><div className="chat-content"><div className="bubble incoming">Is everyone at the meeting point?<small>Group chat sample</small></div><div className="bubble outgoing">I'm checking the route now.<small>Group chat sample</small></div>{demoMessages.map((m,i)=><div className="bubble outgoing" key={`${i}-${m}`}>{m}<small>Not sent</small></div>)}</div><form className="message-compose" onSubmit={e=>{e.preventDefault();if(message.trim()){setDemoMessages(a=>[...a,message.trim()]);setMessage('');setToast('Message saved locally — not sent');}}}><input aria-label="Message" value={message} maxLength={150} placeholder="Type a message…" onChange={e=>setMessage(e.target.value)}/><button type="submit" aria-label="Save draft message" disabled={!message.trim()}><Send size={18}/></button></form></div></>}
+    {meshTab==='Nearby'&&<><Heading title="Nearby devices" sub="Available after Android setup"/><div className="mesh-empty"><div className="mesh-empty-art"><Radio size={35}/></div><h3>{meshScanning?'Looking for connections…':'No devices connected'}</h3><p>{meshScanning?'No devices can be discovered in the browser.':'Mesh discovery works between participating Android phones with permissions enabled.'}</p><button className="secondary-button" type="button" disabled={meshScanning} onClick={()=>{setMeshScanning(true);window.setTimeout(()=>setMeshScanning(false),1300)}}><RefreshCw size={16} className={meshScanning?'spin-icon':''}/> {meshScanning?'Checking view':'Check nearby'}</button></div></>}
+    {meshTab==='Beacons'&&<><Heading title="Community safety beacons" sub="Opt-in places shared by people nearby"/><div className="mesh-beacon-feature"><MapPin size={27}/><h3>Need a meeting point?</h3><p>A person can share a temporary, self-reported location. These are never official shelters or verified safe routes.</p><button type="button" onClick={()=>go('beacon')}>Set a meeting point <ArrowRight size={17}/></button></div><DemoNote>No active beacons are available. Nothing has been shared.</DemoNote></>}
+    {meshTab==='SOS'&&<><Heading title="SOS and relay" sub="Emergency messages when connectivity returns"/><div className="mesh-sos-card"><ShieldAlert size={31}/><div><strong>Emergency sending unavailable</strong><p>Queueing, relaying and acknowledgements will require the native Android bridge.</p></div></div><button className="secondary-button" type="button" onClick={()=>setDialog('sos')}><LifeBuoy size={18}/> View SOS <ArrowRight size={17}/></button><DemoNote>SOS is not sent or queued.</DemoNote></>}
     </motion.div></AnimatePresence>
   </>}
 
@@ -321,23 +321,53 @@ export default function App(){
   </>}
 
   function pack(){const tasks=[{title:'Emergency contacts',detail:'Add people to reach in an emergency',icon:Phone},{title:'Safety guidance',detail:'Review essential instructions',icon:BookOpen},{title:'Trip details',detail:'Keep your itinerary accessible',icon:Map},{title:'Group check-in',detail:'Decide who can see your status',icon:Users}];return <><BackHeader title="Safety pack" back={()=>go('home')} action={<IconButton icon={CircleHelp} label="About safety pack" onClick={()=>setDialog('help')}/>}/>
-    <div className="pack-hero"><span className="pack-hero-mark"><Bookmark size={28}/></span><div><span>YOUR ESSENTIALS</span><h2>Prepared, wherever you go.</h2><p>Review key information before the connection drops.</p></div></div><DemoNote>Offline downloading and syncing are not enabled in this UI preview.</DemoNote>
-    <Heading title="Before you go" sub="Checklist for this demo session"/><div className="list-panel checklist-panel">{tasks.map(t=>{const Icon=t.icon;const done=checklist.includes(t.title);return <button type="button" className="checklist-row" key={t.title} onClick={()=>setChecklist(p=>done?p.filter(x=>x!==t.title):[...p,t.title])}><span className="checklist-icon"><Icon size={21}/></span><span className="row-body"><strong>{t.title}</strong><small>{t.detail}</small></span><span className={`checkmark ${done?'is-checked':''}`}>{done&&<Check size={14}/>}</span></button>})}</div>
-    <section className="content-section"><Heading title="Group check-in"/><div className="checkin-block"><span className="checkin-symbol"><Users size={23}/></span><h3>{checkedIn?'Marked safe in demo':'Let your group know'}</h3><p>{checkedIn?'This status has not been shared with anyone.':'Try how a consent-based group check-in would work.'}</p><button className="secondary-button" type="button" onClick={()=>{setCheckedIn(x=>!x);setToast('Status changed locally — not shared')}}>{checkedIn?'Reset preview':'Mark myself safe'} <ArrowRight size={17}/></button></div></section>
-    <section className="content-section"><Heading title="Saved content"/><div className="list-panel"><AppRow icon={BookOpen} tone="violet" title="Emergency guide" subtitle="General safety instructions" onClick={()=>go('guide')}/><AppRow icon={Download} tone="blue" title="Offline downloads" subtitle="Not available in demo" onClick={()=>setToast('Offline downloading is not connected')}/></div></section>
+    <div className="pack-hero"><span className="pack-hero-mark"><Bookmark size={28}/></span><div><span>YOUR ESSENTIALS</span><h2>Prepared, wherever you go.</h2><p>Review key information before the connection drops.</p></div></div><DemoNote>Offline downloads are not connected yet.</DemoNote>
+    <Heading title="Before you go" sub="Items to review"/><div className="list-panel checklist-panel">{tasks.map(t=>{const Icon=t.icon;const done=checklist.includes(t.title);return <button type="button" className="checklist-row" key={t.title} onClick={()=>setChecklist(p=>done?p.filter(x=>x!==t.title):[...p,t.title])}><span className="checklist-icon"><Icon size={21}/></span><span className="row-body"><strong>{t.title}</strong><small>{t.detail}</small></span><span className={`checkmark ${done?'is-checked':''}`}>{done&&<Check size={14}/>}</span></button>})}</div>
+    <section className="content-section"><Heading title="Group check-in"/><div className="checkin-block"><span className="checkin-symbol"><Users size={23}/></span><h3>{checkedIn?'Marked safe locally':'Let your group know'}</h3><p>{checkedIn?'This status has not been shared with anyone.':'Review your check-in before sharing becomes available.'}</p><button className="secondary-button" type="button" onClick={()=>{setCheckedIn(x=>!x);setToast('Status changed locally — not shared')}}>{checkedIn?'Reset preview':'Mark myself safe'} <ArrowRight size={17}/></button></div></section>
+    <section className="content-section"><Heading title="Saved content"/><div className="list-panel"><AppRow icon={BookOpen} tone="violet" title="Emergency guide" subtitle="General safety instructions" onClick={()=>go('guide')}/><AppRow icon={Download} tone="blue" title="Offline downloads" subtitle="Not available yet" onClick={()=>setToast('Offline downloading is not connected')}/></div></section>
   </>}
 
-  function profile(){return <><BackHeader title="Profile" back={()=>go('home')} action={<IconButton icon={Settings} label="About this demo" onClick={()=>setDialog('help')}/>}/>
-    <button type="button" className="profile-summary" onClick={()=>setDialog('profile')}><div className="profile-top"><span className="profile-ring"><span>{name.charAt(0).toUpperCase()}</span></span><span className="profile-identity"><strong>{name}</strong><small>{phone?`${country} ${phone}`:'Guest profile'}</small><small>Profile preview</small></span></div><span className="profile-divider"/><span className="profile-bottom">Edit your display name <ChevronRight size={20}/></span></button>
-    <button type="button" className="profile-promo" onClick={()=>go('pack')}><span><ShieldCheck size={23}/></span><strong>Review your safety pack</strong><ChevronRight size={20}/></button>
-    <section className="profile-section"><Heading title="Your essentials"/><div className="profile-shortcuts"><button onClick={()=>go('replan')}><span><Map size={25}/></span>My trips</button><button onClick={()=>go('pack')}><span><Phone size={25}/></span>Contacts</button><button onClick={()=>go('pack')}><span><Bookmark size={25}/></span>Offline pack</button></div></section>
-    <section className="profile-section"><Heading title="Preferences"/><div className="list-panel"><AppRow icon={Languages} title="Language" subtitle="English · Demo only" onClick={()=>setToast('Language preferences are not connected')}/><AppRow icon={Bell} title="Notifications" subtitle="Not enabled" onClick={()=>setDialog('alerts')}/><AppRow icon={LockKeyhole} title="Privacy & sharing" subtitle="Nothing is shared in the demo" onClick={()=>setDialog('help')}/></div></section>
-    <section className="profile-section"><Heading title="About SafeHaven"/><div className="list-panel"><AppRow icon={RefreshCw} title="Replay loading animation" subtitle="Watch the shimmer placeholders" onClick={replay}/><AppRow icon={CircleHelp} title="About this prototype" onClick={()=>setDialog('help')}/></div></section>
-    <button type="button" className="signout" onClick={()=>{setAuthenticated(false);setPage('home');setPhone('');setName('Traveler');setToast('')}}>Return to welcome screen</button>
+  function profile(){return <>
+    <BackHeader title="Profile" back={()=>go('home')} action={<IconButton icon={Settings} label="Help and settings" onClick={()=>setDialog('help')}/>}/>
+    <section className="profile-revamp" aria-label="Your profile">
+      <div className="profile-revamp-top">
+        <div className="profile-revamp-avatar"><UserRound size={32} strokeWidth={1.5}/></div>
+        <div className="profile-revamp-person"><span>YOUR ACCOUNT</span><h2>{name}</h2><p>{phone?`${country} ${phone}`:'Guest account'}</p></div>
+        <button type="button" className="profile-revamp-edit" onClick={()=>setDialog('profile')} aria-label="Edit profile"><Settings size={18}/></button>
+      </div>
+      <div className="profile-revamp-divider"/>
+      <div className="profile-revamp-bottom"><span><ShieldCheck size={19}/> Your safety essentials, together</span><button type="button" onClick={()=>go('pack')}>View pack <ArrowRight size={16}/></button></div>
+    </section>
+    <section className="profile-section profile-essential-section"><Heading title="Quick access"/>
+      <div className="profile-shortcuts profile-shortcuts-final">
+        <button type="button" onClick={()=>go('replan')}><span><Map size={27} strokeWidth={1.65}/></span>My trips</button>
+        <button type="button" onClick={()=>go('pack')}><span><Phone size={27} strokeWidth={1.65}/></span>Contacts</button>
+        <button type="button" onClick={()=>go('pack')}><span><FolderOpen size={27} strokeWidth={1.65}/></span>Offline pack</button>
+      </div>
+    </section>
+    <section className="profile-section profile-progress-section">
+      <div className="profile-progress-head"><span className="profile-progress-mark"><CalendarCheck2 size={23}/></span><div><strong>Ready for the journey</strong><small>Review the essentials before you go</small></div><span className="profile-progress-total">{checklist.length}/4</span></div>
+      <div className="profile-progress-track"><span style={{width:`${checklist.length * 25}%`}}/></div>
+      <button type="button" onClick={()=>go('pack')}>Continue checklist <ChevronRight size={17}/></button>
+    </section>
+    <section className="profile-section"><Heading title="Preferences"/>
+      <div className="list-panel profile-settings-list">
+        <AppRow icon={Languages} title="Language" subtitle="English" onClick={()=>setToast('More languages will be available soon')}/>
+        <AppRow icon={Bell} title="Notifications" subtitle="Manage alerts" onClick={()=>setDialog('alerts')}/>
+        <AppRow icon={LockKeyhole} title="Privacy & sharing" subtitle="Location sharing is off" onClick={()=>setDialog('help')}/>
+      </div>
+    </section>
+    <section className="profile-section"><Heading title="More"/>
+      <div className="list-panel profile-settings-list">
+        <AppRow icon={RefreshCw} title="Replay loading" onClick={replay}/>
+        <AppRow icon={CircleHelp} title="Help & information" onClick={()=>setDialog('help')}/>
+      </div>
+    </section>
+    <button type="button" className="signout" onClick={()=>{setAuthenticated(false);setPage('home');setPhone('');setName('Traveler');setToast('')}}>Back to welcome screen</button>
   </>}
   const content=()=>({home,explore,risk,replan,guide:guidePage,mesh,beacon,pack,profile}[page]());
   return <div className="preview-stage">
-    <aside className="desktop-side"><Brand/><h1>Thoughtful design.<br/><span>Ready for the journey.</span></h1><p>Mobile UI prototype featuring real React components, motion and sample content.</p><div className="desktop-help"><Smartphone size={21}/><span>Use Chrome device mode for a phone-sized preview.<br/><b>F12 → Ctrl + Shift + M</b></span></div><p className="desktop-disclaimer">All location, incident and emergency features remain unconnected.</p></aside>
+    <aside className="desktop-side"><Brand/><h1>Thoughtful design.<br/><span>Ready for the journey.</span></h1><p>Discover places, prepare for the unexpected, and keep your plans in one place.</p><div className="desktop-help"><Smartphone size={21}/><span>Use Chrome device mode for a phone-sized preview.<br/><b>F12 → Ctrl + Shift + M</b></span></div><p className="desktop-disclaimer">Emergency information is source-dependent. Always check local authorities.</p></aside>
     <main className={`phone-shell ${!authenticated?'phone-onboarding':''}`} aria-label="SafeHaven application">
       <div className="phone-scroll" ref={scrollRef} onScroll={handleScroll}>
         {!authenticated ? login() : <AnimatePresence mode="wait" initial={false}><motion.div key={page} className="screen-content" initial={reduceMotion?false:{opacity:0,y:14,filter:'blur(3px)'}} animate={{opacity:1,y:0,filter:'blur(0px)'}} exit={reduceMotion?{}:{opacity:0,y:-9,filter:'blur(2px)'}} transition={{type:'spring',stiffness:310,damping:31,mass:.8}}>
@@ -346,8 +376,8 @@ export default function App(){
       </div>
       {authenticated&&<nav className={`floating-dock ${compact?'dock-compact':''}`} aria-label="Main navigation">
         {([{id:'home',label:'Home',icon:Home},{id:'explore',label:'Explore',icon:Compass}] as const).map(t=>{const Icon=t.icon;return <button key={t.id} type="button" aria-label={t.label} aria-current={tab===t.id?'page':undefined} onClick={()=>go(t.id)} className={`dock-item ${tab===t.id?'dock-active':''}`}><span className="dock-active-bg" aria-hidden="true"/><Icon size={22} strokeWidth={2.1}/><span>{t.label}</span></button>})}
-        <motion.button type="button" className="dock-sos" aria-label="Emergency SOS demo" onClick={()=>setDialog('sos')} whileTap={{scale:.92}}><ShieldAlert size={21}/><small>SOS</small></motion.button>
-        {([{id:'mesh',label:'Mesh',icon:Radio},{id:'profile',label:'Profile',icon:Menu}] as const).map(t=>{const Icon=t.icon;return <button key={t.id} type="button" aria-label={t.label} aria-current={tab===t.id?'page':undefined} onClick={()=>go(t.id)} className={`dock-item ${tab===t.id?'dock-active':''}`}><span className="dock-active-bg" aria-hidden="true"/><Icon size={22} strokeWidth={2.1}/><span>{t.label}</span></button>})}
+        <motion.button type="button" className="dock-sos" aria-label="Emergency SOS" onClick={()=>setDialog('sos')} whileTap={{scale:.92}}><ShieldAlert size={21}/><small>SOS</small></motion.button>
+        {([{id:'mesh',label:'Mesh',icon:Radio},{id:'profile',label:'Profile',icon:UserRound}] as const).map(t=>{const Icon=t.icon;return <button key={t.id} type="button" aria-label={t.label} aria-current={tab===t.id?'page':undefined} onClick={()=>go(t.id)} className={`dock-item ${tab===t.id?'dock-active':''}`}><span className="dock-active-bg" aria-hidden="true"/><Icon size={22} strokeWidth={2.1}/><span>{t.label}</span></button>})}
       </nav>}
       <Modal kind={dialog} close={()=>setDialog(null)} go={go} person={name} saveName={setName}/>
       <AnimatePresence>{toast&&<motion.div role="status" className="toast-message" initial={{opacity:0,y:13}} animate={{opacity:1,y:0}} exit={{opacity:0,y:8}}>{toast}</motion.div>}</AnimatePresence>
