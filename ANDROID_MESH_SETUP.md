@@ -1,3 +1,7 @@
+# Historical Android handoff
+
+This document records the original standalone Kotlin review. Current setup is automated on `ui` by `npm run android:init`; follow [RESCUEMESH_INTEGRATION.md](RESCUEMESH_INTEGRATION.md) and `native/android/` for the integrated implementation. The snippets and blockers below describe the old sources on `main`.
+
 # Nearby Connections: Android integration handoff
 
 The current `main` branch contains standalone `android-rescuemesh/*.kt` sources, **not** a generated Capacitor Android project. There is no actual `android/app/build.gradle` or `android/app/src/main/AndroidManifest.xml` yet. When the Capacitor Android project is generated, make the following additions to the real files (do not replace their existing contents).

@@ -4,14 +4,7 @@
 
 ## Mandatory first action
 
-Open https://github.com/Pranav640-ai/SafeHaven and check out **`handoff/risk-ui-onboarding-codex`**. It is based on `feature/rescuemesh-android-bridge` and contains the user's last requested UI fixes. Read `README.md`, `RESCUEMESH_INTEGRATION.md`, `package.json`, `capacitor.config.ts` and the native bridge source. **Do not start from `main`**: it currently holds incomplete standalone Kotlin experiments but not the integrated frontend.
-
-Branches/PR:
-- `main`: https://github.com/Pranav640-ai/SafeHaven/tree/main
-- Restored UI baseline (`ui`): https://github.com/Pranav640-ai/SafeHaven/tree/ui
-- Bridge: https://github.com/Pranav640-ai/SafeHaven/tree/feature/rescuemesh-android-bridge
-- Codex starting branch: https://github.com/Pranav640-ai/SafeHaven/tree/handoff/risk-ui-onboarding-codex
-- Draft integration PR #1: https://github.com/Pranav640-ai/SafeHaven/pull/1
+Check out **`ui`**, the consolidated development branch. It includes `feature/rescuemesh-android-bridge` and `handoff/risk-ui-onboarding-codex`, including the latest UI fixes. Read `README.md`, `RESCUEMESH_INTEGRATION.md`, `package.json`, `capacitor.config.ts` and the native bridge source. `main` contains historical incomplete Kotlin experiments; the older UI branches are design backups.
 
 ## Product constraints (locked)
 
@@ -31,7 +24,7 @@ Do not build a separate RescueMesh APK. No fabricated live weather/incident/news
 ## Run and build
 
 ```bash
-git clone -b handoff/risk-ui-onboarding-codex https://github.com/Pranav640-ai/SafeHaven.git
+git clone -b ui https://github.com/Pranav640-ai/SafeHaven.git
 cd SafeHaven
 npm install
 npm run dev
@@ -99,6 +92,6 @@ Suggested Python FastAPI contract (design first; no backend exists yet): destina
 
 ## Git process / safety
 
-The new UI handoff is **not included in draft PR #1 yet**. Prefer a reviewed PR from `handoff/risk-ui-onboarding-codex` into `feature/rescuemesh-android-bridge`, then refresh PR #1 into `main` once tests pass. Do not force-push over teammates or merge untested mesh behavior into `main`. Make focused commits, keep a rollback reference, and update docs based on observed build/device outcomes, not assumptions.
+The bridge and handoff changes are consolidated into `ui`. Continue work there; preserve the historical branches and original sources on `main`. Do not force-push over teammates. Release integration into `main` still requires the device tests above. Make focused commits and update docs using observed build/device outcomes.
 
 **Definition of done for integration:** frontend build green, Android build green on the final commit, A↔B peer handshake/message/ack evidence, A↔B↔C relay evidence, beacon/SOS safety flow verified, all still within the same APK, and no false live-data/sending claims.

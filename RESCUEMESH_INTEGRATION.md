@@ -1,11 +1,11 @@
 # SafeHaven / RescueMesh Native Integration
 
-This feature branch connects the shared React interface to a Kotlin Capacitor plugin using Google Nearby Connections. It is based on the original `android-rescuemesh` classes in `main`, but **reimplements/fixes incomplete original manager code in `native/android/`**. Keep the originals for audit; only the corrected Kotlin sources are copied into the generated Android APK.
+The consolidated `ui` branch connects the shared React interface to a Kotlin Capacitor plugin using Google Nearby Connections. It is based on the original `android-rescuemesh` classes in `main`, but **reimplements/fixes incomplete original manager code in `native/android/`**. Keep the originals for audit; only the corrected Kotlin sources are copied into the generated Android APK.
 
 ## Installation (Windows, macOS, Linux)
 
 1. Install Node 22+, Android Studio (SDK, build tools and JDK 21), and Google Play services on physical Android phones.
-2. Check out this branch; run `npm install`.
+2. Check out `ui`; run `npm install`.
 3. Run `npm run android:init` once. This builds Vite, creates the normal Capacitor Android project if missing, installs the Kotlin bridge/dependency/permissions, and syncs web assets.
 4. `npm run android:open` and build/run on **two real Android phones**.
 5. After frontend changes, run `npm run android:sync`, then rebuild/reinstall the APK.
@@ -40,6 +40,6 @@ The install script adds Bluetooth (legacy and Android 12+), **BLUETOOTH_ADVERTIS
 
 `android-rescuemesh/RescueMeshManager.kt` contains duplicate `forwardSOS` methods and is missing some functions/closing braces; `Beacon.txt` is not a valid Kotlin compilation unit, and automatic connection acceptance is unsafe. The integrated manager has explicit envelope types, deduplication, bounded TTL, session SOS queue, beacon expiry, opt-in GPS sharing, app-level ACKs and user-confirmed auth-code acceptance. **Originals on `main` remain untouched.**
 
-## Known build verification gap
+## Consolidation verification (2026-10-10)
 
-Android SDK and npm registry are not available in this ChatGPT environment. The Kotlin Android plugin and full Vite build must be compiled on your local machine. Please send first Gradle errors or `adb logcat` output to fix native/API incompatibilities quickly. Do not claim a successful two-phone test until it runs on actual devices.
+The consolidated `ui` frontend passed `npm run build` (TypeScript and Vite). Native setup scripts passed Node syntax checks. This workspace has no Android SDK, so the final Android build is left to the `ui` GitHub Actions workflow. Physical two/three-phone networking tests remain required; compilation alone does not prove delivery.

@@ -4,17 +4,13 @@
 
 **Repository:** https://github.com/Pranav640-ai/SafeHaven
 
-## Start here — active work
+## Start here — consolidated development branch
 
-| Branch / PR | What it contains | Link |
-| --- | --- | --- |
-| `main` | Teammate's original, incomplete standalone `android-rescuemesh/*.kt` sources; **not** the integrated runnable app | [main](https://github.com/Pranav640-ai/SafeHaven/tree/main) |
-| `ui` | Reviewed v7 React interface, with redundant style file removed | [ui](https://github.com/Pranav640-ai/SafeHaven/tree/ui) |
-| `feature/rescuemesh-android-bridge` | React UI + Capacitor setup + corrected Kotlin plugin + connected RescueMesh screens | [integration branch](https://github.com/Pranav640-ai/SafeHaven/tree/feature/rescuemesh-android-bridge) |
-| **`handoff/risk-ui-onboarding-codex`** | **Recommended Codex starting branch:** integration branch plus focused Risk/Explore/Login UI fixes, unused-dependency cleanup and current docs | [Codex starting branch](https://github.com/Pranav640-ai/SafeHaven/tree/handoff/risk-ui-onboarding-codex) |
-| Draft PR #1 | Integrate the Android RescueMesh branch into `main` once hardware tests pass | [PR #1](https://github.com/Pranav640-ai/SafeHaven/pull/1) |
+Use **[ui](https://github.com/Pranav640-ai/SafeHaven/tree/ui)** for all current development. It includes the reviewed interface, Capacitor Android bridge, and the latest Risk/Explore/Login fixes and engineering handoff.
 
-**Use the Codex starting branch above.** The changes on this handoff branch are not automatically part of PR #1. Review/merge or cherry-pick them into the RescueMesh integration branch before merging PR #1 to `main`. Avoid force-resetting other people's branches.
+The former `feature/rescuemesh-android-bridge` and `handoff/risk-ui-onboarding-codex` branches are incorporated into `ui`. The `ui-before-*` and `ui-v8-backup-before-rollback` branches are historical design backups. Leave them as references.
+
+`main` retains the original incomplete standalone Kotlin experiments for audit; their corrected implementation is in `native/android/` on `ui`. Do not merge those obsolete sources into the integrated app. Draft PR #1 is the earlier bridge-to-main proposal; it does not define the canonical development branch.
 
 Detailed developer handoff: **[CODEX_HANDOFF.md](CODEX_HANDOFF.md)**. Android-specific testing and warnings: **[RESCUEMESH_INTEGRATION.md](RESCUEMESH_INTEGRATION.md)**.
 
@@ -40,7 +36,7 @@ Do **not** embed Gemini/news API secrets in Vite environment variables exposed t
 ## Run the frontend
 
 ```bash
-git clone -b handoff/risk-ui-onboarding-codex https://github.com/Pranav640-ai/SafeHaven.git
+git clone -b ui https://github.com/Pranav640-ai/SafeHaven.git
 cd SafeHaven
 npm install
 npm run dev
@@ -95,6 +91,8 @@ The original teammate Kotlin experiments are on **`main/android-rescuemesh/`**, 
 
 ## Current verification and limitations
 
+**Consolidation checks (2026-10-10):** `npm run build` passed locally, and both native setup scripts passed Node syntax checks. Android SDK is unavailable locally; the Android workflow now also runs on `ui`. Hardware networking remains unverified.
+
 **Previously reported passing:** integrated frontend Vite/TypeScript CI and an Android debug APK/Gradle build for the RescueMesh integration branch. These demonstrate compilation only; the small UI edits on this handoff branch still need their own `npm run build` verification.
 
 **Not yet established:** a reliable two-phone offline session, packet receipt and acknowledgement, three-phone relay, SOS delivery, reboot persistence, permission-denied behavior and end-to-end Android device compatibility. Nearby connections can fail if permission/radios/Play services are absent, and the network cannot guarantee delivery.
@@ -103,10 +101,10 @@ The original teammate Kotlin experiments are on **`main/android-rescuemesh/`**, 
 
 ## Next implementation steps
 
-1. On the handoff branch, run `npm install && npm run build`; review the three UI adjustments and accessibility in Chrome/real phone.
+1. On `ui`, run `npm install && npm run build`; review the three UI adjustments and accessibility in Chrome/real phone.
 2. Build and install the Android APK on **two real phones**. Grant OS permissions, compare the displayed six-digit pairing code on both, approve both ends, then prove a chat and a received peer acknowledgement with no internet.
 3. Test A↔B↔C relay, duplicate/TTL behavior, queue recovery, SOS acknowledgement and beacon create/update/expiry/withdrawal on three real devices. Fix any native problems before asserting success.
-4. Merge the handoff UI/docs into `feature/rescuemesh-android-bridge`, then review and land draft PR #1 to `main` only after validated results.
+4. Continue development on `ui`. Any later release to `main` requires validated build and physical-device results.
 5. Integrate FastAPI, Open-Meteo, official incident sources, Gemini replanning, translation, offline caching and opt-in check-ins; wire to actual UI states.
 
 **AI coding assistants:** read [CODEX_HANDOFF.md](CODEX_HANDOFF.md) before editing. Do not remove consent, provenance or undelivered statuses to make the interface appear complete.
