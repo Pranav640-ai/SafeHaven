@@ -99,3 +99,15 @@ This is still a mock-interface-only project; UI indicators are examples, not liv
 - Weather, SOS, mesh and data integrations are pending. Safety-critical feedback still says not sent/not connected.
 
 Run `npm install`, `npm run dev`, then `npm run build` to validate locally.
+
+## Android RescueMesh integration (feature branch)
+
+This branch introduces a Kotlin Capacitor plugin for Nearby Connections, connection-code confirmation, offline chat, best-effort multi-hop relaying, explicit SOS, consent-based temporary community beacons, and opted-in group check-ins. The hosted website does not send offline messages. For setup and two-phone tests see [`RESCUEMESH_INTEGRATION.md`](RESCUEMESH_INTEGRATION.md).
+
+```bash
+npm install
+npm run android:init
+npm run android:open
+```
+
+Native bridge source lives in `native/android/`, and the idempotent Android installer is in `scripts/install-rescuemesh.mjs`. Nothing in this branch is claimed to have passed a physical Android mesh test yet.
