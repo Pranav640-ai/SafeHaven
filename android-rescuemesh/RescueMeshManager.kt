@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import com.google.android.gms.nearby.Nearby
 import com.google.android.gms.nearby.connection.*
+import com.google.gson.Gson
 
 class RescueMeshManager(
     private val context: Context,
@@ -18,7 +19,13 @@ class RescueMeshManager(
     private val connectionsClient =
         Nearby.getConnectionsClient(context)
 
-    private val connectedEndpoints = mutableSetOf<String>()
+    private val connectedEndpoints =
+        mutableSetOf<String>()
+
+    private val gson = Gson()
+
+    private val processedMessages =
+        mutableSetOf<String>()
 
     fun startAdvertising() {
 
@@ -72,13 +79,33 @@ class RescueMeshManager(
                 endpointId,
                 payload
             )
-                .addOnSuccessListener {
-                    Log.d(TAG, "Message Sent")
-                }
-                .addOnFailureListener {
-                    Log.e(TAG, "Message Failed", it)
-                }
         }
+    }
+
+    fun sendRelayMessage(
+        relayMessage: RelayMessage
+    ) {
+
+        val json =
+            gson.toJson(relayMessage)
+
+        val payload =
+            Payload.fromBytes(
+                json.toByteArray()
+            )
+
+        connectedEndpoints.forEach { endpointId ->
+
+            connectionsClient.sendPayload(
+                endpointId,
+                payload
+            )
+        }
+
+        Log.d(
+            TAG,
+            "Relay Message Sent"
+        )
     }
 
     fun stopAllConnections() {
@@ -96,7 +123,10 @@ class RescueMeshManager(
                 discoveredEndpointInfo: DiscoveredEndpointInfo
             ) {
 
-                Log.d(TAG, "Found Device: $endpointId")
+                Log.d(
+                    TAG,
+                    "Found Device: $endpointId"
+                )
 
                 connectionsClient.requestConnection(
                     deviceName,
@@ -105,9 +135,14 @@ class RescueMeshManager(
                 )
             }
 
-            override fun onEndpointLost(endpointId: String) {
+            override fun onEndpointLost(
+                endpointId: String
+            ) {
 
-                Log.d(TAG, "Lost Device: $endpointId")
+                Log.d(
+                    TAG,
+                    "Lost Device: $endpointId"
+                )
             }
         }
 
@@ -119,7 +154,10 @@ class RescueMeshManager(
                 connectionInfo: ConnectionInfo
             ) {
 
-                Log.d(TAG, "Connection Initiated")
+                Log.d(
+                    TAG,
+                    "Connection Initiated"
+                )
 
                 connectionsClient.acceptConnection(
                     endpointId,
@@ -137,7 +175,9 @@ class RescueMeshManager(
                     ConnectionsStatusCodes.STATUS_OK
                 ) {
 
-                    connectedEndpoints.add(endpointId)
+                    connectedEndpoints.add(
+                        endpointId
+                    )
 
                     Log.d(
                         TAG,
@@ -156,3 +196,48 @@ class RescueMeshManager(
             override fun onDisconnected(
                 endpointId: String
             ) {
+
+                connectedEndpoints.remove(
+                    endpointId
+                )
+
+                Log.d(
+                    TAG,
+                    "Disconnected: $endpointId"
+                )
+            }
+        }
+
+    private val payloadCallback =
+        object : PayloadCallback() {
+
+            override fun onPayloadReceived(
+                endpointId: String,
+                payload: Payload
+            ) {
+
+                val bytes =
+                    payload.asBytes()
+                        ?: return
+
+                val json =
+                    String(bytes)
+
+                try {
+
+                    val relayMessage =
+                        gson.fromJson(
+                            json,
+                            RelayMessage::class.java
+                        )
+
+                    handleRelayMessage(
+                        relayMessage
+                    )
+
+                } catch (e: Exception) {
+
+                    Log.d(
+                        TAG,
+                        "Normal Message: $json"
+     
