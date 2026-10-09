@@ -1013,6 +1013,6 @@ h1,h2,h3,h4,.brand{font-weight:500}
 
 /* Forest green notifications with a gentle lift and fade. */
 .toast-anchor{position:absolute;z-index:25;left:23px;right:23px;bottom:calc(102px + env(safe-area-inset-bottom));display:flex;justify-content:center;pointer-events:none}
-.notification-toast{position:relative;width:100%;max-width:340px;min-height:48px;border-radius:18px;background:linear-gradient(135deg,#245743c9,#39735dc2);backdrop-filter:blur(20px) saturate(135%);-webkit-backdrop-filter:blur(20px) saturate(135%);border:1px solid #e0f1df61;box-shadow:0 9px 25px #214e402b,inset 0 1px #ffffff38;color:#f6faf3;font:500 12px/1.5 'Nunito',sans-serif;text-align:center}
+.notification-toast{position:relative;width:100%;max-width:340px;min-height:48px;border-radius:18px;background:linear-gradient(135deg,#dfe7d9f2,#cfdcccf2);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid #91ab9473;box-shadow:0 7px 20px #214e4017,inset 0 1px #ffffff70;color:#294e3e;font:500 12px/1.5 'Nunito',sans-serif;text-align:center}
 .toast-copy{display:block;width:100%;padding:13px 18px;min-width:0}
-@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.notification-toast{background:#30634f}}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.notification-toast{background:#d7e2d2}}
