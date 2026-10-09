@@ -207,7 +207,7 @@ export default function App(){
   const reduceMotion=useReducedMotion();
 
   useEffect(()=>{if(!authenticated)return;setLoading(true);const t=window.setTimeout(()=>setLoading(false),page==='home'?640:420);return()=>window.clearTimeout(t)},[page,authenticated]);
-  useEffect(()=>{if(!toast)return;const t=window.setTimeout(()=>setToast(''),3800);return()=>window.clearTimeout(t)},[toast]);
+  useEffect(()=>{if(!toast)return;const t=window.setTimeout(()=>setToast(''),1600);return()=>window.clearTimeout(t)},[toast]);
   const openDestination=(name:string)=>{setSelectedDestination(name);go('risk')};
   const go=(p:Page)=>{setPage(p);setCompact(false);lastTop.current=0;if(scrollRef.current) scrollRef.current.scrollTo({top:0,behavior:'instant'})};
   const handleScroll=(event:UIEvent<HTMLDivElement>)=>{const y=event.currentTarget.scrollTop;const diff=y-lastTop.current;if(y<66)setCompact(false);else if(diff>15)setCompact(true);else if(diff< -16)setCompact(false);lastTop.current=y;};
