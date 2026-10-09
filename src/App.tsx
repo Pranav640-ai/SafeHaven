@@ -7,7 +7,7 @@ import {
   CircleHelp, Clock3, CloudRain, Compass, Eye, Globe2, HeartHandshake,
   Home, Languages, LocateFixed, Map, MapPin, Menu, MessageCircle, Navigation,
   Phone, Plus, Radio, RefreshCw, Search, Send, Settings2, Shield,
-  ShieldAlert, ShieldCheck, SignalZero, Sparkles, Users, WifiOff, X,
+  ShieldAlert, ShieldCheck, SignalZero, Sparkles, Users, WifiOff, X, Waves, Layers3, Zap,
   type LucideIcon,
 } from 'lucide-react';
 import Skeleton from 'react-loading-skeleton';
@@ -20,10 +20,10 @@ type Hazard = 'Flood' | 'Heatwave' | 'Earthquake';
 interface Tile { name: string; subtitle: string; emoji: string; tint: string; page: Page; }
 
 const tiles: Tile[] = [
-  { name: 'Risk Radar', subtitle: 'Know before you go', emoji: '🌦️', tint: 'purple', page: 'risk' },
+  { name: 'Risk Radar', subtitle: 'Know before you go', emoji: '🌩️', tint: 'purple', page: 'risk' },
   { name: 'AI Replanner', subtitle: 'Adapt your plans', emoji: '🧭', tint: 'blue', page: 'replan' },
   { name: 'Emergency', subtitle: 'Know what to do', emoji: '🚨', tint: 'coral', page: 'guide' },
-  { name: 'RescueMesh', subtitle: 'Stay in touch', emoji: '📡', tint: 'teal', page: 'mesh' },
+  { name: 'RescueMesh', subtitle: 'Stay in touch', emoji: '📶', tint: 'teal', page: 'mesh' },
   { name: 'Safety Pack', subtitle: 'Be ready offline', emoji: '🎒', tint: 'gold', page: 'pack' },
   { name: 'Safety Beacon', subtitle: 'Community support', emoji: '📍', tint: 'pink', page: 'beacon' },
 ];
@@ -73,7 +73,7 @@ function SectionTitle({ children, subtitle, action, onAction }: { children: Reac
 function FeatureTile({ tile, onClick, index }: { tile: Tile; onClick: () => void; index: number }) {
   return <motion.button type="button" aria-label={`Open ${tile.name}`} className={`feature-tile ${tile.tint}`} onClick={onClick}
     initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.035, duration: .25 }} whileTap={{ scale: .95 }}>
-    <span className="feature-illustration" aria-hidden="true">{tile.emoji}</span>
+    <span className="feature-icon-stage" aria-hidden="true"><span className="feature-icon-orbit"/><span className="feature-illustration">{tile.emoji}</span><span className="feature-icon-spark">✦</span></span>
     <strong>{tile.name}</strong><small>{tile.subtitle}</small>
   </motion.button>;
 }
@@ -88,10 +88,10 @@ function PageHeader({ title, onBack, action }: { title: string; onBack: () => vo
 
 function OverviewPoster({ onClick }: { onClick: () => void }) {
   return <motion.button whileTap={{ scale: .985 }} className="overview-poster" type="button" onClick={onClick}>
-    <div className="poster-aura poster-aura-one"/><div className="poster-aura poster-aura-two"/>
+    <img className="poster-photo" src="/visuals/sunset-trail.webp" alt="" loading="lazy"/><div className="poster-aura poster-aura-one"/><div className="poster-aura poster-aura-two"/>
     <div className="poster-top"><span className="poster-overline"><Sparkles size={13}/> THE SAFER WAY TO EXPLORE</span><span className="poster-arrow"><ArrowDownRight size={18}/></span></div>
     <div className="poster-copy"><h2>Your next adventure,<br/><em>with peace of mind.</em></h2><p>One place to plan, prepare and stay connected.</p></div>
-    <div className="poster-globe" aria-hidden="true"><div className="globe-core"><Globe2 size={75} strokeWidth={.9}/></div><span className="globe-pin first">✦</span><span className="globe-pin second">✦</span></div>
+    <div className="poster-orb" aria-hidden="true"><span>✧</span></div>
     <span className="poster-footer">Explore your safety dashboard <ArrowRight size={16}/></span>
   </motion.button>;
 }
@@ -116,9 +116,24 @@ function MockNotice({ kind = 'content' }: { kind?: string }) {
 }
 
 function LoadingCards() {
-  return <div className="loading-grid" aria-label="Loading example content"><Skeleton className="skeleton-banner" baseColor="#252529" highlightColor="#42404f" enableAnimation />
+  return <div className="loading-grid" aria-label="Loading sample content"><span className="loading-kicker"><span/> PREPARING YOUR DEMO EXPERIENCE</span><Skeleton className="skeleton-banner" baseColor="#252529" highlightColor="#42404f" enableAnimation />
     <div className="loading-row">{[0, 1, 2].map(i => <Skeleton key={i} className="skeleton-tile" baseColor="#252529" highlightColor="#42404f" enableAnimation />)}</div>
     <Skeleton className="skeleton-wide" baseColor="#252529" highlightColor="#42404f" enableAnimation /></div>;
+}
+
+
+function SafetySnapshot({ onAction }: { onAction: () => void }) {
+  return <motion.button type="button" className="safety-snapshot" onClick={onAction} whileTap={{ scale: .985 }}>
+    <span className="snapshot-glow" aria-hidden="true"/>
+    <span className="snapshot-top"><span className="snapshot-mark"><ShieldCheck size={17}/></span><span>YOUR SAFETY SPACE</span><span className="snapshot-live">PREVIEW <span/></span></span>
+    <span className="snapshot-main"><span><small>Destination intelligence</small><strong>Stay a step ahead<span>.</span></strong><em>Explore sample warnings, guidance and route insights.</em></span><span className="snapshot-visual"><span className="snapshot-radar radar-a"/><span className="snapshot-radar radar-b"/><MapPin size={28} strokeWidth={1.8}/></span></span>
+    <span className="snapshot-divider"/>
+    <span className="snapshot-foot"><span><Zap size={14}/> Incident intelligence</span><span className="snapshot-foot-action">Take a look <ArrowRight size={16}/></span></span>
+  </motion.button>;
+}
+
+function PreviewLoadingButton({ onClick }: { onClick: () => void }) {
+  return <button type="button" onClick={onClick} className="preview-loading-button"><RefreshCw size={14}/> Preview shimmer loading</button>;
 }
 
 export default function App() {
@@ -143,6 +158,7 @@ export default function App() {
 
   useEffect(() => { const timer = setTimeout(() => setIsLoading(false), 950); return () => clearTimeout(timer); }, []);
   useEffect(() => { scrollRef.current?.scrollTo(0, 0); setCompactDock(false); scrollTopRef.current = 0; }, [page]);
+  useEffect(() => { const closeOnEsc = (event: KeyboardEvent) => { if (event.key === 'Escape') setSosOpen(false); }; window.addEventListener('keydown', closeOnEsc); return () => window.removeEventListener('keydown', closeOnEsc); }, []);
 
   const go = (next: Page) => setPage(next);
   const onScroll = (ev: UIEvent<HTMLDivElement>) => {
@@ -152,16 +168,18 @@ export default function App() {
     scrollTopRef.current = top;
   };
   const currentTab: MainTab = page === 'mesh' || page === 'beacon' ? 'mesh' : page === 'pack' ? 'pack' : page === 'home' || page === 'profile' ? 'home' : 'explore';
+  const replayLoading = () => { setIsLoading(true); window.setTimeout(() => setIsLoading(false), 1250); };
   const toggleSaved = (key: string) => setSaved(current => current.includes(key) ? current.filter(v => v !== key) : [...current, key]);
 
   function home() {
     return <>
       <div className="location-topline"><button className="location-trigger" onClick={() => go('explore')} type="button"><MapPin size={20} fill="#9581ff" color="#9581ff" /><span><small>EXPLORING FROM</small><strong>Chennai, India <ChevronDown size={15}/></strong></span></button>
         <button type="button" onClick={() => go('profile')} className="avatar" aria-label="Profile"><span>S</span><span className="avatar-indicator"/></button></div>
-      <div className="home-welcome"><div><DemoTag /><h1>Go places.<br/><span>Feel prepared.</span></h1><p>Your travel safety companion, all in one place.</p></div></div>
+      <div className="home-welcome"><div><DemoTag /><h1>Go places.<br/><span>Feel prepared.</span></h1><p>Adventure is better when you are ready for anything.</p></div><span className="welcome-spark" aria-hidden="true">✳</span></div>
       <button type="button" className="search-launch" onClick={() => go('explore')}><Search size={21}/><span>Search destinations, alerts, guidance...</span><span className="search-key">⌕</span></button>
       {isLoading ? <LoadingCards /> : <>
-        <SectionTitle subtitle="Everything you need, close at hand">Your safety toolkit</SectionTitle>
+        <SafetySnapshot onAction={() => go('risk')}/>
+        <div className="toolkit-heading"><SectionTitle subtitle="Everything you need, close at hand">Your safety toolkit</SectionTitle><PreviewLoadingButton onClick={replayLoading}/></div>
         <div className="feature-grid">{tiles.map((tile, i) => <FeatureTile tile={tile} index={i} key={tile.name} onClick={() => go(tile.page)}/>)}</div>
         <div className="spaced-section"><SectionTitle action="Explore" onAction={() => go('risk')}>The spotlight</SectionTitle><Spotlight go={go}/></div>
         <div className="spaced-section"><SectionTitle subtitle="Your journey, with a little extra care">A safer way forward</SectionTitle><OverviewPoster onClick={() => go('risk')}/></div>
@@ -275,14 +293,14 @@ export default function App() {
     }
   }
 
-  return <div className="desktop-stage"><aside className="desktop-intro"><img src="/safehaven-mark.svg" width="62" height="62" alt="SafeHaven mark"/><span className="desktop-kicker">MOBILE EXPERIENCE / CONCEPT 01</span><h1>Safer journeys.<br/><span>Beautifully simple.</span></h1><p>Interactive SafeHaven AI UI prototype inspired by the visual language of District and Uber.</p><div className="desktop-bullet"><span>01</span> Dark, expressive UI</div><div className="desktop-bullet"><span>02</span> Smooth, tactile motion</div><div className="desktop-bullet"><span>03</span> Five safety modules, one app</div><div className="desktop-caveat">All content shown is a demo. No emergency, weather, location or mesh services are connected.</div></aside>
+  return <div className="desktop-stage"><aside className="desktop-intro"><img src="/safehaven-mark.svg" width="62" height="62" alt="SafeHaven mark"/><span className="desktop-kicker">MOBILE EXPERIENCE / CONCEPT 01</span><h1>Safer journeys.<br/><span>Beautifully simple.</span></h1><p>Interactive SafeHaven AI UI prototype inspired by the visual language of District and Uber.</p><div className="desktop-board"><img src="/visuals/visual-direction.webp" alt="AI-generated SafeHaven mobile visual direction board" loading="lazy"/><span><Sparkles size={13}/> AI-GENERATED VISUAL DIRECTION</span></div><div className="desktop-bullet"><span>01</span> Dark, expressive UI</div><div className="desktop-bullet"><span>02</span> Smooth, tactile motion</div><div className="desktop-bullet"><span>03</span> Five safety modules, one app</div><div className="desktop-caveat">All content shown is a demo. No emergency, weather, location or mesh services are connected.</div></aside>
     <main className="mobile-shell" aria-label="SafeHaven mobile app preview">
       <div className="content-scroll" onScroll={onScroll} ref={scrollRef}>
         <AnimatePresence mode="wait" initial={false}>
           <motion.div key={page} className="page-content" initial={{ opacity: 0, y: 11 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: .22, ease: [0.22, 1, 0.36, 1] }}>{content()}</motion.div>
         </AnimatePresence>
       </div>
-      <motion.nav aria-label="Main navigation" layout className={`bottom-dock ${compactDock ? 'compact' : ''}`} transition={{ type: 'spring', damping: 28, stiffness: 300 }}>
+      <motion.nav aria-label="Main navigation" className={`bottom-dock ${compactDock ? 'compact' : ''}`} transition={{ type: 'spring', damping: 28, stiffness: 300 }}>
         {bottomTabs.slice(0,2).map(tab => <button key={tab.id} type="button" className={`dock-tab ${currentTab === tab.id ? 'active' : ''}`} onClick={()=>go(tab.id)} aria-label={tab.title} aria-current={currentTab === tab.id ? 'page' : undefined}>{currentTab === tab.id && <motion.span layoutId="active-dock-pill" className="active-dock-pill" transition={{type:'spring',damping:30,stiffness:350}}/>}<tab.icon size={23} strokeWidth={2.35}/><small>{tab.title}</small></button>)}
         <motion.button type="button" aria-label="Emergency SOS demo" className="dock-sos" onClick={()=>setSosOpen(true)} whileTap={{ scale: .92 }}><ShieldAlert size={23} strokeWidth={2.2}/><span>SOS</span></motion.button>
         {bottomTabs.slice(2).map(tab => <button key={tab.id} type="button" className={`dock-tab ${currentTab === tab.id ? 'active' : ''}`} onClick={()=>go(tab.id)} aria-label={tab.title} aria-current={currentTab === tab.id ? 'page' : undefined}>{currentTab === tab.id && <motion.span layoutId="active-dock-pill" className="active-dock-pill" transition={{type:'spring',damping:30,stiffness:350}}/>}<tab.icon size={23} strokeWidth={2.35}/><small>{tab.title}</small></button>)}

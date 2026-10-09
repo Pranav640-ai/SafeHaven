@@ -1,38 +1,49 @@
-# SafeHaven AI — UI Preview
+# SafeHaven AI — Premium UI Prototype
 
-**One mobile-first SafeHaven experience.** This branch contains a UI-only React prototype inspired by the dark cards, floating navigation and interaction patterns of District and Uber. The visual work is original and does not use their proprietary code or branded assets.
+This repository's `ui` branch contains the **UI-only** React + TypeScript + Vite prototype for SafeHaven AI, built with Tailwind CSS and reusable interaction components. The visual style is inspired by District and Uber, but all product branding, card styling, and generated illustrations are original.
 
-## Run locally
+## View on your laptop
+
+Install Node.js 22 or current LTS and Git, then open a terminal:
 
 ```bash
+git clone -b ui https://github.com/Pranav640-ai/SafeHaven.git
+cd SafeHaven
 npm install
 npm run dev
 ```
 
-Open the URL from Vite (usually http://localhost:5173). To preview mobile sizes on a laptop, open Chrome DevTools (`F12`) and toggle device emulation (`Ctrl+Shift+M`).
+In Chrome, visit **http://localhost:5173/** (or the URL Vite prints), press **F12**, and then **Ctrl + Shift + M** to select Pixel 7 or a similar ~390px wide phone viewport. Keep the terminal running for hot reload. Use `Ctrl + C` to stop it.
 
-To compile:
+To use the packaged ZIP instead, extract the ZIP, open a terminal in the extracted folder, and run `npm install` followed by `npm run dev`.
+
+To preview on a real phone, connect the laptop and phone to the same Wi-Fi, start Vite, and open the **Network** URL printed by Vite on the phone. If the network URL does not work, allow Node.js through your laptop's firewall.
+
+For a production check:
 
 ```bash
 npm run build
+npm run preview
 ```
 
-## Included screens
+There is also a standalone HTML visual preview in the downloadable delivery. It is **not the React app**; it is intended as a quick design reference even without npm.
 
-- Home dashboard with six entry tiles for the **five core modules** (Safety Beacon is part of RescueMesh)
-- Explore/search shell, destination risk intelligence, sample trip replanner, emergency guidance
-- RescueMesh chat drafts, opt-in Community Safety Beacon preview
-- Offline Safety Pack/check-in preview, Profile/preferences
-- District/Uber-inspired dark theme, shared card system, floating spring-animated bottom dock that shrinks while scrolling, Embla carousels, skeleton shimmer, tactile animations and SOS preview sheet
+## What's included
+
+- Home with premium dark gradients, a destination-intelligence status widget, six illustrated modules, animated carousel stories, and a custom **AI-generated** scenic feature image
+- Risk Intelligence, Trip Replanner, Emergency Guide, RescueMesh messaging UI, Community Safety Beacon, Safety Pack/check-in UI, Search/Explore, and Profile
+- Floating bottom dock that compacts when scrolling down and expands when scrolling back up, with a permanently available demo SOS control
+- `motion` for tactile transitions and animated navigation, `embla-carousel-react` for swipeable cards, `react-loading-skeleton` for shimmer loading, and `lucide-react` for consistent icons
+- Press **Preview shimmer loading** on Home to replay loading placeholders; risk cards have their own refresh preview
+- Generated, optimized WebP artwork in `public/visuals/`
+- Mobile and laptop layouts; basic reduced-motion accessibility styling
 
 ## Important: UI demonstration only
 
-**No integrations are live** on this branch: no weather, incident/news feeds, AI trip replan, emergency SOS, Nearby Connections, location sharing, messaging, user accounts or offline caching. Mock alerts and example data are visibly labeled. SOS **never sends** anything, messages are local UI drafts, check-ins are not shared, community beacons are unverified examples and are **not broadcast**.
+**None of the integrations are live**: no weather, news, incident warnings, Gemini, maps, login, emergency SOS delivery, native Android networking, GPS beacons, offline downloads, or group check-in synchronization. Every preview is explicitly demo content. RescueMesh messages are *local UI drafts*, not transmitted, and pressing SOS only opens a clear disclosure sheet.
 
-## Connecting later
+The frontend can later be connected to a FastAPI service through a typed API client and to Capacitor/Kotlin for Android-only Nearby Connections. Never display actual delivered/sent states without real acknowledgments.
 
-Keep the React UI and replace mock collections in `src/App.tsx` with data hooks/services. The exact same project can be packaged with Capacitor later; Android-only RescueMesh features should be exposed via a native Kotlin bridge (Nearby Connections) and must be proven on physical devices. Do not display a sent/delivered state before receiving actual native acknowledgement.
+## Stack
 
-## Libraries
-
-React 19, Vite, TypeScript, Tailwind CSS 4 + custom design tokens, Motion, Embla Carousel, React Loading Skeleton and Lucide React. Font: Plus Jakarta Sans (with system fallbacks).
+React 19 · TypeScript · Vite · Tailwind CSS 4 · Motion · Embla Carousel · React Loading Skeleton · Lucide React · Plus Jakarta Sans (system fallback).
