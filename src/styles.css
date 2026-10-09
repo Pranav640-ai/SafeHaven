@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;1,400&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Nunito:wght@400;500;600;700;800&family=Raleway:wght@400;500;600;700;800&display=swap');
 @import 'tailwindcss';
 
@@ -370,7 +371,7 @@ html,body,#root {background:#0b110f;color:#f2faf5}
 .explore-intro{margin:4px 0 22px}.eyebrow{font-size:10px;letter-spacing:.13em;font-weight:800;color:#9ae4b5}.explore-intro h2{font-family:'League Spartan','DM Sans',sans-serif;font-size:34px;line-height:1.03;letter-spacing:-.03em;margin:10px 0 9px}.explore-intro p{font-size:12px;line-height:1.6;color:#afc1b6;max-width:290px}
 .explore-search{border-color:#45664f;background:#1a2c22;margin-bottom:21px}.explore-search input{background:transparent}
 .explore-editorial{height:228px;border-radius:25px;position:relative;isolation:isolate;overflow:hidden;background:linear-gradient(140deg,#1c5741,#3d7e61);border:1px solid #6bc79254;box-shadow:0 18px 40px #0004}
-.explore-editorial-art{position:absolute;inset:0;background:url('https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=850&q=80') center 46%/cover,url('/visuals/sunset-trail.webp') center/cover}
+.explore-editorial-art{position:absolute;inset:0;background:url('https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=850&q=80') center 46%/cover,linear-gradient(140deg,#24476c,#739ec3)}
 .explore-editorial-shade{position:absolute;inset:0;background:linear-gradient(0deg,#071a12f5,transparent 72%),linear-gradient(120deg,#0c382e55,transparent 60%)}
 .explore-overline{position:absolute;left:18px;top:17px;display:inline-flex;align-items:center;gap:7px;padding:8px 11px;background:#0a2d22aa;border:1px solid #a4ffca44;border-radius:999px;color:#ddffed;font-size:10px;letter-spacing:.09em;font-weight:800}
 .explore-editorial>div:last-child{position:absolute;left:20px;right:18px;bottom:20px}.explore-editorial h3{font-family:'League Spartan',sans-serif;font-size:28px;line-height:1.1;letter-spacing:-.025em;text-shadow:0 3px 14px #0009}.explore-editorial p{font-size:11px;color:#d4f1de;margin-top:6px}
@@ -856,3 +857,98 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 @media(max-width:719px){.preview-stage{background:#d4dfec}.phone-shell{border:0;border-radius:0}}
 @media(max-width:360px){.swipe-viewport{margin-left:-16px;margin-right:-16px}.native-swipe-row{padding-left:29px!important;padding-right:29px!important}.profile-revamp{padding:19px 15px 16px}.profile-revamp-bottom>span{font-size:10px}}
 @media(prefers-reduced-motion:reduce){.feature-illustration,.carousel-art-illustration{animation:none!important}}
+
+/* Focused October 2026 handoff corrections. Keep these scoped to the affected screens. */
+
+/* Risk Intelligence has a single, coherent segmented control like the other sections. */
+.tab-strip.risk-view-tabs{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  align-items:stretch;
+  gap:5px;
+  margin:16px 0 17px;
+  padding:5px;
+  overflow:visible;
+  border:1px solid #9cb9d7;
+  border-radius:16px;
+  background:rgba(212,227,246,.74);
+  box-shadow:inset 0 1px 0 #ffffffbb;
+  -webkit-backdrop-filter:blur(12px);
+  backdrop-filter:blur(12px);
+}
+.tab-strip.risk-view-tabs > button{
+  width:100%;
+  min-width:0;
+  min-height:43px;
+  padding:0 8px;
+  border:1px solid transparent;
+  border-radius:12px;
+  background:transparent;
+  color:#416688;
+  font-family:'Nunito',sans-serif;
+  font-size:13px;
+  font-weight:700;
+  text-align:center;
+  transition:background-color .2s ease,color .2s ease,box-shadow .2s ease;
+}
+.tab-strip.risk-view-tabs > button[aria-selected="true"]{
+  background:#f1f7ff!important;
+  border-color:#ffffff!important;
+  color:#174573!important;
+  box-shadow:0 3px 13px #234e7c24, inset 0 1px #fff;
+}
+.tab-strip.risk-view-tabs > button::after{
+  display:none!important;
+  content:none!important;
+}
+.tab-strip.risk-view-tabs > button:focus-visible{
+  outline:2px solid #245f9a;
+  outline-offset:2px;
+}
+
+/* A restrained, regular-weight italic serif for the single scenic editorial heading. */
+.explore-editorial h3,
+.explore-editorial > div:last-child h3{
+  font-family:'Cormorant Garamond',Georgia,serif!important;
+  font-style:italic!important;
+  font-size:clamp(34px,8.4vw,42px);
+  font-weight:400!important;
+  line-height:1.04;
+  letter-spacing:-.015em;
+  text-shadow:0 2px 12px #09253b40;
+}
+
+/* Continue the welcome artwork behind its full title, before the form begins. */
+.phone-onboarding .login-screen{
+  min-height:100%;
+  background:linear-gradient(180deg,#173b63 0%,#507aa7 49%,#d6e4f3 76%,#cad9ea 100%);
+}
+.phone-onboarding .login-art{
+  height:auto;
+  min-height:clamp(372px,52dvh,515px);
+  flex-shrink:0;
+  padding-bottom:24px;
+  background:
+    radial-gradient(ellipse at 51% 55%,#92b9d8 0%,#4d77a5 49%,#183c67 100%);
+}
+.phone-onboarding .login-art::after{
+  background:linear-gradient(180deg,transparent 50%,#4875a422 75%,#cad9ea24 100%);
+}
+.phone-onboarding .login-art-copy{
+  margin-top:auto;
+  margin-bottom:0;
+  padding:4px 20px 22px;
+}
+.phone-onboarding .login-panel{
+  margin-top:-12px;
+  flex-shrink:0;
+  position:relative;
+  z-index:3;
+}
+@media(max-height:710px){
+  .phone-onboarding .login-art{min-height:348px;padding-bottom:12px}
+  .phone-onboarding .login-art-copy{padding-bottom:16px}
+}
+@media(prefers-reduced-motion:reduce){
+  .tab-strip.risk-view-tabs > button{transition:none}
+}

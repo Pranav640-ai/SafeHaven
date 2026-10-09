@@ -1,108 +1,63 @@
-# SafeHaven AI — Mobile UI Prototype
+# SafeHaven AI
 
-A **mobile-first, React + TypeScript + Vite** interface designed for the SafeHaven AI TravelTech prototype. Built around the user's District and Uber references with a distinct SafeHaven visual identity. All flows in this branch are **UI-only demonstrations**.
+**One mobile-first tourist safety app:** a React/TypeScript website that can also be packaged as **one Android APK** with Capacitor. A Kotlin bridge supplies Android-only offline peer networking. The project is a hackathon prototype, **not a production emergency service**.
 
-## Run on your laptop
+**Repository:** https://github.com/Pranav640-ai/SafeHaven
 
-Install Node.js LTS (22+ recommended) and Git, then run:
+## Start here — active work
+
+| Branch / PR | What it contains | Link |
+| --- | --- | --- |
+| `main` | Teammate's original, incomplete standalone `android-rescuemesh/*.kt` sources; **not** the integrated runnable app | [main](https://github.com/Pranav640-ai/SafeHaven/tree/main) |
+| `ui` | Reviewed v7 React interface, with redundant style file removed | [ui](https://github.com/Pranav640-ai/SafeHaven/tree/ui) |
+| `feature/rescuemesh-android-bridge` | React UI + Capacitor setup + corrected Kotlin plugin + connected RescueMesh screens | [integration branch](https://github.com/Pranav640-ai/SafeHaven/tree/feature/rescuemesh-android-bridge) |
+| **`handoff/risk-ui-onboarding-codex`** | **Recommended Codex starting branch:** integration branch plus focused Risk/Explore/Login UI fixes, unused-dependency cleanup and current docs | [Codex starting branch](https://github.com/Pranav640-ai/SafeHaven/tree/handoff/risk-ui-onboarding-codex) |
+| Draft PR #1 | Integrate the Android RescueMesh branch into `main` once hardware tests pass | [PR #1](https://github.com/Pranav640-ai/SafeHaven/pull/1) |
+
+**Use the Codex starting branch above.** The changes on this handoff branch are not automatically part of PR #1. Review/merge or cherry-pick them into the RescueMesh integration branch before merging PR #1 to `main`. Avoid force-resetting other people's branches.
+
+Detailed developer handoff: **[CODEX_HANDOFF.md](CODEX_HANDOFF.md)**. Android-specific testing and warnings: **[RESCUEMESH_INTEGRATION.md](RESCUEMESH_INTEGRATION.md)**.
+
+## Product scope — five core modules
+
+1. **Destination Risk Intelligence:** location/date-aware weather and incident intelligence with sources, timestamps, trust labels and uncertainty. **Presently UI placeholders; live providers are not integrated.**
+2. **Minimum-disruption Trip Replanner:** identify affected itinerary stops and recommend justified alternatives with minimal changes. **Presently a sample itinerary and UI logic; Gemini/server integration pending.**
+3. **Sourced Multilingual Emergency Guidance:** hazard instructions, official warnings and translations that retain provenance. **Presently general static guidance; authoritative feeds and translation pending.**
+4. **Android RescueMesh:** offline Nearby peer discovery, code-confirmed connections, chats, application-managed best-effort relaying and SOS; includes opt-in **Community Safety Beacon** as a subfeature. **Bridge is implemented and builds, but actual radio/device delivery remains unverified.**
+5. **Offline Safety Pack / Group Check-in:** cached contacts, itinerary, prior guidance and voluntary group status. **Presently mostly local UI; durable offline storage and synchronization remain pending.**
+
+A Community Safety Beacon is **self-reported/unverified**, optional, temporary and revocable. Local GPS/bearing can provide approximate direction, **never** a guaranteed safe route. No location is shared by default. SOS must not imply actual delivery without an acknowledgement.
+
+## Technology
+
+- **Frontend:** React 19, TypeScript, Vite 6, Tailwind CSS 4 + app CSS, Motion for React, Lucide React, React Loading Skeleton; native horizontal scrolling in the UI.
+- **Android:** Capacitor 7; Kotlin Capacitor plugin in `native/android/`; Google Nearby Connections (`com.google.android.gms:play-services-nearby:19.3.0`), plus Capacitor Geolocation when a user chooses to broadcast coordinates.
+- **Planned backend (NOT committed):** Python/FastAPI (Railway), Google Gemini server-side, Open-Meteo, official government safety sources, news search APIs, optional Supabase/PostgreSQL, Leaflet/OpenStreetMap; frontend hosting on Vercel.
+- **Development:** GitHub, Node.js 22+, VS Code, Android Studio with JDK 21, at least two physical Android devices (three for relay).
+
+Do **not** embed Gemini/news API secrets in Vite environment variables exposed to the browser or Android APK.
+
+## Run the frontend
 
 ```bash
-git clone -b ui https://github.com/Pranav640-ai/SafeHaven.git
+git clone -b handoff/risk-ui-onboarding-codex https://github.com/Pranav640-ai/SafeHaven.git
 cd SafeHaven
 npm install
 npm run dev
 ```
 
-Open the URL printed by Vite (typically `http://localhost:5173/`). In Chrome, press **F12**, then **Ctrl + Shift + M** to select a Pixel or iPhone viewport. Browser device emulation is a layout preview, not an Android runtime.
+Visit the Vite address (normally `http://localhost:5173`). In Chrome, use F12 → Ctrl+Shift+M to emulate a phone. Real mobile browsers can reach the Vite Network URL while on the same Wi-Fi, subject to firewall restrictions.
 
-**If you downloaded the ZIP instead:** unzip it, open a terminal inside its `safehaven-ui` folder, then run `npm install` and `npm run dev`.
+```bash
+npm run build
+npm run preview
+```
 
-Run production checks with `npm run build`; test the result with `npm run preview`. The dev server is configured with `--host 0.0.0.0`, so a phone on the same Wi-Fi can use the Network URL printed by Vite if local firewall rules permit it. Local IP HTTP previews are not equivalent to a Capacitor APK.
+The login/phone-number UI is **not an OTP authentication service**; guest entry is available. In a browser, RescueMesh must say Android/native hardware is required rather than invent peers or delivered messages.
 
-## UI walkthrough
+## Build one Android app
 
-1. Start on the **login screen**. Tap **Explore as guest** or type a phone number and **Continue**; both enter the mock preview. **No SMS or OTP is sent.**
-2. Home has a risk hero, 3-column feature grid, interactive local check-in, expandable emergency tips, an on-page preparation checklist, a horizontal momentum/drag-free Embla carousel with arrow controls, and a scroll-compacting floating dock.
-3. Open Risk, Trip Replanner, Emergency Guide, RescueMesh, Community Beacon, Safety Pack, and Profile. Navigation and previews respond to taps.
-4. From **Profile → About SafeHaven → Replay loading animation**, watch the skeleton shimmer and content transition. You can also switch between screens to see simulated loading.
-5. Open SOS in the center of the dock to view a *demo-only* bottom sheet. It never sends a message.
-
-## Design system and components
-
-- Near-black graphite background (#101216), charcoal surfaces, indigo/blue and teal accents, and controlled coral/amber/violet feature colors.
-- DM Sans for controls and body text, League Spartan for page/card headings, and a restrained Libre Caslon Display accent on onboarding; with system fallbacks and a consistent type scale.
-- Motion for page transitions, button feedback and bottom sheet; **Embla Carousel** for horizontal editorial cards; **React Loading Skeleton** for shimmer; **Lucide** icons. CSS handles native vertical scrolling and safe-area padding.
-- Login and profile screens follow the *layout principles* of user-provided District screenshots, without copying District branding or proprietary assets.
-- Restored small, colorful emoji-based illustrations in the six Home cards and spotlight carousel, inspired by the earlier premium prototype. The Home risk banner uses a bundled generated landscape illustration (not a baked UI screen). Destination photography uses an optional Unsplash photo with a gradient fallback. Navigation and functional controls use Lucide SVG icons.
-
-## What is *not* implemented
-
-This prototype does **not** fetch weather, news, official alerts, locations, AI recommendations or real maps. It has **no account authentication**, actual downloaded offline packs, Android Nearby Connections, SOS dispatch, beacon broadcasts, messaging delivery or check-in synchronization. Any message, check-in, beacon or edit is a **local state preview**. Risk and itinerary data are clearly marked as examples. The web frontend is intentionally independent so it can be wired to a Python FastAPI backend and packaged via Capacitor later.
-
-## Developer notes
-
-- Main screens and local mock state: `src/App.tsx`
-- App design tokens, responsive layout, transitions: `src/styles.css`
-- Design checklist and scope: `UI_CHECKLIST.md`
-- Entry: `src/main.tsx`
-
-Don't show "delivered", "verified", "safe route" or "official shelter" for unverified, offline or simulated data. Preserve the opt-in nature of Community Beacons and never imply that navigating toward one is safe.
-
-## UI polish v3
-
-The floating dock is CSS-centered with independent, locally clipped active-tab indicators to avoid overlapping bubbles and off-center icons on compact mobile widths. The previous UI commit remains recoverable via the `ui-before-artwork-dock-fix` branch.
-
-## UI interaction polish v4
-
-- **Horizontal gesture:** use touch or trackpad to drag the Home spotlight carousel left/right. It uses Embla drag-free momentum (no forced CSS snapping) and provides visible previous/next buttons for mouse users. Filter tabs also support horizontal drag/scroll.
-- **Vertical scroll:** native browser momentum/overscroll with no scroll locking or sticky section snapping. Navigation shrinks only after a meaningful downward gesture, and expands on upward scroll.
-- **Independent Home tools:** local check-in toggle, a source-cautioned safety-tip expander and a preparation checklist. All local-only.
-- **Mobile typography/colors:** League Spartan display, DM Sans UI, Libre Caslon Display small editorial accent, indigo/teal with restrained warm category colors.
-- **Android handoff:** see `ANDROID_MESH_SETUP.md` for Gradle and manifest snippets and the main-branch Kotlin review. The generated Capacitor Android project does not yet exist in this branch.
-
-## UI v5 — green spotlight, destination discovery, and organized mesh
-
-- Deep emerald spotlight/glass theme and fine grid treatment. The grid is drawn in CSS so it works offline without a downloaded background.
-- The **Explore** page includes sample destination tiles, category filters, a scenic cover, and horizontal scrolling.
-- **Home** retains local-only check-in, hazard tips and preparation checklist, and adds a session-only trip reminder that can be edited in place.
-- **RescueMesh** includes **Chats / Nearby / Beacons / SOS** tabs. All connectivity and messages remain simulations; no native transport or server is connected.
-- Horizontal showcases now use **native overflow scrolling** instead of a snap-driven carousel: swipe on a touchscreen or trackpad, click the arrow buttons, or click-drag with a mouse. The scroll is free-moving and does not force the selected card into a snapped position.
-- Destination photography uses hosted Unsplash image URLs; it requires internet when first opened. The editorial Explore cover also has a local fallback in `public/visuals/sunset-trail.webp` (a generated graphic). For eventual offline installation, replace the online photo URLs with locally optimized and licensed files.
-- Image credit: destination background/photo assets from [Unsplash](https://unsplash.com/license), including the hosted landscape photographs linked in the source. These are demonstration photos and not necessarily photographs of the labeled locations.
-
-### Test checklist
-
-1. Start with `npm install && npm run dev`; enter via **Explore as guest**.
-2. Home: edit a trip note, mark check-in, tick a preparation item, expand an emergency tip without navigating away.
-3. Explore: type `Goa` and clear the field; switch between Mountains, Nature, and Coast; click/swipe the destination photos horizontally.
-4. Home spotlight: swipe left/right by touch or mouse drag; use chevron buttons and verify vertical scrolling still works when the finger starts on a carousel card.
-5. RescueMesh: switch among Chats, Nearby, Beacons and SOS; preview a scan; send a local message draft; never expect real devices or message delivery.
-6. Test at 320, 375, 390 and 430px phone widths and in a real phone browser when possible.
-
-## v6 — porcelain and tidal blue theme
-
-The UI now uses a restrained **warm porcelain + ocean blue + sea-glass + sand** palette in place of the earlier neon green/dark theme. Interface text and small controls stay opaque for contrast; supporting surfaces use translucent panels with backdrop blur over a subtle CSS grid and soft spotlights. No background image or network request is needed for the grid.
-
-**Typography:** Nunito for body/UI labels, Raleway for headings and navigation, and Abril Fatface for a few prominent editorial highlights (all loaded from Google Fonts with local system fallbacks). Astralaga is not bundled because redistribution rights/availability were not established.
-
-**Horizontal gestures:** Home spotlight and Explore destination strips use native horizontal overflow and a subtle spring pull (Motion) when dragged a short distance past either edge. Carousel arrow buttons and sticky snapping have been removed. Phone swipes use native browser momentum; desktop users can also drag with a mouse. Reduced-motion preferences disable the spring effect.
-
-This is still a mock-interface-only project; UI indicators are examples, not live safety advisories or connected RescueMesh states.
-
-## Final interface pass (v7)
-
-- Typography: Raleway headings, Nunito controls/body, Abril Fatface only for editorial highlights.
-- Unified sapphire/blue porcelain palette in `src/styles.css`, with v7 styles preserved in their original cascade order. Blue grid, frosted slate-blue cards, readable white selected tab.
-- Lucide vector feature icons replace emoji artwork; swipe rows fade at the sides with edge breathing room.
-- Profile has an editable identity area, genuine local safety-pack progress, shortcuts and grouped settings.
-- Real Unsplash photography is used for the Home hero and destinations where online; local scenic cover remains the fallback. These photos depict places generically and are not live hazard data.
-- Weather, SOS, mesh and data integrations are pending. Safety-critical feedback still says not sent/not connected.
-
-Run `npm install`, `npm run dev`, then `npm run build` to validate locally.
-
-## Android RescueMesh integration (feature branch)
-
-This branch introduces a Kotlin Capacitor plugin for Nearby Connections, connection-code confirmation, offline chat, best-effort multi-hop relaying, explicit SOS, consent-based temporary community beacons, and opted-in group check-ins. The hosted website does not send offline messages. For setup and two-phone tests see [`RESCUEMESH_INTEGRATION.md`](RESCUEMESH_INTEGRATION.md).
+Install Android Studio/SDK, Node.js 22+, JDK 21 and Google Play services on testing phones.
 
 ```bash
 npm install
@@ -110,4 +65,48 @@ npm run android:init
 npm run android:open
 ```
 
-Native bridge source lives in `native/android/`, and the idempotent Android installer is in `scripts/install-rescuemesh.mjs`. Nothing in this branch is claimed to have passed a physical Android mesh test yet.
+`android:init` runs the frontend build, generates `android/` with Capacitor if absent, syncs assets, installs the Kotlin bridge, registers the plugin and patches the real Android Gradle/manifest. The generated `android/` project is intentionally **not** tracked in Git. Reopen Android Studio to build/install a debug APK.
+
+After React/native source edits:
+
+```bash
+npm run android:sync
+npm run android:open
+```
+
+See `RESCUEMESH_INTEGRATION.md` for permissions, pairing approval and detailed tests. Never test real Nearby networking using Chrome device emulation or a web-only deployment.
+
+## Repository map
+
+| Location | Responsibility |
+| --- | --- |
+| `src/App.tsx` | Shared mobile interface, navigation, Login, Home, Explore, Risk, Replanner, Emergency Guide, Safety Pack and Profile |
+| `src/styles.css` | Unified v7 design system plus narrowly scoped UI fixes (no second override stylesheet) |
+| `src/mesh/RescueMeshScreen.tsx`, `src/mesh/mesh.css` | Tabs/screens for Chats, Nearby, Beacons and SOS |
+| `src/mesh/useRescueMesh.ts` | Typed React hook and Capacitor bridge/events, with browser guard |
+| `native/android/com/safehaven/rescuemesh/` | Corrected Kotlin manager, plugin and native message protocol |
+| `scripts/init-android.mjs`, `scripts/install-rescuemesh.mjs` | Capacitor bootstrap and Android dependency/permission/plugin installer |
+| `capacitor.config.ts` | Single Android app config, application ID `com.safehaven.ai` |
+| `RESCUEMESH_INTEGRATION.md` | Hardware permissions, protocol and testing instructions |
+| `CODEX_HANDOFF.md` | Exact engineering priorities, acceptance criteria and integration plan |
+| `.github/workflows/` | Available CI configurations; inspect actual GitHub Actions results before merging |
+
+The original teammate Kotlin experiments are on **`main/android-rescuemesh/`**, not the buildable plugin source on this branch.
+
+## Current verification and limitations
+
+**Previously reported passing:** integrated frontend Vite/TypeScript CI and an Android debug APK/Gradle build for the RescueMesh integration branch. These demonstrate compilation only; the small UI edits on this handoff branch still need their own `npm run build` verification.
+
+**Not yet established:** a reliable two-phone offline session, packet receipt and acknowledgement, three-phone relay, SOS delivery, reboot persistence, permission-denied behavior and end-to-end Android device compatibility. Nearby connections can fail if permission/radios/Play services are absent, and the network cannot guarantee delivery.
+
+**Known safety limitations:** SOS queue is currently in memory, so process death can lose it; beacon claims are not officially verified; an unverified refuge is not an approved shelter; compass distance/bearing does not establish safe routing. Treat external photos as illustrative, not evidence of current destination conditions.
+
+## Next implementation steps
+
+1. On the handoff branch, run `npm install && npm run build`; review the three UI adjustments and accessibility in Chrome/real phone.
+2. Build and install the Android APK on **two real phones**. Grant OS permissions, compare the displayed six-digit pairing code on both, approve both ends, then prove a chat and a received peer acknowledgement with no internet.
+3. Test A↔B↔C relay, duplicate/TTL behavior, queue recovery, SOS acknowledgement and beacon create/update/expiry/withdrawal on three real devices. Fix any native problems before asserting success.
+4. Merge the handoff UI/docs into `feature/rescuemesh-android-bridge`, then review and land draft PR #1 to `main` only after validated results.
+5. Integrate FastAPI, Open-Meteo, official incident sources, Gemini replanning, translation, offline caching and opt-in check-ins; wire to actual UI states.
+
+**AI coding assistants:** read [CODEX_HANDOFF.md](CODEX_HANDOFF.md) before editing. Do not remove consent, provenance or undelivered statuses to make the interface appear complete.
