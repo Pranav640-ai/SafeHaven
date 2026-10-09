@@ -92,7 +92,7 @@ This is still a mock-interface-only project; UI indicators are examples, not liv
 ## Final interface pass (v7)
 
 - Typography: Raleway headings, Nunito controls/body, Abril Fatface only for editorial highlights.
-- Unified sapphire/blue porcelain palette in `src/final-polish.css`, imported last. Blue grid, frosted slate-blue cards, readable white selected tab.
+- Unified sapphire/blue porcelain palette in `src/styles.css`, with v7 styles preserved in their original cascade order. Blue grid, frosted slate-blue cards, readable white selected tab.
 - Lucide vector feature icons replace emoji artwork; swipe rows fade at the sides with edge breathing room.
 - Profile has an editable identity area, genuine local safety-pack progress, shortcuts and grouped settings.
 - Real Unsplash photography is used for the Home hero and destinations where online; local scenic cover remains the fallback. These photos depict places generically and are not live hazard data.
