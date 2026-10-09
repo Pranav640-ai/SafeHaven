@@ -79,8 +79,23 @@ The floating dock is CSS-centered with independent, locally clipped active-tab i
 5. RescueMesh: switch among Chats, Nearby, Beacons and SOS; preview a scan; send a local message draft; never expect real devices or message delivery.
 6. Test at 320, 375, 390 and 430px phone widths and in a real phone browser when possible.
 
-## v6 — Porcelain & ocean blue visual theme
+## v6 — porcelain and tidal blue theme
 
-SafeHaven UI now uses warm pearl surfaces, ocean blue primary actions, subtle sea-glass and sand accents, a lightweight background grid, and frosted translucent panels. Typography combines Nunito (body/controls), Raleway (headings) and Abril Fatface (select editorial accents), with sensible fallbacks. Astralaga is not distributed because its font license was not established.
+The UI now uses a restrained **warm porcelain + ocean blue + sea-glass + sand** palette in place of the earlier neon green/dark theme. Interface text and small controls stay opaque for contrast; supporting surfaces use translucent panels with backdrop blur over a subtle CSS grid and soft spotlights. No background image or network request is needed for the grid.
 
-Home and Explore horizontal strips are **native, free-scrolling (no snap, no arrow controls)**. At either end you can pull slightly beyond the boundary and release for a spring return; reduced-motion settings disable that spring. Test phone gestures in Chrome mobile emulation and on physical devices. These remain mock safety and network UI flows.
+**Typography:** Nunito for body/UI labels, Raleway for headings and navigation, and Abril Fatface for a few prominent editorial highlights (all loaded from Google Fonts with local system fallbacks). Astralaga is not bundled because redistribution rights/availability were not established.
+
+**Horizontal gestures:** Home spotlight and Explore destination strips use native horizontal overflow and a subtle spring pull (Motion) when dragged a short distance past either edge. Carousel arrow buttons and sticky snapping have been removed. Phone swipes use native browser momentum; desktop users can also drag with a mouse. Reduced-motion preferences disable the spring effect.
+
+This is still a mock-interface-only project; UI indicators are examples, not live safety advisories or connected RescueMesh states.
+
+## Final interface pass (v7)
+
+- Typography: Raleway headings, Nunito controls/body, Abril Fatface only for editorial highlights.
+- Unified sapphire/blue porcelain palette in `src/final-polish.css`, imported last. Blue grid, frosted slate-blue cards, readable white selected tab.
+- Lucide vector feature icons replace emoji artwork; swipe rows fade at the sides with edge breathing room.
+- Profile has an editable identity area, genuine local safety-pack progress, shortcuts and grouped settings.
+- Real Unsplash photography is used for the Home hero and destinations where online; local scenic cover remains the fallback. These photos depict places generically and are not live hazard data.
+- Weather, SOS, mesh and data integrations are pending. Safety-critical feedback still says not sent/not connected.
+
+Run `npm install`, `npm run dev`, then `npm run build` to validate locally.
