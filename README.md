@@ -78,3 +78,9 @@ The floating dock is CSS-centered with independent, locally clipped active-tab i
 4. Home spotlight: swipe left/right by touch or mouse drag; use chevron buttons and verify vertical scrolling still works when the finger starts on a carousel card.
 5. RescueMesh: switch among Chats, Nearby, Beacons and SOS; preview a scan; send a local message draft; never expect real devices or message delivery.
 6. Test at 320, 375, 390 and 430px phone widths and in a real phone browser when possible.
+
+## v6 — Porcelain & ocean blue visual theme
+
+SafeHaven UI now uses warm pearl surfaces, ocean blue primary actions, subtle sea-glass and sand accents, a lightweight background grid, and frosted translucent panels. Typography combines Nunito (body/controls), Raleway (headings) and Abril Fatface (select editorial accents), with sensible fallbacks. Astralaga is not distributed because its font license was not established.
+
+Home and Explore horizontal strips are **native, free-scrolling (no snap, no arrow controls)**. At either end you can pull slightly beyond the boundary and release for a spring return; reduced-motion settings disable that spring. Test phone gestures in Chrome mobile emulation and on physical devices. These remain mock safety and network UI flows.
