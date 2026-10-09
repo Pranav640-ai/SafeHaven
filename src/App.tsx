@@ -5,7 +5,7 @@ import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import {
   AlertCircle, AlertTriangle, ArrowLeft, ArrowRight, Bell, Bookmark,
-  BookOpen, Check, CheckCheck, ChevronDown, ChevronRight, CircleHelp,
+  BookOpen, Check, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, CircleHelp,
   Clock3, CloudRain, Compass, Download, Globe2, Heart, Home,
   Languages, LocateFixed, LockKeyhole, Map, MapPin, Menu, MessageCircle,
   Navigation, Phone, Plus, Radio, RefreshCw, Search, Send, Settings,
@@ -85,11 +85,27 @@ function SkeletonScreen({ profile = false }: {profile?:boolean}) {
   </div>;
 }
 function Carousel({items,onOpen}: {items:{kicker:string;title:string;subtitle:string;icon:LucideIcon;art:string;tint:string;page:Page}[];onOpen:(page:Page)=>void}) {
-  const [ref] = useEmblaCarousel({align:'start',containScroll:'trimSnaps'});
-  return <div className="carousel-frame" ref={ref}><div className="carousel-track">{items.map(x=>{
-    const Icon = x.icon;
-    return <div className="carousel-slide" key={x.title}><button type="button" onClick={()=>onOpen(x.page)} className={`carousel-card carousel-${x.tint}`}><span className="carousel-overline">{x.kicker}</span><span className="carousel-art" aria-hidden="true"><span className="carousel-art-illustration">{x.art}</span><Icon className="carousel-art-symbol" size={24} strokeWidth={1.8}/></span><h3>{x.title}</h3><p>{x.subtitle}</p></button></div>;
-  })}</div></div>;
+  // Embla handles touch momentum, rubber-band containment and pointer gestures.
+  // dragFree keeps a swipe from feeling like a hard, sticky page snap.
+  const [ref,api] = useEmblaCarousel({align:'start',dragFree:true,containScroll:'trimSnaps',duration:27,watchDrag:true});
+  const [canPrev,setCanPrev] = useState(false);
+  const [canNext,setCanNext] = useState(true);
+  useEffect(()=>{
+    if(!api)return;
+    const update=()=>{setCanPrev(api.canScrollPrev());setCanNext(api.canScrollNext())};
+    api.on('select',update);api.on('reInit',update);api.on('scroll',update);update();
+    return ()=>{api.off('select',update);api.off('reInit',update);api.off('scroll',update)};
+  },[api]);
+  return <div className="carousel-unit">
+    <div className="carousel-controls"><span>Swipe to browse</span><div>
+      <button type="button" aria-label="Previous cards" disabled={!canPrev} onClick={()=>api?.scrollPrev()}><ChevronLeft size={19}/></button>
+      <button type="button" aria-label="Next cards" disabled={!canNext} onClick={()=>api?.scrollNext()}><ChevronRight size={19}/></button>
+    </div></div>
+    <div className="carousel-frame" ref={ref}><div className="carousel-track">{items.map(x=>{
+      const Icon=x.icon;
+      return <div className="carousel-slide" key={x.title}><motion.button whileTap={{scale:.985}} type="button" onClick={()=>onOpen(x.page)} className={`carousel-card carousel-${x.tint}`}><span className="carousel-overline">{x.kicker}</span><span className="carousel-art" aria-hidden="true"><span className="carousel-art-illustration">{x.art}</span><Icon className="carousel-art-symbol" size={24} strokeWidth={1.8}/></span><h3>{x.title}</h3><p>{x.subtitle}</p></motion.button></div>;
+    })}</div></div>
+  </div>;
 }
 function AppRow({icon:Icon,title,subtitle,end,onClick,tone='default'}:{icon:LucideIcon;title:string;subtitle?:string;end?:ReactNode;onClick:()=>void;tone?:string}) {
   return <button type="button" className="app-row" onClick={onClick}><span className={`row-icon row-${tone}`}><Icon size={20}/></span><span className="row-body"><strong>{title}</strong>{subtitle&&<small>{subtitle}</small>}</span>{end??<ChevronRight size={18} className="row-chevron"/>}</button>;
@@ -130,14 +146,17 @@ export default function App(){
   const [beaconDraft,setBeaconDraft]=useState(false);
   const [checklist,setChecklist]=useState<string[]>([]);
   const [checkedIn,setCheckedIn]=useState(false);
+  const [showQuickGuide,setShowQuickGuide]=useState(false);
+  const [homeGuide,setHomeGuide]=useState<GuideKind>('Flood');
+  const [homeChecklist,setHomeChecklist]=useState<string[]>([]);
   const scrollRef=useRef<HTMLDivElement>(null);
   const lastTop=useRef(0);
   const reduceMotion=useReducedMotion();
 
-  useEffect(()=>{if(!authenticated) return;setLoading(true);const t=window.setTimeout(()=>setLoading(false),1050);return()=>window.clearTimeout(t)},[page,authenticated]);
+  useEffect(()=>{if(!authenticated)return;setLoading(true);const t=window.setTimeout(()=>setLoading(false),page==='home'?640:420);return()=>window.clearTimeout(t)},[page,authenticated]);
   useEffect(()=>{if(!toast)return;const t=window.setTimeout(()=>setToast(''),2700);return()=>window.clearTimeout(t)},[toast]);
-  const go=(p:Page)=>{setPage(p);setCompact(false);lastTop.current=0;if(scrollRef.current) scrollRef.current.scrollTop=0};
-  const handleScroll=(event:UIEvent<HTMLDivElement>)=>{const y=event.currentTarget.scrollTop;const diff=y-lastTop.current;if(y<80)setCompact(false);else if(diff>6)setCompact(true);else if(diff< -6)setCompact(false);lastTop.current=y;};
+  const go=(p:Page)=>{setPage(p);setCompact(false);lastTop.current=0;if(scrollRef.current) scrollRef.current.scrollTo({top:0,behavior:'instant'})};
+  const handleScroll=(event:UIEvent<HTMLDivElement>)=>{const y=event.currentTarget.scrollTop;const diff=y-lastTop.current;if(y<66)setCompact(false);else if(diff>15)setCompact(true);else if(diff< -16)setCompact(false);lastTop.current=y;};
   const replay=()=>{go('home');setLoading(true);window.setTimeout(()=>setLoading(false),1850);setToast('Previewing loading states')};
   const tab:Page = ['risk','replan','guide','beacon'].includes(page)?'explore':page;
   const enter=(guest:boolean)=>{if(!guest && phone.replace(/\D/g,'').length<7){setToast('Enter a valid phone number or continue as guest');return;}setAuthenticated(true);setPage('home');setToast(guest?'Browsing in demo mode':'Signed in to demo mode — no SMS sent');};
@@ -145,7 +164,7 @@ export default function App(){
   function login(){return <div className="login-screen">
     <section className="login-art"><div className="login-top"><Brand/><button className="login-skip" type="button" onClick={()=>enter(true)}>Skip</button></div>
       <div className="login-visual" aria-hidden="true"><span className="orbit orbit-one"/><span className="orbit orbit-two"/><span className="login-point main-point"><ShieldCheck size={53} strokeWidth={1.5}/></span><span className="login-point side-point"><MapPin size={25}/></span><span className="login-point left-point"><Radio size={22}/></span></div>
-      <div className="login-art-copy"><span>READY WHEN YOU ARE</span><h1>Explore more.<br/><em>Stay prepared.</em></h1></div>
+      <div className="login-art-copy"><span>YOUR JOURNEY, YOUR SAFETY</span><h1>Go further.<br/><em>Stay prepared.</em></h1></div>
     </section>
     <section className="login-panel"><h2>Your journey starts here</h2><p>Plan ahead, keep informed and stay connected.</p>
       <label className="field-label" htmlFor="phone">Mobile number</label><div className="phone-field"><label className="country-select-wrap"><span className="sr-only">Country code</span><select value={country} onChange={e=>setCountry(e.target.value)} aria-label="Country code"><option value="+91">+91</option><option value="+973">+973</option><option value="+1">+1</option><option value="+44">+44</option></select><ChevronDown size={14}/></label><input id="phone" type="tel" autoComplete="tel-national" inputMode="tel" maxLength={16} placeholder="Enter your number" value={phone} onChange={e=>setPhone(e.target.value)}/></div>
@@ -157,11 +176,34 @@ export default function App(){
 
   function home(){return <>
     <header className="home-header"><button className="home-location" type="button" onClick={()=>go('explore')}><MapPin size={21}/><span><small>YOUR DESTINATION</small><strong>Explore a location <ChevronDown size={14}/></strong></span></button><div className="header-actions"><IconButton icon={Bell} onClick={()=>setDialog('alerts')} label="Notifications"/><button className="avatar-button" type="button" onClick={()=>go('profile')} aria-label="Open profile"><span>{name.charAt(0).toUpperCase()}</span></button></div></header>
-    <div className="home-welcome"><p>Welcome to SafeHaven</p><h1>Travel with a plan.</h1></div>
+    <div className="home-welcome"><p>Welcome to SafeHaven</p><h1>A better way to be prepared.</h1></div>
     <button type="button" className="hero-risk" onClick={()=>go('risk')}><img className="hero-risk-photo" src="/visuals/sunset-trail.webp" alt="" loading="eager"/><div className="hero-risk-bg"/><div className="hero-risk-top"><span className="hero-shield"><ShieldCheck size={24}/></span><span className="hero-label">DESTINATION SAFETY</span><ArrowRight size={20}/></div><h2>Know before<br/>you go.</h2><p>Check weather, reports and local guidance for your next stop.</p><span className="hero-link">Explore risk insights <ChevronRight size={16}/></span></button>
     <DemoNote>Live safety alerts are not connected. All reports shown are examples.</DemoNote>
     <Heading title="What would you like to do?"/>
     <div className="feature-grid">{features.map((f,i)=><FeatureCard key={f.title} feature={f} index={i} open={()=>go(f.page)}/>)}</div>
+    <section className="home-quick-section" aria-label="Quick safety actions">
+      <Heading title="Quick actions" sub="Try these directly from Home"/>
+      <div className="home-action-grid">
+        <motion.button type="button" whileTap={{scale:.97}} className={`home-action ${checkedIn?'home-action-done':''}`} onClick={()=>{setCheckedIn(v=>!v);setToast('Check-in changed locally. Nothing was shared.')}}>
+          <span className="home-action-icon"><CheckCheck size={25}/></span>
+          <span><strong>{checkedIn?'Checked in locally':'Quick check-in'}</strong><small>{checkedIn?'Tap to reset · not shared':'Mark safe · demo only'}</small></span>
+          <ChevronRight size={18}/>
+        </motion.button>
+        <motion.button type="button" whileTap={{scale:.97}} className={`home-action ${showQuickGuide?'home-action-done':''}`} aria-expanded={showQuickGuide} onClick={()=>setShowQuickGuide(v=>!v)}>
+          <span className="home-action-icon home-action-guide"><BookOpen size={25}/></span>
+          <span><strong>Emergency tips</strong><small>Read the basics here</small></span>
+          <ChevronDown size={18}/>
+        </motion.button>
+      </div>
+      <AnimatePresence initial={false}>{showQuickGuide&&<motion.div className="home-guide-inline" initial={{opacity:0,height:0,y:-6}} animate={{opacity:1,height:'auto',y:0}} exit={{opacity:0,height:0,y:-4}} transition={{type:'spring',stiffness:260,damping:30}}>
+        <div className="home-guide-inner"><div className="home-guide-types" role="group" aria-label="Safety topic">{(Object.keys(guides) as GuideKind[]).map(k=><button key={k} type="button" className={homeGuide===k?'is-active':''} aria-pressed={homeGuide===k} onClick={()=>setHomeGuide(k)}>{k}</button>)}</div>
+        <p>{guides[homeGuide].steps[0]}</p><small>General guidance · verify local authority instructions</small></div>
+      </motion.div>}</AnimatePresence>
+      <div className="home-prep"><div><strong>Before you head out</strong><span>{homeChecklist.length} of 3 reviewed</span></div>
+        <div className="home-prep-tasks">{['Check forecast','Save emergency contacts','Share plans with your group'].map(t=><button type="button" key={t} aria-pressed={homeChecklist.includes(t)} className={homeChecklist.includes(t)?'done':''} onClick={()=>setHomeChecklist(old=>old.includes(t)?old.filter(v=>v!==t):[...old,t])}><span>{homeChecklist.includes(t)?<Check size={15}/>:null}</span>{t}</button>)}</div>
+        <p>Checklist saved in this demo session only.</p>
+      </div>
+    </section>
     <section className="home-section"><Heading title="For your next trip" right={<button className="section-link" onClick={()=>go('explore')}>See all <ChevronRight size={15}/></button>}/>
       <Carousel onOpen={go} items={[
         {kicker:'DESTINATION CHECK',title:'Before you leave',subtitle:'Review known conditions',icon:MapPin,art:'🌍',tint:'indigo',page:'risk'},
@@ -237,7 +279,7 @@ export default function App(){
     <aside className="desktop-side"><Brand/><h1>Thoughtful design.<br/><span>Ready for the journey.</span></h1><p>Mobile UI prototype featuring real React components, motion and sample content.</p><div className="desktop-help"><Smartphone size={21}/><span>Use Chrome device mode for a phone-sized preview.<br/><b>F12 → Ctrl + Shift + M</b></span></div><p className="desktop-disclaimer">All location, incident and emergency features remain unconnected.</p></aside>
     <main className={`phone-shell ${!authenticated?'phone-onboarding':''}`} aria-label="SafeHaven application">
       <div className="phone-scroll" ref={scrollRef} onScroll={handleScroll}>
-        {!authenticated ? login() : <AnimatePresence mode="wait" initial={false}><motion.div key={page} className="screen-content" initial={reduceMotion?false:{opacity:0,y:8}} animate={{opacity:1,y:0}} exit={reduceMotion?{}:{opacity:0,y:-7}} transition={{duration:.2}}>
+        {!authenticated ? login() : <AnimatePresence mode="wait" initial={false}><motion.div key={page} className="screen-content" initial={reduceMotion?false:{opacity:0,y:14,filter:'blur(3px)'}} animate={{opacity:1,y:0,filter:'blur(0px)'}} exit={reduceMotion?{}:{opacity:0,y:-9,filter:'blur(2px)'}} transition={{type:'spring',stiffness:310,damping:31,mass:.8}}>
           {loading?<SkeletonScreen profile={page==='profile'}/>:content()}
         </motion.div></AnimatePresence>}
       </div>
