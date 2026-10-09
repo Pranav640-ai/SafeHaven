@@ -145,7 +145,7 @@ function AppRow({icon:Icon,title,subtitle,end,onClick,tone='default'}:{icon:Luci
 function Modal({kind,close,go,person,saveName}: {kind:Dialog;close:()=>void;go:(p:Page)=>void;person:string;saveName:(s:string)=>void}) {
   const [draft,setDraft]=useState(person);
   useEffect(()=>setDraft(person),[person,kind]);
-  return <AnimatePresence>{kind && <motion.div className="modal-backdrop" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} onClick={close}>
+  return <AnimatePresence>{kind && <motion.div className={`modal-backdrop ${kind==='sos'?'sos-modal':''}`} initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} onClick={close}>
     <motion.section className="bottom-sheet" role="dialog" aria-modal="true" aria-label={`${kind} dialog`} onClick={e=>e.stopPropagation()}
       initial={{y:'100%'}} animate={{y:0}} exit={{y:'100%'}} transition={{type:'spring',stiffness:340,damping:34}}>
       <div className="sheet-handle"/><IconButton icon={X} onClick={close} label="Close dialog" className="sheet-close"/>
