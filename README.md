@@ -59,3 +59,22 @@ The floating dock is CSS-centered with independent, locally clipped active-tab i
 - **Independent Home tools:** local check-in toggle, a source-cautioned safety-tip expander and a preparation checklist. All local-only.
 - **Mobile typography/colors:** League Spartan display, DM Sans UI, Libre Caslon Display small editorial accent, indigo/teal with restrained warm category colors.
 - **Android handoff:** see `ANDROID_MESH_SETUP.md` for Gradle and manifest snippets and the main-branch Kotlin review. The generated Capacitor Android project does not yet exist in this branch.
+
+## UI v5 — green spotlight, destination discovery, and organized mesh
+
+- Deep emerald spotlight/glass theme and fine grid treatment. The grid is drawn in CSS so it works offline without a downloaded background.
+- The **Explore** page includes sample destination tiles, category filters, a scenic cover, and horizontal scrolling.
+- **Home** retains local-only check-in, hazard tips and preparation checklist, and adds a session-only trip reminder that can be edited in place.
+- **RescueMesh** includes **Chats / Nearby / Beacons / SOS** tabs. All connectivity and messages remain simulations; no native transport or server is connected.
+- Horizontal showcases now use **native overflow scrolling** instead of a snap-driven carousel: swipe on a touchscreen or trackpad, click the arrow buttons, or click-drag with a mouse. The scroll is free-moving and does not force the selected card into a snapped position.
+- Destination photography uses hosted Unsplash image URLs; it requires internet when first opened. The editorial Explore cover also has a local fallback in `public/visuals/sunset-trail.webp` (a generated graphic). For eventual offline installation, replace the online photo URLs with locally optimized and licensed files.
+- Image credit: destination background/photo assets from [Unsplash](https://unsplash.com/license), including the hosted landscape photographs linked in the source. These are demonstration photos and not necessarily photographs of the labeled locations.
+
+### Test checklist
+
+1. Start with `npm install && npm run dev`; enter via **Explore as guest**.
+2. Home: edit a trip note, mark check-in, tick a preparation item, expand an emergency tip without navigating away.
+3. Explore: type `Goa` and clear the field; switch between Mountains, Nature, and Coast; click/swipe the destination photos horizontally.
+4. Home spotlight: swipe left/right by touch or mouse drag; use chevron buttons and verify vertical scrolling still works when the finger starts on a carousel card.
+5. RescueMesh: switch among Chats, Nearby, Beacons and SOS; preview a scan; send a local message draft; never expect real devices or message delivery.
+6. Test at 320, 375, 390 and 430px phone widths and in a real phone browser when possible.
