@@ -645,3 +645,5 @@ button,input,select,textarea{font-family:'Nunito',ui-sans-serif,system-ui,sans-s
 .caution-inline{background:#fff0ee;border:1px solid #e4bdc2;color:#9a3c4e}
 .quiet-button{color:#4b7187}
 :where(.home-action,.home-note-card,.profile-summary,.mesh-status,.mesh-empty,.list-panel,.steps,.day-card):hover{border-color:#bed2d7}
+/* Keep the selected tab bubble porcelain rather than the older forced dark fill. */
+.dock-item > .dock-active-bg{background:#d6e8ecf2!important}
