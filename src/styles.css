@@ -1016,3 +1016,11 @@ h1,h2,h3,h4,.brand{font-weight:500}
 .morph-toast{position:relative;min-height:48px;overflow:hidden;display:grid;place-items:center;flex-shrink:0;background:linear-gradient(125deg,#663c69,#895371);border:1px solid #d9abc580;box-shadow:0 10px 30px #512e5b30,inset 0 1px #ffffff24;color:#fff8fc;font:500 12px/1.5 'Nunito',sans-serif;text-align:center}
 .toast-copy{display:block;width:100%;padding:13px 18px;min-width:0}
 .toast-orb{position:absolute;top:19px;left:calc(50% - 5px);width:10px;height:10px;border-radius:50%;background:#f9dce9;box-shadow:0 0 0 5px #f9dce919,0 0 16px #f9dce947}
+
+/* Scroll-linked pastel light stays behind all content and hit targets. */
+.ambient-backdrop{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;background:radial-gradient(ellipse at 10% 54%,#c6edd87a,transparent 70%)}
+.ambient-wash{position:absolute;inset:-55px -35px;pointer-events:none;will-change:transform,opacity}
+.ambient-warm{background:radial-gradient(ellipse 90% 44% at 94% 12%,#ffc9b9bb,transparent 78%),radial-gradient(ellipse 82% 45% at 0% 75%,#d8c6f5b3,transparent 79%),radial-gradient(ellipse 90% 34% at 95% 98%,#ffe2ab91,transparent 80%)}
+.ambient-cool{background:radial-gradient(ellipse 90% 46% at 8% 20%,#b7dff6cc,transparent 78%),radial-gradient(ellipse 88% 43% at 98% 60%,#c9bbf2b8,transparent 79%),radial-gradient(ellipse 85% 42% at 14% 96%,#ade6ceba,transparent 80%)}
+.phone-shell::before{opacity:.45}
+@media(prefers-reduced-motion:reduce){.ambient-wash{will-change:auto}}
