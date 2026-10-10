@@ -187,19 +187,20 @@ export default function App(){
   // If user is not authenticated and hasn't chosen guest mode, render the Google Login page
   if (!isAuthenticated && !isGuest) {
     return (
-      <GoogleLoginPage 
+        <GoogleLoginPage
         onLoginSuccess={(user) => {
           if (user?.displayName) setName(user.displayName);
           setIsAuthenticated(true);
-          setToast('Welcome to SafeHaven');
-        }} 
+          setToast("Welcome to SafeHaven");
+        }}
         onGuestContinue={() => {
           setIsGuest(true);
-          setToast('Welcome to SafeHaven');
-        }} 
+          setToast("Welcome to SafeHaven");
+        }}
       />
     );
   }
+  
 
   useEffect(()=>{setLoading(true);const t=window.setTimeout(()=>setLoading(false),640);return()=>window.clearTimeout(t)},[page]);
   useEffect(()=>{if(!toast)return;const t=window.setTimeout(()=>setToast(''),1600);return()=>window.clearTimeout(t)},[toast]);
