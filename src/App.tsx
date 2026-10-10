@@ -60,7 +60,7 @@ const destinations = [
 ];
 
 function Brand({ compact = false }: {compact?:boolean}) {
-  return <span className={`brand ${compact ? 'brand-small' : ''}`}><span className="brand-symbol"><ShieldCheck size={compact ? 19 : 25} strokeWidth={2.5}/></span><span>meridian</span></span>;
+  return <span className={`brand ${compact ? 'brand-small' : ''}`}><span className="brand-symbol"><ShieldCheck size={compact ? 19 : 25} strokeWidth={2.5}/></span><span>SafeHaven</span></span>;
 }
 function IconButton({ icon: Icon, onClick, label, className = '' }: {icon:LucideIcon;onClick:()=>void;label:string;className?:string}) {
   return <button type="button" aria-label={label} className={`icon-button ${className}`} onClick={onClick}><Icon size={21} strokeWidth={1.9}/></button>;
@@ -145,9 +145,9 @@ function Modal({kind,close,person,saveName,navigate,checkDestination}: {kind:Dia
       <div className="sheet-handle"/><IconButton icon={X} onClick={close} label="Close dialog" className="sheet-close"/>
       {kind==='profile'&&<><h2>Edit display name</h2><p>Your display name is saved until you close the app.</p><label className="field-label" htmlFor="profile-name">Display name</label><input className="form-input" id="profile-name" maxLength={32} value={draft} onChange={e=>setDraft(e.target.value)}/><button className="primary-button" type="button" onClick={()=>{saveName(draft.trim()||'Traveler');close()}}>Save changes</button></>}
       {kind==='alerts'&&<><h2>Destination warnings</h2><p>Review saved notices and check the latest information for your destination.</p><SavedAreaWarnings/><button className="primary-button" onClick={checkDestination}>Check latest warnings</button></>}
-      {kind==='menu'&&<><h2>Your travel tools</h2><AppRow icon={Navigation} title="My trip plan" subtitle="Compare and approve proposed changes" onClick={()=>navigate('replan')}/><AppRow icon={Bookmark} title="Safety pack" onClick={()=>navigate('pack')}/><AppRow icon={Languages} title="Language settings" onClick={()=>navigate('language')}/><AppRow icon={CircleHelp} title="How to use Meridian" onClick={()=>navigate('guide')}/></>}
+      {kind==='menu'&&<><h2>Your travel tools</h2><AppRow icon={Navigation} title="My trip plan" subtitle="Compare and approve proposed changes" onClick={()=>navigate('replan')}/><AppRow icon={Bookmark} title="Safety pack" onClick={()=>navigate('pack')}/><AppRow icon={Languages} title="Language settings" onClick={()=>navigate('language')}/><AppRow icon={CircleHelp} title="How to use SafeHaven" onClick={()=>navigate('guide')}/></>}
       {kind==='settings'&&<><h2>Settings</h2><AppRow icon={Languages} title="Language" subtitle="Choose your guidance language" onClick={()=>navigate('language')}/><AppRow icon={LockKeyhole} title="Privacy & sharing" subtitle="Manage consent and saved information" onClick={()=>navigate('privacy')}/></>}
-      {kind==='help'&&<><h2>About Meridian</h2><p>Start with Explore to choose a destination and check its weather and reports. Add your activities in Trip replanner, then save contacts and guidance in Safety pack. On Android, open Mesh → Nearby to join the nearby help network without exchanging codes. Participants are unverified. Use SOS to ask connected travelers for help.</p><button className="primary-button" type="button" onClick={close}>Understood</button></>}
+      {kind==='help'&&<><h2>About SafeHaven</h2><p>Start with Explore to choose a destination and check its weather and reports. Add your activities in Trip replanner, then save contacts and guidance in Safety pack. On Android, open Mesh → Nearby to join the nearby help network without exchanging codes. Participants are unverified. Use SOS to ask connected travelers for help.</p><button className="primary-button" type="button" onClick={close}>Understood</button></>}
     </motion.section>
   </motion.div>}</AnimatePresence>;
 }
@@ -336,8 +336,7 @@ export default function App(){
     <section className="profile-section profile-essential-section"><Heading title="Quick access"/>
       <div className="profile-shortcuts profile-shortcuts-final">
 
-<Map size={27} strokeWidth={1.65}/>
-<button type="button" onClick={()=>go('replan')}><span></span>My trips</button>
+<button type="button" onClick={()=>go('replan')}><span><Map size={27} strokeWidth={1.65}/></span>My trips</button>
         <button type="button" onClick={()=>{packSection.current='contacts';go('pack')}}><span><Phone size={27} strokeWidth={1.65}/></span>Contacts</button>
         <button type="button" onClick={()=>go('pack')}><span><FolderOpen size={27} strokeWidth={1.65}/></span>Offline pack</button>
       </div>
@@ -401,7 +400,7 @@ export default function App(){
     return (
       <div className="preview-stage" aria-busy="true" aria-live="polite">
         <div className="phone-shell"><div className="phone-scroll"><div className="screen-content">
-          <p>Loading Meridian...</p>
+          <p>Loading SafeHaven...</p>
         </div></div></div>
       </div>
     );
