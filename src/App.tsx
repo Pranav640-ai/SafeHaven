@@ -21,11 +21,6 @@ import {
 } from 'lucide-react';
 import GoogleLoginPage from "./GoogleLoginPage";
 
-// Option 1: Render the Google Login Page directly as the entry point
-export default function App() {
-  return <GoogleLoginPage />;
-}
-
 type Page = 'home' | 'explore' | 'risk' | 'replan' | 'guide' | 'mesh' | 'beacon' | 'pack' | 'profile' | 'language' | 'privacy' | 'sos';
 type GuideKind = 'Flood' | 'Extreme heat' | 'Earthquake';
 type Dialog = 'profile' | 'help' | 'alerts' | 'menu' | 'settings' | null;
@@ -165,4 +160,239 @@ function NotificationToast({message}:{message:string}) {
       transition={reduced?{duration:.15}:{duration:.32,ease:[.22,1,.36,1]}}
     ><span className="toast-copy">{message}</span></motion.div>
   </div>;
+}
+
+export default function App(){
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isGuest, setIsGuest] = useState(false);
+
+  const [name,setName]=useState('Traveler');
+  const [page,setPage]=useState<Page>('home');
+  const [loading,setLoading]=useState(false);
+  const [dialog,setDialog]=useState<Dialog>(null);
+  const [compact,setCompact]=useState(false);
+  const [toast,setToast]=useState('');
+  const [query,setQuery]=useState('');
+  const packSection=useRef<'contacts'|'group'|null>(null);
+  const [selectedDestination,setSelectedDestination]=useState<string|null>(null);
+  const [destinationMood,setDestinationMood]=useState('All');
+  const meshApi=useRescueMesh();
+  const [checklist,setChecklist]=useSaved<string[]>('checklist',[]);
+  const [showQuickGuide,setShowQuickGuide]=useState(false);
+  const [homeGuide,setHomeGuide]=useState<GuideKind>('Flood');
+  const scrollRef=useRef<HTMLDivElement>(null);
+  const lastTop=useRef(0);
+  const reduceMotion=useReducedMotion();
+
+  // If user is not authenticated and hasn't chosen guest mode, render the Google Login page
+  if (!isAuthenticated && !isGuest) {
+    return (
+      <GoogleLoginPage 
+        onLoginSuccess={(user) => {
+          if (user?.displayName) setName(user.displayName);
+          setIsAuthenticated(true);
+          setToast('Welcome to SafeHaven');
+        }} 
+        onGuestContinue={() => {
+          setIsGuest(true);
+          setToast('Welcome to SafeHaven');
+        }} 
+      />
+    );
+  }
+
+  useEffect(()=>{setLoading(true);const t=window.setTimeout(()=>setLoading(false),640);return()=>window.clearTimeout(t)},[page]);
+  useEffect(()=>{if(!toast)return;const t=window.setTimeout(()=>setToast(''),1600);return()=>window.clearTimeout(t)},[toast]);
+  const openDestination=(name:string)=>{go('risk');setSelectedDestination(name);window.history.replaceState({...window.history.state,destination:name},'')};
+  const pendingScroll=useRef<number|null>(null);
+  const navigationDepth=useRef(0);
+  const languageNames:Record<string,string>={en:'English',hi:'Hindi',ta:'Tamil',fr:'French',es:'Spanish'};
+  const [language,setLanguage]=useSaved('language','en');
+  const rememberScroll=()=>window.history.replaceState({...window.history.state,scroll:scrollRef.current?.scrollTop||0},'');
+  const go=(p:Page)=>{
+    if(p===page && !dialog)return;
+    if(p!=='pack')packSection.current=null;
+    if(p==='risk')setSelectedDestination(null);
+    rememberScroll();
+    if(!dialog)navigationDepth.current+=1;
+    window.history[dialog?'replaceState':'pushState']({safehaven:true,page:p,scroll:0,depth:navigationDepth.current,dialog:null},'');
+    setDialog(null);setPage(p);pendingScroll.current=0;setCompact(false);
+  };
+  const openDialog=(d:Dialog)=>{
+    if(!d)return;
+    rememberScroll();navigationDepth.current+=1;
+    window.history.pushState({safehaven:true,page,scroll:scrollRef.current?.scrollTop||0,depth:navigationDepth.current,dialog:d},'');
+    setDialog(d);
+  };
+  const back=()=>{if(navigationDepth.current>0)window.history.back();else if(page!=='home')go('home');};
+  const closeDialog=()=>{if(dialog)back();};
+  useEffect(()=>{
+    window.history.replaceState({safehaven:true,page:'home',scroll:0,depth:0,dialog:null},'');
+    const pop=(event:PopStateEvent)=>{
+      const entry=event.state;
+      navigationDepth.current=entry?.safehaven?entry.depth:0;
+      setSelectedDestination(entry?.destination||null);
+      setPage(entry?.safehaven?entry.page:'home');setDialog(entry?.safehaven?entry.dialog:null);
+      pendingScroll.current=entry?.scroll||0;setCompact(false);
+    };
+    window.addEventListener('popstate',pop);
+    return()=>window.removeEventListener('popstate',pop);
+  },[]);
+  useEffect(()=>{
+    if(loading || pendingScroll.current===null)return;
+    const timer=window.setTimeout(()=>{if(scrollRef.current){scrollRef.current.scrollTop=pendingScroll.current||0;lastTop.current=scrollRef.current.scrollTop;pendingScroll.current=null;}},250);
+    return()=>window.clearTimeout(timer);
+  },[page,loading,dialog]);
+  useEffect(()=>{
+    const key=(event:KeyboardEvent)=>{if(event.key==='Escape' && dialog)closeDialog();};
+    window.addEventListener('keydown',key);
+    return()=>window.removeEventListener('keydown',key);
+  },[dialog,page]);
+  const nativeBackAction=useRef<()=>void>(()=>{});
+  nativeBackAction.current=()=>{
+    if(dialog || navigationDepth.current>0 || page!=='home')back();else void NativeApp.exitApp();
+  };
+  useEffect(()=>{
+    if(!Capacitor.isNativePlatform())return;
+    const listener=NativeApp.addListener('backButton',()=>nativeBackAction.current());
+    return()=>{void listener.then(handle=>handle.remove());};
+  },[]);
+  const handleScroll=(event:UIEvent<HTMLDivElement>)=>{const y=event.currentTarget.scrollTop;const diff=y-lastTop.current;if(y<66)setCompact(false);else if(diff>15)setCompact(true);else if(diff< -16)setCompact(false);lastTop.current=y;};
+
+  const tab:Page = ['language','privacy'].includes(page)?'profile':['risk','replan','guide','beacon','pack'].includes(page)?'explore':page;
+
+  function home(){const currentPlace=read<Place|null>('destination',null);return <>
+    <header className="home-header"><button className="home-location" type="button" onClick={()=>currentPlace?openDestination(currentPlace.name):go('explore')}><MapPin size={21}/><span><small>YOUR DESTINATION</small><strong><span className="home-destination-name">{currentPlace?.name||'Choose a location'}</span> <ChevronDown size={14}/></strong></span></button><div className="header-actions"><IconButton icon={Bell} onClick={()=>openDialog('alerts')} label="Notifications"/><IconButton icon={Menu} onClick={()=>openDialog('menu')} label="Open menu"/><button className="avatar-button" type="button" onClick={()=>go('profile')} aria-label="Open profile"><span>{name.charAt(0).toUpperCase()}</span></button></div></header>
+    <div className="home-welcome"><p>Welcome to SafeHaven</p><h1>A better way to be prepared.</h1></div>
+    <button type="button" className="hero-risk" onClick={()=>go('risk')}><img className="hero-risk-photo" src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1100&q=82" onError={e=>{e.currentTarget.style.display="none"}} alt="Mountain landscape" loading="eager"/><div className="hero-risk-bg"/><div className="hero-risk-top"><span className="hero-shield"><ShieldCheck size={24}/></span><span className="hero-label">DESTINATION SAFETY</span></div><h2>Know before<br/>you go.</h2><p>Check weather, reports and local guidance for your next stop.</p><span className="hero-link">Check a destination <ChevronRight size={16}/></span></button>
+    
+    <Heading title="What would you like to do?" sub="Planning a trip? Start with a destination check, then build your itinerary and save your pack. Already there? Use guidance, check-in or SOS."/>
+    <div className="feature-grid">{features.map((f,i)=><FeatureCard key={f.title} feature={f} index={i} open={()=>go(f.page)}/>)}</div>
+    <section className="home-quick-section" aria-label="Quick safety actions">
+      <Heading title="Quick actions" />
+      <div className="home-action-grid">
+        <motion.button type="button" whileTap={{scale:.97}} className="home-action" onClick={()=>{packSection.current='group';go('pack')}}>
+          <span className="home-action-icon"><CheckCheck size={25}/></span>
+          <span><strong>Quick check-in</strong><small>Share with your private group</small></span>
+          <ChevronRight size={18}/>
+        </motion.button>
+        <motion.button type="button" whileTap={{scale:.97}} className={`home-action ${showQuickGuide?'home-action-done':''}`} aria-expanded={showQuickGuide} onClick={()=>setShowQuickGuide(v=>!v)}>
+          <span className="home-action-icon home-action-guide"><BookOpen size={25}/></span>
+          <span><strong>Emergency tips</strong><small>Read the basics here</small></span>
+          <ChevronDown size={18}/>
+        </motion.button>
+      </div>
+      <AnimatePresence initial={false}>{showQuickGuide&&<motion.div className="home-guide-inline" initial={{opacity:0,height:0,y:-6}} animate={{opacity:1,height:'auto',y:0}} exit={{opacity:0,height:0,y:-4}} transition={{type:'spring',stiffness:260,damping:30}}>
+        <div className="home-guide-inner"><div className="home-guide-types" role="group" aria-label="Safety topic">{(Object.keys(guides) as GuideKind[]).map(k=><button key={k} type="button" className={homeGuide===k?'is-active':''} aria-pressed={homeGuide===k} onClick={()=>setHomeGuide(k)}>{k}</button>)}</div>
+        <p>{guides[homeGuide].steps[0]}</p><small>General guidance · verify local authority instructions</small></div>
+      </motion.div>}</AnimatePresence>
+    </section>
+    <section className="home-section"><Heading title="For your next trip" right={<button className="section-link" onClick={()=>go('explore')}>See all <ChevronRight size={15}/></button>}/>
+      <Carousel onOpen={go} items={[
+        {kicker:'DESTINATION CHECK',title:'Before you leave',subtitle:'Review known conditions',icon:MapPin,tint:'indigo',page:'risk'},
+        {kicker:'YOUR ITINERARY',title:'Plans can change',subtitle:'Compare alternatives',icon:Navigation,tint:'violet',page:'replan'},
+        {kicker:'STAY IN TOUCH',title:'Keep your group close',subtitle:'Explore offline chat',icon:Radio,tint:'teal',page:'mesh'},
+      ]}/>
+    </section>
+  </>};
+
+  function explore(){
+    const matched=destinations.filter(d=>(d.name+' '+d.region+' '+d.label).toLowerCase().includes(query.toLowerCase())&&(destinationMood==='All'||d.mood===destinationMood));
+    return <><BackHeader title="Explore" back={back}/>
+      <div className="explore-intro"><span className="eyebrow">DISCOVER PLACES</span><h2>Where to next?</h2><p>Find places worth exploring. Check conditions before making plans.</p></div>
+      <div className="search-field explore-search"><Search size={21}/><input placeholder="Search a place or region" value={query} onChange={e=>setQuery(e.target.value)} aria-label="Search destinations"/>{query&&<button type="button" aria-label="Clear search" onClick={()=>setQuery('')}><X size={17}/></button>}</div>
+      <div className="explore-editorial" role="img" aria-label="Mountains and lakes scenic photograph"><div className="explore-editorial-art"/><div className="explore-editorial-shade"/><span className="explore-overline"><Compass size={15}/> THE OUTDOORS</span><div><h3>Take the scenic route.</h3><p>Great trips start with a little preparation.</p></div></div>
+      <section className="explore-section"><Heading title="Find your kind of place"/><div className="explore-moods" role="group" aria-label="Filter destinations">{[
+        {name:'All',icon:Compass},{name:'Mountains',icon:Mountain},{name:'Nature',icon:Trees},{name:'Coast',icon:Waves}
+      ].map(x=>{const Icon=x.icon;return <button type="button" key={x.name} className={destinationMood===x.name?'selected':''} aria-pressed={destinationMood===x.name} onClick={()=>setDestinationMood(x.name)}><Icon size={17}/>{x.name}</button>})}</div></section>
+      <section className="explore-section explore-destinations"><Heading title={query?'Search results':'Popular destinations'} sub="Explore destinations"/>
+        {matched.length>0?<SwipeRow label="Destination cards">{matched.map((d,i)=><button key={d.name} type="button" className="destination-tile" onClick={()=>openDestination(d.name)}><span className={`destination-photo destination-photo-${i%5}`} style={{backgroundImage:`linear-gradient(180deg,transparent 25%,#09110fdb 100%),url('${d.image}')`}}/><span className="destination-tile-copy"><span>{d.label}</span><strong>{d.name}</strong><small>{d.region}<ArrowRight size={14}/></small></span></button>)}</SwipeRow>:<div className="empty-feature empty-compact"><Search size={26}/><h3>No matches here</h3><p>Try another region or category.</p></div>}
+      </section>
+      <section className="explore-section"><Heading title="Check before you go" sub="Useful tools for your next stop"/><div className="explore-tools"><button type="button" onClick={()=>go('risk')}><span><ShieldCheck size={22}/></span><strong>Risk overview</strong><small>Understand report sources</small><ArrowRight size={17}/></button><button type="button" onClick={()=>go('guide')}><span><BookOpen size={22}/></span><strong>Safety essentials</strong><small>Guidance for common hazards</small><ArrowRight size={17}/></button></div></section>
+    </>;
+  }
+
+  function risk(){return <RiskTool onChoose={place=>{setSelectedDestination(place.name);window.history.replaceState({...window.history.state,destination:place.name},'')}} key={selectedDestination||"choose-destination"} destination={selectedDestination} back={back} notify={setToast} navigate={go}/>;}
+
+  function replan(){return <ReplanTool back={back} notify={setToast} navigate={go}/>;}
+
+  function guidePage(){return <GuidanceTool back={back} notify={setToast} navigate={go}/>;}
+
+  function mesh(){return <RescueMeshScreen mesh={meshApi} onBack={back} onGuide={()=>go('guide')}/>;}
+  function sos(){return <RescueMeshScreen mesh={meshApi} onBack={back} initialTab="SOS" onGuide={()=>go('guide')} standaloneSOS/>;}
+  function beacon(){return <RescueMeshScreen key="beacon" mesh={meshApi} onBack={back} initialTab="Beacons" onGuide={()=>go('guide')}/>;}
+
+  function pack(){return <PackTool initialSection={packSection.current} back={back} notify={setToast} navigate={go} checklist={checklist} toggleChecklist={title=>setChecklist(old=>old.includes(title)?old.filter(x=>x!==title):[...old,title])} nearbyShare={meshApi.available&&meshApi.state.peers.length>0?meshApi.sendCheckIn:undefined}/>;}
+
+  function profile(){return <>
+    <BackHeader title="Profile" back={back} action={<IconButton icon={Settings} label="Profile settings" onClick={()=>openDialog('settings')}/>}/>
+    <section className="profile-revamp" aria-label="Your profile">
+      <div className="profile-revamp-top">
+        <div className="profile-revamp-avatar"><UserRound size={32} strokeWidth={1.5}/></div>
+        <div className="profile-revamp-person"><span>YOUR ACCOUNT</span><h2>{name}</h2><p>{isAuthenticated ? 'Google Account' : 'Guest account'}</p></div>
+        <button type="button" className="profile-revamp-edit" onClick={()=>openDialog('profile')} aria-label="Edit profile"><Pencil size={18}/></button>
+      </div>
+      <div className="profile-revamp-divider"/>
+      <div className="profile-revamp-bottom"><span><ShieldCheck size={19}/> Your safety essentials, together</span><button type="button" onClick={()=>go('pack')}>View pack <ArrowRight size={16}/></button></div>
+    </section>
+    <section className="profile-section profile-essential-section"><Heading title="Quick access"/>
+      <div className="profile-shortcuts profile-shortcuts-final">
+
+<Map size={27} strokeWidth={1.65}/>
+<button type="button" onClick={()=>go('replan')}><span></span>My trips</button>
+        <button type="button" onClick={()=>{packSection.current='contacts';go('pack')}}><span><Phone size={27} strokeWidth={1.65}/></span>Contacts</button>
+        <button type="button" onClick={()=>go('pack')}><span><FolderOpen size={27} strokeWidth={1.65}/></span>Offline pack</button>
+      </div>
+    </section>
+    <section className="profile-section profile-progress-section">
+      <div className="profile-progress-head"><span className="profile-progress-mark"><CalendarCheck2 size={23}/></span><div><strong>Ready for the journey</strong><small>Review the essentials before you go</small></div><span className="profile-progress-total">{checklist.length}/4</span></div>
+      <div className="profile-progress-track"><span style={{width:`${checklist.length * 25}%`}}/></div>
+      <button type="button" onClick={()=>go('pack')}>Continue checklist <ChevronRight size={17}/></button>
+    </section>
+    <section className="profile-section"><Heading title="Preferences"/>
+      <div className="list-panel profile-settings-list">
+        <AppRow icon={Languages} title="Language" subtitle={languageNames[read('language','en')]||'English'} onClick={()=>go('language')}/>
+        <AppRow icon={LockKeyhole} title="Privacy & sharing" subtitle="Review consent and local storage" onClick={()=>go('privacy')}/>
+      </div>
+    </section>
+    <section className="profile-section"><Heading title="More"/>
+      <div className="list-panel profile-settings-list">
+        <AppRow icon={CircleHelp} title="Help & information" onClick={()=>openDialog('help')}/>
+      </div>
+    </section>
+    <button type="button" className="signout" onClick={()=>{setIsAuthenticated(false);setIsGuest(false);setPage('home');navigationDepth.current=0;window.history.replaceState({safehaven:true,page:'home',scroll:0,depth:0,dialog:null},'');setName('Traveler');setToast('')}}>Sign out</button>
+  </>;}
+
+  function languagePage(){return <>
+    <BackHeader title="Language settings" back={back}/>
+    <section className="content-section">
+      <h2>Preferred language</h2>
+      <p>Used for safety guidance and report explanations. The rest of the interface currently remains in English.</p>
+      <label className="tool-field">Language
+        <select aria-label="Preferred language" value={read('language',language)} onChange={event=>{setLanguage(event.target.value);setToast('Language preference saved');}}>
+          {Object.entries(languageNames).map(([code,title])=><option key={code} value={code}>{title}</option>)}
+        </select>
+      </label>
+    </section>
+  </>;}
+
+  return (
+    <div className="app-shell" onScroll={handleScroll} ref={scrollRef}>
+      {page === 'home' && home()}
+      {page === 'explore' && explore()}
+      {page === 'risk' && risk()}
+      {page === 'replan' && replan()}
+      {page === 'guide' && guidePage()}
+      {page === 'mesh' && mesh()}
+      {page === 'beacon' && beacon()}
+      {page === 'pack' && pack()}
+      {page === 'profile' && profile()}
+      {page === 'language' && languagePage()}
+      {page === 'privacy' && <><BackHeader title="Privacy & sharing" back={back}/><div className="content-section"><h2>Privacy</h2><p>Your data stays on your device.</p></div></>}
+      {page === 'sos' && sos()}
+      <Modal kind={dialog} close={closeDialog} person={name} saveName={setName} navigate={go} checkDestination={()=>openDestination(read<Place|null>('destination',null)?.name||'Manali')}/>
+      {loading && <SkeletonScreen profile={page==='profile'} />}
+      {toast && <NotificationToast message={toast} />}
+    </div>
+  );
 }
