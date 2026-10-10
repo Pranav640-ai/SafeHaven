@@ -1,6 +1,6 @@
 import { App as NativeApp } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
-import { useEffect, useRef, useState, type ReactNode, type UIEvent } from 'react';
+import { useEffect, useRef, useState, lazy, Suspense, type ReactNode, type UIEvent } from 'react';
 import { AnimatePresence, animate, motion, useMotionValue, useReducedMotion } from 'motion/react';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
@@ -27,7 +27,11 @@ import { onAuthStateChanged, type User } from 'firebase/auth';
 import { auth } from './firebase';
 import { signOutGoogle } from './services/googleAuth';
 
-type Page = 'home' | 'explore' | 'risk' | 'replan' | 'guide' | 'mesh' | 'beacon' | 'pack' | 'profile' | 'language' | 'privacy' | 'sos';
+const IncidentReporting=lazy(()=>import('./features/IncidentReporting'));
+const DocumentVault=lazy(()=>import('./features/DocumentVault'));
+const DecoyScreen=lazy(()=>import('./features/DecoyScreen'));
+
+type Page = 'reports' | 'vault' | 'decoy' | 'home' | 'explore' | 'risk' | 'replan' | 'guide' | 'mesh' | 'beacon' | 'pack' | 'profile' | 'language' | 'privacy' | 'sos';
 type GuideKind = 'Flood' | 'Extreme heat' | 'Earthquake';
 type Dialog = 'profile' | 'help' | 'alerts' | 'menu' | 'settings' | null;
 
@@ -259,7 +263,7 @@ export default function App(){
   },[]);
   const handleScroll=(event:UIEvent<HTMLDivElement>)=>{const y=event.currentTarget.scrollTop;const diff=y-lastTop.current;if(y<66)setCompact(false);else if(diff>15)setCompact(true);else if(diff< -16)setCompact(false);lastTop.current=y;};
 
-  const tab:Page = ['language','privacy'].includes(page)?'profile':['risk','replan','guide','beacon','pack'].includes(page)?'explore':page;
+  const tab:Page = ['language','privacy','vault'].includes(page)?'profile':['risk','replan','guide','beacon','pack','reports'].includes(page)?'explore':page==='decoy'?'home':page;
   const enter=(_guest:boolean)=>{navigationDepth.current=0;window.history.replaceState({safehaven:true,page:'home',scroll:0,depth:0,dialog:null},'');setEnteredApp(true);setPage('home');setToast('Welcome to Meridian');};
 
   function home(){const currentPlace=read<Place|null>('destination',null);return <>
@@ -282,6 +286,8 @@ export default function App(){
           <span><strong>Emergency tips</strong><small>Read the basics here</small></span>
           <ChevronDown size={18}/>
         </motion.button>
+        <motion.button type="button" whileTap={{scale:.97}} className="home-action" onClick={()=>go('reports')}><span className="home-action-icon"><ShieldAlert size={25}/></span><span><strong>Report an incident</strong><small>Share observations and check sources</small></span><ChevronRight size={18}/></motion.button>
+        <motion.button type="button" whileTap={{scale:.97}} className="home-action" onClick={()=>go('decoy')}><span className="home-action-icon"><Phone size={25}/></span><span><strong>Fake call & decoy</strong><small>A local call or blank screen</small></span><ChevronRight size={18}/></motion.button>
       </div>
       <AnimatePresence initial={false}>{showQuickGuide&&<motion.div className="home-guide-inline" initial={{opacity:0,height:0,y:-6}} animate={{opacity:1,height:'auto',y:0}} exit={{opacity:0,height:0,y:-4}} transition={{type:'spring',stiffness:260,damping:30}}>
         <div className="home-guide-inner"><div className="home-guide-types" role="group" aria-label="Safety topic">{(Object.keys(guides) as GuideKind[]).map(k=><button key={k} type="button" className={homeGuide===k?'is-active':''} aria-pressed={homeGuide===k} onClick={()=>setHomeGuide(k)}>{k}</button>)}</div>
@@ -344,6 +350,7 @@ export default function App(){
         <button type="button" onClick={()=>go('replan')}><span><Map size={27} strokeWidth={1.65}/></span>My trips</button>
         <button type="button" onClick={()=>{packSection.current='contacts';go('pack')}}><span><Phone size={27} strokeWidth={1.65}/></span>Contacts</button>
         <button type="button" onClick={()=>go('pack')}><span><FolderOpen size={27} strokeWidth={1.65}/></span>Offline pack</button>
+        <button type="button" onClick={()=>go('vault')}><span><LockKeyhole size={27} strokeWidth={1.65}/></span>Document vault</button>
       </div>
     </section>
     <section className="profile-section profile-progress-section">
@@ -373,7 +380,10 @@ export default function App(){
   </>}
   function languagePage(){return <><BackHeader title="Language settings" back={back}/><section className="content-section"><h2>Preferred language</h2><p>Used for safety guidance and report explanations. The rest of the interface currently remains in English.</p><label className="tool-field">Language<select aria-label="Preferred language" value={read('language',language)} onChange={event=>{setLanguage(event.target.value);setToast('Language preference saved');}}>{Object.entries(languageNames).map(([code,title])=><option key={code} value={code}>{title}</option>)}</select></label><p className="tool-muted">Hindi and Tamil have prepared translations. French and Spanish require the online AI service. Translations are unreviewed; English source text stays available.</p><button className="secondary-button" onClick={()=>go('guide')}>Preview safety guidance <ArrowRight size={17}/></button></section></>}
   function privacy(){return <><BackHeader title="Privacy & sharing" back={back}/><section className="content-section"><h2>Your choices</h2><p>Contacts, plans, saved guidance and language preferences are stored on this device. Editing your display name lasts for this session.</p><p>Private group check-ins require consent and an online service. Nearby check-ins require a connected phone and separate consent. Beacons share your location only when you publish one.</p><p>Stopping RescueMesh disconnects peers and removes saved pending SOS/check-ins and beacons. Pending messages are encrypted on this phone, survive an app restart and expire within 24 hours. No background delivery is guaranteed. Leaving a private group removes your membership from that group.</p><button className="secondary-button" onClick={()=>go('pack')}>Manage group sharing</button><button className="secondary-button" onClick={()=>go('mesh')}>Manage nearby connections</button></section></>}
-  const content=()=>({home,explore,risk,replan,guide:guidePage,mesh,beacon,pack,profile,language:languagePage,privacy,sos}[page]());
+  const reports=()=> <Suspense fallback={<p role="status">Opening incident reports…</p>}><IncidentReporting back={back} notify={setToast} onTrip={()=>go('replan')}/></Suspense>;
+  const vault=()=> <Suspense fallback={<p role="status">Opening document vault…</p>}><DocumentVault back={back}/></Suspense>;
+  const decoy=()=> <Suspense fallback={<p role="status">Opening decoy screen…</p>}><DecoyScreen back={back}/></Suspense>;
+  const content=()=>({reports,vault,decoy,home,explore,risk,replan,guide:guidePage,mesh,beacon,pack,profile,language:languagePage,privacy,sos}[page]());
   if(authLoading)return <div className="preview-stage" aria-busy="true"><main className="phone-shell"><div className="phone-scroll"><SkeletonScreen/></div></main></div>;
   if(!enteredApp)return <GoogleLoginPage onLoginSuccess={user=>{setFirebaseUser(user);setName(user.displayName||'Traveler');enter(false);}} onGuestContinue={()=>enter(true)}/>;
   return <div className="preview-stage">

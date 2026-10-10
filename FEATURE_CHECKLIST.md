@@ -60,3 +60,8 @@ Auth integration: Firebase browser popup/session and Android Credential Managerâ
 - [x] Beacon connection shortcut, capacity validation and native own-sharing state recovery. Radio acceptance remains open.
 - [x] Railway URL recorded and online APK origin configured locally. Health succeeded; deployed intelligence routes and AI/news configuration were absent at inspection.
 - [ ] Online buddy invitations/chat: intentionally deferred until physical Mesh verification; see BUDDY_SYSTEM_PLAN.md.
+
+- [x] Incident ZIP categories/severity/filter/consented observations/public evidence integrated into existing safety API; shared risk/trip context without fabricated verification.
+- [x] Local encrypted document/contact-snapshot vault and fake-call/blank-decoy implementation. Physical native PDF/audio/security lifecycle acceptance remains.
+- [x] Own beacon excludes self-bearing; recipient location action remains explicit.
+- [ ] Deployed incident/evidence/context acceptance after Railway service restoration; new vault/PDF/decoy physical acceptance.

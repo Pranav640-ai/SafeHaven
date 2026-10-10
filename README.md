@@ -49,3 +49,5 @@ The combined UI retains Meridian’s earlier widgets/navigation/animations with 
 Risk and nearby-place functionality from the backend branch is now integrated; see [FUNCTIONALITY_INTEGRATION.md](FUNCTIONALITY_INTEGRATION.md) for API routes, user flow and provider requirements.
 
 Current backend: [https://safehaven-production-9f5d.up.railway.app](https://safehaven-production-9f5d.up.railway.app). Deployment must use canonical `ui` to include the intelligence routes; health alone does not prove all features are deployed. Online buddy chat is deferred until physical Mesh acceptance; see [BUDDY_SYSTEM_PLAN.md](BUDDY_SYSTEM_PLAN.md).
+
+New local vault/decoy and incident ZIP adaptation: [PERSONAL_SAFETY_HANDOFF.md](PERSONAL_SAFETY_HANDOFF.md). Full user acceptance steps: [USER_TEST_GUIDE.md](USER_TEST_GUIDE.md).

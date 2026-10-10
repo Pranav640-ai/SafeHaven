@@ -53,9 +53,12 @@ class Point(BaseModel):
     longitude: float = Field(ge=-180, le=180)
 
 class Observation(Point):
-    kind: Literal['blockedRoad', 'risingWater', 'damage', 'help', 'shelter']
+    kind: Literal['blockedRoad', 'risingWater', 'damage', 'help', 'shelter', 'fire', 'landslide', 'weather', 'other']
     description: str = Field(min_length=5, max_length=500)
     observed_at: datetime
+    category: Literal['flood','landslide','road_blockage','fire','weather','other'] | None = None
+    severity: Literal['low','moderate','high'] | None = None
+    place_name: str = Field(default='', max_length=80)
     consent: bool
 
     @model_validator(mode='after')
@@ -83,6 +86,25 @@ def observations():
     with store() as conn:
         rows = conn.execute('SELECT content FROM observations ORDER BY created DESC LIMIT 500').fetchall()
     return active([json.loads(r['content']) for r in rows])
+
+def trip_observations(point, day, rows=None):
+    """Local, dated context only; not a verified hazard or replanning trigger."""
+    from backend.app import distance
+    from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
+    try:
+        zone = ZoneInfo(getattr(point, 'timezone', 'UTC'))
+    except ZoneInfoNotFoundError:
+        zone = ZoneInfo('UTC')
+    result = []
+    for row in observations() if rows is None else rows:
+        km = distance(point.latitude, point.longitude, row['latitude'], row['longitude'])
+        if row['status'] in ['resolved', 'rejected'] or km > 10:
+            continue
+        start = datetime.fromisoformat(row['observed_at']).astimezone(zone).date()
+        end = datetime.fromisoformat(row['expires_at']).astimezone(zone).date()
+        if start <= day <= end:
+            result.append({**{k: row.get(k) for k in ['id','description','category','severity','observed_at','expires_at','trust','status']}, 'distance_km': round(km, 1)})
+    return result[:10]
 
 @router.post('/nearby')
 def nearby(point: Point):

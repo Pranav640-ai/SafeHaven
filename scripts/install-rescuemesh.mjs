@@ -125,3 +125,10 @@ patch(main, source => {
   if (main.endsWith('.kt')) return source.replace('import com.safehaven.rescuemesh.RescueMeshPlugin', 'import com.safehaven.rescuemesh.MeridianAuthPlugin\nimport com.safehaven.rescuemesh.RescueMeshPlugin').replace('registerPlugin(RescueMeshPlugin::class.java)', 'registerPlugin(MeridianAuthPlugin::class.java)\n        registerPlugin(RescueMeshPlugin::class.java)');
   return source.replace('import com.safehaven.rescuemesh.RescueMeshPlugin;', 'import com.safehaven.rescuemesh.MeridianAuthPlugin;\nimport com.safehaven.rescuemesh.RescueMeshPlugin;').replace('registerPlugin(RescueMeshPlugin.class);', 'registerPlugin(MeridianAuthPlugin.class);\n        registerPlugin(RescueMeshPlugin.class);');
 });
+
+// Offline vault PDF preview uses only Android framework APIs.
+patch(main, source => {
+  if (source.includes('registerPlugin(VaultPreviewPlugin')) return source;
+  if (main.endsWith('.kt')) return source.replace('import com.safehaven.rescuemesh.RescueMeshPlugin', 'import com.safehaven.rescuemesh.VaultPreviewPlugin\nimport com.safehaven.rescuemesh.RescueMeshPlugin').replace('registerPlugin(RescueMeshPlugin::class.java)', 'registerPlugin(VaultPreviewPlugin::class.java)\n        registerPlugin(RescueMeshPlugin::class.java)');
+  return source.replace('import com.safehaven.rescuemesh.RescueMeshPlugin;', 'import com.safehaven.rescuemesh.VaultPreviewPlugin;\nimport com.safehaven.rescuemesh.RescueMeshPlugin;').replace('registerPlugin(RescueMeshPlugin.class);', 'registerPlugin(VaultPreviewPlugin.class);\n        registerPlugin(RescueMeshPlugin.class);');
+});

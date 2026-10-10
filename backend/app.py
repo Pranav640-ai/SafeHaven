@@ -252,6 +252,8 @@ async def build_plan(request: PlanRequest):
         raise HTTPException(422, 'Each itinerary stop needs a unique id.')
     from backend.safety import bulletins, in_polygon
     local_bulletins = [p['bulletin'] for p in bulletins()]
+    from backend.safety import observations, trip_observations
+    community = [r for r in observations() if r['status'] not in ['resolved','rejected']]
     rows, ai_used = [], False
     forecasts = {}
     for stop in request.stops:
@@ -266,6 +268,7 @@ async def build_plan(request: PlanRequest):
         reason = signals(day) if day else []
         local = [b for b in local_bulletins if b['severity'] in ['warning','critical'] and in_polygon([stop.place.longitude,stop.place.latitude],b['polygon']) and datetime.fromisoformat(b['published_at']).date()<=stop.date<=datetime.fromisoformat(b['expires_at']).date()]
         reason += [f"{b['trust']}: {b['title']}. Follow the linked publisher instructions; applicability is based on its supplied area." for b in local]
+        context = trip_observations(stop.place, stop.date, community)
         affected = (bool(reason) and stop.kind in ['outdoor', 'water']) or (bool(local) and stop.kind=='indoor')
         alternative = stop.activity
         alternative_date = stop.date.isoformat()
@@ -285,8 +288,8 @@ async def build_plan(request: PlanRequest):
                     ai_used = True
             except Exception:
                 pass
-        rows.append({'original': stop.model_dump(mode='json'), 'alternative': alternative, 'alternative_date':alternative_date,'alternative_kind':alternative_kind, 'changed': affected, 'reasons': reason, 'assessment': 'Model estimate' if day else 'Unknown — forecast unavailable for this date', 'weather': day, 'bulletins':local, 'source': forecast['source'] if forecast else None, 'fetched_at': forecast['fetched_at'] if forecast else None})
-    return {'stops': rows, 'engine': 'Gemini-assisted suggestions with forecast rules' if ai_used else 'Forecast planning rules (AI unavailable or not needed)', 'generated_at': now(), 'limitations': 'Planning suggestions only. Thresholds are app heuristics, not official warnings. Published warning polygons are checked when supplied. Local news, bookings, venue availability and unreported restrictions need independent confirmation. Date proposals stay inside the entered trip window and preserve fixed bookings. Changes apply only when accepted; no road-safety guarantee is made.'}
+        rows.append({'original': stop.model_dump(mode='json'), 'alternative': alternative, 'alternative_date':alternative_date,'alternative_kind':alternative_kind, 'changed': affected, 'community_reports':context[:10], 'reasons': reason, 'assessment': 'Model estimate' if day else 'Unknown — forecast unavailable for this date', 'weather': day, 'bulletins':local, 'source': forecast['source'] if forecast else None, 'fetched_at': forecast['fetched_at'] if forecast else None})
+    return {'stops': rows, 'engine': 'Gemini-assisted suggestions with forecast rules' if ai_used else 'Forecast planning rules (AI unavailable or not needed)', 'generated_at': now(), 'limitations': 'Planning suggestions only. Thresholds are app heuristics, not official warnings. Published warning polygons are checked when supplied. Nearby community reports are context only and do not independently change the plan. Local news, bookings, venue availability and unreported restrictions need independent confirmation. Date proposals stay inside the entered trip window and preserve fixed bookings. Changes apply only when accepted; no road-safety guarantee is made.'}
 
 GUIDES = {
     'Flood': {'source': 'https://www.ready.gov/floods', 'title': 'Ready.gov · Floods', 'steps': ['Avoid walking, swimming or driving through floodwater.', 'Follow evacuation instructions from local authorities.', 'Move to higher ground when instructed and when you can do so without entering floodwater.']},
@@ -423,6 +426,7 @@ def leave_group(gid: str, authorization: str | None = Header(default=None)):
     return {'removed': True}
 
 from backend.safety import router as safety_router
+from backend import incident_evidence  # registers public-context routes before mounting
 app.include_router(safety_router)
 from backend.push import router as push_router
 app.include_router(push_router)

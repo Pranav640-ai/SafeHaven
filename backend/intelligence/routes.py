@@ -53,7 +53,9 @@ async def assess(request: DailyRiskRequest):
             'url':url if url and urlparse(url).scheme in ['http','https'] else None,
             'published_at':alert.published_at.isoformat(),'distance_km':round(distance,1),
             'status':'Reported event; current local impact unconfirmed.'})
-    return {'reported_events':events[:10],'assessed_at':datetime.now(timezone.utc).isoformat(),'summary':summary,
+    from backend.safety import trip_observations
+    community = trip_observations(request.place, request.date)
+    return {'community_reports':community[:10],'reported_events':events[:10],'assessed_at':datetime.now(timezone.utc).isoformat(),'summary':summary,
         'window':'06:00–18:00 local time; your exact activity time is not recorded.',
         'limitations':'Prototype planning model, not a disaster probability or travel clearance. Event-centre proximity does not establish local impact. Official local instructions take priority.'}
 

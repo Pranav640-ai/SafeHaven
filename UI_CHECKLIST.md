@@ -54,3 +54,6 @@ Latest validation: three focused browser checks passed for fixed SVG artwork (6 
 - [x] Fixed Home/trip artwork, icons and navigation remain intact in the locations/contacts/beacon update.
 - [x] Added only functional destination selection, contact editor/category and beacon connection action/state handling.
 - [ ] Physical two-phone beacon/check-in/SOS/chat acceptance remains pending.
+
+- [x] Added requested Home quick actions and Profile vault without replacing fixed six/three SVG illustrations.
+- [x] Decoy overlays sit above the dock; own-beacon arrow is suppressed.

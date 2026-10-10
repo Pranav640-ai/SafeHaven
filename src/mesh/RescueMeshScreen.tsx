@@ -66,8 +66,8 @@ export function RescueMeshScreen({mesh,onBack,onGuide,standaloneSOS=false,initia
       <label className="mesh-live-field">Automatically expire after<select disabled={!linked||busy} value={minutes} onChange={e=>setMinutes(Number(e.target.value))}><option value={15}>15 minutes</option><option value={30}>30 minutes</option><option value={60}>1 hour</option><option value={120}>2 hours</option></select></label>
       <button type="button" className="primary-button mesh-live-cta" disabled={!linked||busy||!beaconText.trim()||(capacity!==''&&(!Number.isInteger(Number(capacity))||Number(capacity)<1||Number(capacity)>999))} onClick={()=>run(()=>mesh.publishBeacon(`${offer}: ${beaconText}${capacity?` · Space reported for ${Number(capacity)} people`:''}`,minutes))}>Share my location temporarily</button>
       {mesh.ownBeacon&&<button type="button" className="secondary-button mesh-live-cta" disabled={busy} onClick={()=>run(()=>mesh.withdrawBeacon())}>Stop sharing beacon</button>}
-      <button type="button" className="secondary-button mesh-live-cta" disabled={!mesh.available||busy||!mesh.state.beacons.some(b=>b.expiresAt>now)} onClick={()=>run(()=>mesh.locate())}>Show approximate distance & bearing</button>
-      {mesh.state.beacons.map(b=><BeaconItem key={b.beaconId} item={b} position={mesh.position} heading={mesh.heading} now={now}/>)}
+      <button type="button" className="secondary-button mesh-live-cta" disabled={!mesh.available||busy||!mesh.state.beacons.some(b=>b.expiresAt>now&&b.from!==mesh.state.identity)} onClick={()=>run(()=>mesh.locate())}>Show approximate distance & bearing</button>
+      {mesh.state.beacons.map(b=><BeaconItem key={b.beaconId} item={b} position={b.from===mesh.state.identity?null:mesh.position} heading={mesh.heading} now={now}/>)}
       {!mesh.state.beacons.some(b=>b.expiresAt>now)&&<div className="mesh-live-empty"><MapPin size={32}/><h4>No active community beacons</h4><p>A beacon appears here only after a nearby participant shares one.</p></div>}
       <p className="mesh-live-hint">A beacon is not an officially approved shelter. Direction is a straight-line bearing, never a guarantee of a safe route.</p>
     </>}

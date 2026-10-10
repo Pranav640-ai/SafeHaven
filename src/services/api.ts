@@ -62,6 +62,7 @@ export type Plan = {
         alternative_kind?:Stop['kind'];
         changed: boolean;
         reasons: string[];
+        community_reports?: {id:string;description:string;distance_km:number;trust:string;observed_at:string}[];
         assessment: string;
         bulletins?: {id:string;title:string;source_url:string;trust:string}[];
         source: Source | null;
