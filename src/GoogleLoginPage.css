@@ -1,0 +1,26 @@
+/* Standalone SafeHaven onboarding: intentionally scoped to avoid legacy login overrides. */
+.sh-login-stage{min-height:100dvh;display:grid;place-items:center;padding:24px;background:radial-gradient(ellipse at 22% 18%,#a6d5bd 0%,transparent 37%),radial-gradient(ellipse at 84% 85%,#4c9b7d 0%,transparent 44%),linear-gradient(145deg,#153e31 0%,#2e7056 54%,#184534 100%);font-family:'Nunito',sans-serif}
+.sh-login-phone{width:min(100%,390px);height:min(780px,calc(100dvh - 48px));min-height:580px;display:flex;flex-direction:column;overflow:hidden;isolation:isolate;position:relative;border-radius:35px;background:#f5f7f1;border:1px solid #ffffff70;box-shadow:0 26px 85px #0a2e2480,0 0 0 7px #ffffff13;color:#214c3d}
+.sh-login-hero{position:relative;min-height:0;flex:1 1 54%;display:flex;flex-direction:column;overflow:hidden;background:radial-gradient(ellipse at 50% 54%,#80bba2 0%,#367b62 50%,#164b3c 100%);color:white}
+.sh-login-hero:before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 48%,#e2f6db30,transparent 47%);pointer-events:none}
+.sh-login-brand{position:relative;z-index:1;display:flex;align-items:center;gap:10px;padding:27px 25px 0;font-family:'Raleway',sans-serif;font-size:20px;font-weight:500;letter-spacing:-.6px}
+.sh-brand-icon{width:37px;height:37px;display:grid;place-items:center;border-radius:12px;border:1px solid #ffffff65;background:#ffffff28}
+.sh-hero-art{width:260px;max-width:85%;height:175px;position:relative;margin:auto auto 0;flex-shrink:1;min-height:115px}
+.sh-orbit{position:absolute;top:56px;left:50%;width:230px;height:92px;border:1px solid #ffffff60;border-radius:50%;transform:translateX(-50%) rotate(-12deg)}
+.sh-orbit-two{width:192px;height:82px;top:64px;transform:translateX(-50%) rotate(17deg)}
+.sh-hero-shield{position:absolute;top:14px;left:50%;transform:translateX(-50%) rotate(-10deg);width:112px;height:122px;display:grid;place-items:center;border-radius:33px;background:linear-gradient(145deg,#dcebd6,#8fbca1);color:#326f58;box-shadow:0 16px 45px #143c3860,inset 0 2px #ffffff9c}
+.sh-orbit-chip{position:absolute;display:grid;place-items:center;border-radius:17px;box-shadow:0 12px 25px #143e3650;color:white}
+.sh-chip-left{width:47px;height:47px;left:8px;top:94px;background:linear-gradient(140deg,#b6d9c8,#76a996);transform:rotate(-12deg)}
+.sh-chip-right{width:50px;height:50px;right:6px;top:65px;background:linear-gradient(140deg,#efd9b9,#bd9c78);transform:rotate(14deg)}
+.sh-hero-copy{position:relative;z-index:1;text-align:center;padding:2px 15px 25px}
+.sh-hero-copy>span{font-size:9px;letter-spacing:.19em;font-weight:700;color:#e5f4e8}
+.sh-hero-copy h1{margin:11px 0 0;font-family:'Raleway',sans-serif;font-weight:500;font-size:31px;letter-spacing:-1.3px;line-height:1.18}
+.sh-hero-copy em{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.23em;font-weight:400;letter-spacing:0}
+.sh-login-panel{position:relative;z-index:2;flex:0 0 auto;min-height:290px;border-radius:28px 28px 0 0;margin-top:-14px;padding:25px 25px 20px;background:linear-gradient(180deg,#f9faf5,#eff3ea);box-shadow:0 -9px 26px #163f2b1c;display:flex;flex-direction:column}
+.sh-login-intro{text-align:center}.sh-login-intro h2{font-size:21px;font-weight:600;letter-spacing:-.65px;color:#255844}.sh-login-intro p{margin-top:6px;font-size:11px;color:#6b8879}
+.sh-login-actions{margin-top:24px}.sh-google-button,.sh-guest-button{width:100%;min-height:48px;border-radius:15px;display:flex;align-items:center;justify-content:center;gap:11px;font-size:12px;font-weight:700;transition:transform .18s,filter .18s}
+.sh-google-button{background:#fff;color:#285c48;border:1px solid #b7d4c3;box-shadow:0 4px 15px #24533c0b}.sh-google-button svg:last-child{margin-left:2px}.sh-guest-button{background:linear-gradient(110deg,#286c51,#4c9b78);color:#fff;box-shadow:0 8px 18px #2d7a5740}.sh-google-button:active,.sh-guest-button:active{transform:scale(.98)}.sh-google-button:disabled,.sh-guest-button:disabled{opacity:.6;cursor:wait}
+.sh-divider{display:flex;align-items:center;gap:14px;margin:13px 0;color:#91a69a;font-size:10px;text-transform:uppercase}.sh-divider span{height:1px;background:#d7e1d8;flex:1}.sh-login-note{text-align:center;font-size:10px;color:#7d9688;margin-top:auto;padding-top:17px}.sh-login-error{color:#a32e35;text-align:center;font-size:11px;margin-top:10px}
+@media(max-width:600px){.sh-login-stage{padding:12px}.sh-login-phone{width:min(100%,410px);height:calc(100dvh - 24px);min-height:0;border-radius:29px;box-shadow:0 12px 36px #0a2e244a}.sh-login-hero{flex-basis:53%}.sh-login-panel{min-height:285px}}
+@media(max-height:690px){.sh-login-stage{padding:9px}.sh-login-phone{height:calc(100dvh - 18px);min-height:0}.sh-login-brand{padding-top:18px}.sh-hero-art{height:125px}.sh-hero-shield{width:88px;height:92px;border-radius:26px;top:3px}.sh-hero-shield svg{width:49px}.sh-orbit{top:29px}.sh-orbit-two{top:38px}.sh-chip-left{top:60px}.sh-chip-right{top:43px}.sh-hero-copy{padding-bottom:19px}.sh-hero-copy h1{font-size:27px}.sh-login-panel{min-height:266px;padding-top:19px}.sh-login-actions{margin-top:18px}}
+@media(prefers-reduced-motion:reduce){.sh-google-button,.sh-guest-button{transition:none}}
