@@ -186,7 +186,7 @@ class SupabaseRepository(BaseRepository):
 
 def get_repository() -> BaseRepository:
     if settings.is_supabase_enabled and settings.SUPABASE_URL:
-        key = settings.SUPABASE_ANON_KEY or settings.SUPABASE_SERVICE_ROLE_KEY or ""
+        key = settings.supabase_api_key or ""
         logger.info("Initializing Supabase repository persistence")
         return SupabaseRepository(supabase_url=settings.SUPABASE_URL, api_key=key)
     return InMemoryRepository()

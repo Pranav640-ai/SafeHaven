@@ -27,6 +27,7 @@ class Settings(BaseSettings):
     # Optional Supabase Persistence (loaded from .env)
     SUPABASE_URL: Optional[str] = Field(default=None)
     SUPABASE_ANON_KEY: Optional[str] = Field(default=None)
+    SUPABASE_KEY: Optional[str] = Field(default=None)
     SUPABASE_SERVICE_ROLE_KEY: Optional[str] = Field(default=None)
 
     # Server-side LLM (loaded from .env)
@@ -68,8 +69,12 @@ class Settings(BaseSettings):
         return [origin.strip() for origin in self.CORS_ORIGINS.split(",") if origin.strip()]
 
     @property
+    def supabase_api_key(self) -> Optional[str]:
+        return self.SUPABASE_ANON_KEY or self.SUPABASE_KEY or self.SUPABASE_SERVICE_ROLE_KEY
+
+    @property
     def is_supabase_enabled(self) -> bool:
-        return bool(self.SUPABASE_URL and (self.SUPABASE_ANON_KEY or self.SUPABASE_SERVICE_ROLE_KEY))
+        return bool(self.SUPABASE_URL and self.supabase_api_key)
 
     @property
     def is_llm_enabled(self) -> bool:
