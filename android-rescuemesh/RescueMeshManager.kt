@@ -237,6 +237,18 @@ class RescueMeshManager(
     
         return GroupStore.getStatuses()
     }
+    fun saveSafetyPack(
+        pack: SafetyPack
+    ) {
+    
+        SafetyPackStore.savePack(pack)
+    }
+    
+    fun getSafetyPack():
+            SafetyPack? {
+    
+        return SafetyPackStore.getPack()
+    }
     fun stopAllConnections() {
 
         connectionsClient.stopAdvertising()
