@@ -1,6 +1,12 @@
 package com.safehaven.rescuemesh
 
 import android.Manifest
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
+import android.hardware.GeomagneticField
+import android.view.Surface
 import android.os.Build
 import androidx.core.content.ContextCompat
 import android.content.pm.PackageManager
@@ -30,6 +36,40 @@ class RescueMeshPlugin : Plugin() {
             notifyListeners(event, details)
         }
     }
+
+    private var compassListener: SensorEventListener? = null
+    private val sensors by lazy { context.getSystemService(android.content.Context.SENSOR_SERVICE) as SensorManager }
+    @PluginMethod fun startCompass(call: PluginCall) {
+        stopCompassSensor()
+        val sensor = sensors.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR)
+        if (sensor == null) { call.resolve(JSObject().put("available", false)); return }
+        val declination = GeomagneticField((call.getDouble("latitude") ?: 0.0).toFloat(), (call.getDouble("longitude") ?: 0.0).toFloat(), 0f, System.currentTimeMillis()).declination
+        compassListener = object : SensorEventListener {
+            override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+            override fun onSensorChanged(event: SensorEvent) {
+                if (event.accuracy == SensorManager.SENSOR_STATUS_UNRELIABLE) {
+                    notifyListeners("compass", JSObject().put("available", false)); return
+                }
+                val matrix = FloatArray(9); val adjusted = FloatArray(9); val orientation = FloatArray(3)
+                SensorManager.getRotationMatrixFromVector(matrix, event.values)
+                val rotation = activity.windowManager.defaultDisplay.rotation
+                val axes = when(rotation) {
+                    Surface.ROTATION_90 -> SensorManager.AXIS_Y to SensorManager.AXIS_MINUS_X
+                    Surface.ROTATION_180 -> SensorManager.AXIS_MINUS_X to SensorManager.AXIS_MINUS_Y
+                    Surface.ROTATION_270 -> SensorManager.AXIS_MINUS_Y to SensorManager.AXIS_X
+                    else -> SensorManager.AXIS_X to SensorManager.AXIS_Y
+                }
+                SensorManager.remapCoordinateSystem(matrix, axes.first, axes.second, adjusted)
+                SensorManager.getOrientation(adjusted, orientation)
+                val heading = (Math.toDegrees(orientation[0].toDouble()) + declination + 360) % 360
+                notifyListeners("compass", JSObject().put("available", true).put("heading", heading))
+            }
+        }
+        val started = sensors.registerListener(compassListener, sensor, SensorManager.SENSOR_DELAY_UI)
+        call.resolve(JSObject().put("available", started))
+    }
+    private fun stopCompassSensor() { compassListener?.let { sensors.unregisterListener(it) }; compassListener = null }
+    @PluginMethod fun stopCompass(call: PluginCall) { stopCompassSensor(); call.resolve() }
 
     private fun aliasesForVersion(): Array<String> = when {
         Build.VERSION.SDK_INT >= 33 -> arrayOf("bluetooth", "wifi")
@@ -103,5 +143,5 @@ class RescueMeshPlugin : Plugin() {
         catch (e: Exception) { call.reject(e.message ?: "Cannot publish beacon") }
     }
     @PluginMethod fun withdrawBeacon(call: PluginCall) { call.resolve(mesh.withdrawBeacon()) }
-    override fun handleOnDestroy() { mesh.stop(); super.handleOnDestroy() }
+    override fun handleOnDestroy() { stopCompassSensor(); mesh.stop(false); super.handleOnDestroy() }
 }

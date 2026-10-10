@@ -17,7 +17,7 @@ For automatic preliminary checks after building the APK, start two emulators and
 
 In Android Studio, open this project's `android` folder, allow Gradle sync, select device A in the device dropdown and click Run. Repeat with device B. If using physical phones, enable Developer options and USB debugging, connect USB and approve the debugging prompt. Both devices must have Google Play services. Use JDK 21 (installed here at `C:\Users\asus\.jdks\jbr-21.0.11`). In Android Studio, Settings → Build, Execution, Deployment → Build Tools → Gradle → Gradle JDK must select that JDK 21 path. The Studio bundled JBR is Java 25 and is too new for this Gradle version.
 
-For your two virtual devices, start both from Device Manager and install by selecting each in turn. Android Emulator 36.5+ supports shared multi-instance Wi-Fi and simulated Bluetooth on supported system images. Use Google Play enabled images, API 31+ and the latest emulator package. Simulator discovery success is useful preliminary evidence; repeat the acceptance tests on two physical Android phones to check actual radios, range and permissions.
+For your two virtual devices, start both from Device Manager and install by selecting each in turn. Use Google Play enabled images and an up-to-date emulator package. Nearby transport can still fail in an emulator even when permission and UI checks pass. Simulator discovery success is useful preliminary evidence; repeat the acceptance tests on two physical Android phones to check actual radios, range and permissions.
 
 Optional APK build/install from PowerShell:
 
@@ -142,3 +142,11 @@ For an ANR/stalled VM, use Device Manager's Cold Boot and inspect its graphics/r
 - [Google Nearby pairing and authentication](https://developers.google.com/nearby/connections/android/manage-connections)
 - [Android Emulator networking](https://developer.android.com/studio/run/emulator-networking)
 - [Android multi-device emulator support](https://android-developers.googleblog.com/2026/04/Test-Multi-Device-Interactions-with-the-Android-Emulator.html)
+
+## Current persistent queue acceptance
+
+Pending SOS, carried SOS and the latest queued nearby check-in now use encrypted Android Keystore storage, bounded to 24 hours. Chat history remains in memory. Queue while disconnected, force-stop, reopen/start Nearby, pair and verify peer ACK removes pending entries. Explicit Stop clears local queues; cancellation cannot retract a peer copy already relayed. Test expiry and fresh-install permission denial separately. No background delivery is promised. Verify beacon capacity/expiry/withdraw, true-heading compass and sensor fallback, installed offline TTS and three-phone store/carry/forward on physical hardware. See FINAL_HANDOFF.md for latest measured results.
+
+Automated runs with more than two devices must pass explicit serials and select pairing requests by counterpart name, not the first visible request. The current harness filters MESH TEST A/B and compares matching digits. Prefer stopping unrelated discovery manually before an isolated pair test; do not accept a different phone just to make the test pass.
+
+Latest measured attempt (10 October): final APK installed on 5558/5560, disconnected SOS queue/cancel and hardware Back passed. Selected-pair discovery timed out with STATUS_ENDPOINT_IO_ERROR (8012). Connected message/SOS ACK and physical/multi-hop acceptance remain unverified.

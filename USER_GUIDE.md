@@ -1,13 +1,14 @@
-# SafeHaven: a trip from start to finish
+# Using SafeHaven
 
-1. **Welcome → Explore as guest.** Your preparation stays on this device. Google sign-in is awaiting a teammate's setup.
-2. **Home → Risk insights**, then search for your town and choose a result. Alternatively, **Explore → destination card** opens that particular place. Select your travel date, review **Overview / Weather / Reports**, then **Save briefing to safety pack**. Reports are information to review, not a guarantee of safety.
-3. **Home → Trip replanner.** Choose a place, enter activities with dates and types, and add them to your itinerary. Review conditions and alternatives; fixed bookings are retained. You can edit or delete activities.
-4. **Home → Emergency guide.** Pick a hazard, read the steps, choose a language, and save guidance for offline use. **Profile → Language** sets the preferred guidance language; the interface remains English.
-5. **Home → Safety pack.** Save hotel/meeting details and verified contacts, prepare offline guidance, and review your saved itinerary and destination briefing. Tap a saved phone number to open the phone's calling app.
-6. **Home → Quick check-in** opens the private group section in Safety pack. Give consent, create or join a group, and share your status. This needs internet access and does not send your location automatically.
-7. **Android app → Mesh → Nearby.** Open the app on two phones, start discovery, compare the same pairing digits, and approve on both. **Chats** then allows nearby messages. **Beacons** lets you explicitly share a temporary location. Before connecting, the sections stay visible and unavailable actions are gray. Browser users need the Android app for these connections.
-8. **Bottom SOS button → Emergency SOS.** Review your message and consent. With nearby phones connected, relay it to them. Without a connection, Android can queue it on this phone; you can cancel that queue. An SOS in this app does not automatically contact emergency services. Use your saved local emergency number when possible.
-9. **Back** returns to the previous page. The bottom bar opens **Home / Explore / SOS / Mesh / Profile**. Profile also contains contacts, offline pack, language, privacy, and help.
+1. Enter as guest. Your preparation stays on this device.
+2. Planning a visit? Home → Check a destination → search/select → choose travel date → review Weather, Reports and Map. Save a briefing. Explore tiles open their named places.
+3. Plan activities: Trip replanner → dated stops/preferences → review changes → compare original/proposal → edit or accept. Fixed bookings stay fixed.
+4. Prepare Safety pack while connected: save guidance, contacts, meeting point and itinerary. Reopen the pack offline; check saved timestamps.
+5. Already at a location? Risk → Map → select a point or explicitly use location. Reports require public consent; routes consider only available hazard data.
+6. Need instructions? Emergency guide → hazard/language → source-linked steps, one-step view, listening or source questions. Translations need review; English comparison is available.
+7. Share status online? Home → Quick check-in → create/join private group → consent → choose status. Nearby connections use separate consent.
+8. No internet? Android Mesh → Nearby → start on both phones → compare digits → accept on both → chat/status. A browser cannot use the native radio.
+9. Emergency SOS has its own navigation button. Read guidance/contact someone or consent to queue/send a Nearby SOS. Peer acknowledgement does not mean rescue dispatch.
+10. Safety beacon publishes a chosen GPS refuge/meeting point to nearby peers; check expiry and sender. It is not an authority-certified shelter.
 
-Before travel, open and save the information while online. Saved guidance, contacts and plans remain on the device; fresh weather, translations and private groups need a working internet service. For practical pairing and message-delivery checks, see [MESH_TEST_GUIDE.md](MESH_TEST_GUIDE.md).
+Back returns to the previous page. Profile holds language, contacts and privacy settings. For installation/testing and remaining features read FINAL_HANDOFF.md and FEATURE_AUDIT.md.

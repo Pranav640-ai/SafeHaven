@@ -19,3 +19,8 @@
 .tool-place>span,.group-member>span{min-width:0;overflow-wrap:anywhere}
 .tool-place>svg,.group-member>.icon-button{flex:none}
 .tool-card>.secondary-button{min-height:44px;justify-content:center}
+
+/* Keep destination entry and its action aligned at narrow phone widths. */
+.place-search>.tool-inline{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center}
+.place-search>.tool-inline>input,.place-search>.tool-inline>.secondary-button{height:46px;min-height:46px;margin:0;box-sizing:border-box}
+.tool-inline>.tool-field input,.tool-inline>.tool-field select{min-height:44px}

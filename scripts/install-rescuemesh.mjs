@@ -95,3 +95,11 @@ patch(main, source => {
   return source;
 });
 console.log('RescueMesh Kotlin plugin, Nearby Gradle dependency, permissions and activity registration installed.');
+
+// Native speech is a separate service; it does not depend on a Nearby link.
+patch(main, source => {
+  if(source.includes('registerPlugin(SafetySpeechPlugin')) return source;
+  if(main.endsWith('.kt')) return source.replace('import com.safehaven.rescuemesh.RescueMeshPlugin','import com.safehaven.rescuemesh.RescueMeshPlugin\nimport com.safehaven.rescuemesh.SafetySpeechPlugin').replace('registerPlugin(RescueMeshPlugin::class.java)','registerPlugin(RescueMeshPlugin::class.java)\n        registerPlugin(SafetySpeechPlugin::class.java)');
+  return source.replace('import com.safehaven.rescuemesh.RescueMeshPlugin;','import com.safehaven.rescuemesh.RescueMeshPlugin;\nimport com.safehaven.rescuemesh.SafetySpeechPlugin;').replace('registerPlugin(RescueMeshPlugin.class);','registerPlugin(RescueMeshPlugin.class);\n        registerPlugin(SafetySpeechPlugin.class);');
+});
+patch(manifest, source=>source.includes('android.intent.action.TTS_SERVICE')?source:source.replace('<application','<queries><intent><action android:name="android.intent.action.TTS_SERVICE" /></intent></queries>\n    <application'));

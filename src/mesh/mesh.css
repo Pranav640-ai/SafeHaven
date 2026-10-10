@@ -79,3 +79,5 @@
 .mesh-live-sectionhead{align-items:center;flex-wrap:wrap}
 .mesh-live .mesh-live-guide{min-height:44px}
 .mesh-live-field input,.mesh-live-field textarea,.mesh-live-field select{box-sizing:border-box}
+
+.mesh-live-beacon.is-expired{background:#e6e8e1;border-color:#cdd3c6}.mesh-live-beacon.is-expired *{color:#7e8876}

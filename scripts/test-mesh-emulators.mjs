@@ -5,7 +5,8 @@ import { chromium, expect as baseExpect } from '@playwright/test';
 
 // Only touches two explicitly selected running emulators, never a physical phone.
 const adb=process.env.ADB_PATH||path.join(process.env.LOCALAPPDATA||'', 'Android/Sdk/platform-tools/adb.exe');
-const apk=path.resolve('android/app/build/outputs/apk/debug/app-debug.apk');
+const apk=process.env.MESH_APK_PATH||['android/app/build/outputs/apk/debug/app-debug.apk','android/app/build/intermediates/apk/debug/app-debug.apk'].map(p=>path.resolve(p)).find(p=>fs.existsSync(p));
+if(!apk)throw new Error('Build a debug APK first with :app:assembleDebug.');
 const pkg='com.safehaven.ai';
 const expect=baseExpect.configure({timeout:15000});
 const output=path.resolve('test-results/mesh-emulators');
@@ -28,7 +29,7 @@ try{
   const serial=selected[i];const shell=(...args)=>invoke(['-s',serial,'shell',...args]);
   await waitUntil(()=>shell('getprop','sys.boot_completed')==='1',120000);
   record('emulator-booted',{serial});
-  record('install',{serial,result:invoke(['-s',serial,'install','-r',apk])});
+  record('install',{serial,result:invoke(['-s',serial,'install','-r','-t',apk])});
   const sdk=Number(shell('getprop','ro.build.version.sdk'));
   // Explicit testing grants avoid native permission dialogs blocking the WebView driver.
   const permissions=['ACCESS_COARSE_LOCATION','ACCESS_FINE_LOCATION',...(sdk>=31?['BLUETOOTH_SCAN','BLUETOOTH_CONNECT','BLUETOOTH_ADVERTISE']:[]),...(sdk>=33?['NEARBY_WIFI_DEVICES']:[])];
@@ -66,6 +67,7 @@ try{
  }
  const [a,b]=clients;
  // Validate offline queue/cancellation and the SOS route even if simulator radios cannot pair.
+ record('before-sos-route',{history:await a.page.evaluate(()=>window.history.state)});
  await a.page.getByRole('button',{name:'Emergency SOS',exact:true}).dispatchEvent('click');
  await expect(a.page.getByRole('heading',{name:'Emergency SOS',exact:true})).toBeVisible();
  await expect(a.page.getByRole('button',{name:'Mesh',exact:true})).not.toHaveAttribute('aria-current','page');
@@ -79,18 +81,20 @@ try{
  await expect(a.page.locator('.mesh-live-confirm input')).not.toBeChecked();
  record('before-android-back',{focus:a.shell('dumpsys','window').split(/\r?\n/).find(line=>line.includes('mCurrentFocus=')),history:await a.page.evaluate(()=>window.history.state)});
  a.shell('input','keyevent','4');
- await expect(a.page.getByRole('heading',{name:'RescueMesh',exact:true})).toBeVisible();
+ try{await expect(a.page.getByRole('heading',{name:'RescueMesh',exact:true})).toBeVisible();record('initial-sos-route-android-back-passed',{});}catch(error){record('android-back-failed',{message:error.message,history:await a.page.evaluate(()=>window.history.state)});await a.page.getByRole('button',{name:'Mesh',exact:true}).dispatchEvent('click');await expect(a.page.getByRole('heading',{name:'RescueMesh',exact:true})).toBeVisible();}
  await a.page.getByRole('tab',{name:'Nearby',exact:true}).dispatchEvent('click');
- record('initial-sos-route-android-back-passed',{});
  await a.page.getByRole('button',{name:'Start Nearby discovery'}).dispatchEvent('click');
  await b.page.getByRole('button',{name:'Start Nearby discovery'}).dispatchEvent('click');
  record('discovery-started',{devices:selected});
+ let recordDiscoveryError='';
  const codes=await waitUntil(async()=>{
-  const read=async(client)=>{const request=client.page.locator('.mesh-live-peer-request').first();return await request.count()?await request.locator('b').innerText():null;};
+  const read=async(client,peerName)=>{const request=client.page.locator('.mesh-live-peer-request').filter({hasText:peerName}).first();return await request.count()?await request.locator('b').innerText():null;};
   const errors=await Promise.all(clients.map(c=>c.page.locator('.mesh-live-alert').allTextContents()));
-  if(errors.flat().length)throw new Error(`Native discovery error: ${errors.flat().join('; ')}`);
-  const pair=await Promise.all([read(a),read(b)]);return pair[0]&&pair[0]===pair[1]?pair:null;
- },60000);
+  const pair=await Promise.all([read(a,'MESH TEST B'),read(b,'MESH TEST A')]);
+  if(pair[0]&&pair[0]===pair[1])return pair;
+  if(errors.flat().length)recordDiscoveryError=errors.flat().join('; ');
+  return null;
+ },60000).catch(error=>{throw new Error(`${error.message}${recordDiscoveryError?': '+recordDiscoveryError:''}`)});
  record('authentication-codes-match',{matched:true});
  // Compare automatically, then approve precisely the requests containing that code.
  for(const client of clients)await client.page.locator('.mesh-live-peer-request').filter({hasText:codes[0]}).getByRole('button',{name:'Codes match'}).dispatchEvent('click');
@@ -133,7 +137,8 @@ try{
  a.shell('input','keyevent','4');
  await expect(a.page.getByRole('heading',{name:'RescueMesh',exact:true})).toBeVisible();
  record('android-back-passed',{});
- record('complete',{passed:true,scope:'Two-emulator pairing, bidirectional chat ACK, SOS ACK, disconnect, queue cancellation, Android Back. Not physical-radio or multi-hop acceptance.'});
+ record('complete',{passed:!records.some(r=>r.step==='android-back-failed'),scope:'Two-emulator pairing, bidirectional chat ACK, SOS ACK, disconnect, queue cancellation, Android Back. Not physical-radio or multi-hop acceptance.'});
+ if(records.some(r=>r.step==='android-back-failed'))process.exitCode=1;
 }catch(error){
  record('failure',{message:error.message});
  for(const client of clients){

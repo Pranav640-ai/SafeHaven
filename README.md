@@ -108,3 +108,7 @@ The original teammate Kotlin experiments are on **`main/android-rescuemesh/`**, 
 3. Build the Android APK with its public HTTPS API URL, then perform the deferred two/three-phone mesh tests. No radio-delivery claim is established by web tests.
 
 **AI coding assistants:** read [CODEX_HANDOFF.md](CODEX_HANDOFF.md) and [IMPLEMENTATION.md](IMPLEMENTATION.md) before editing. Preserve consent, provenance and honest delivery state.
+
+## Current product handoff
+
+Use [FINAL_HANDOFF.md](FINAL_HANDOFF.md) for website/Android setup, hosting, Google sign-in and testing. [FEATURE_AUDIT.md](FEATURE_AUDIT.md) covers both feature lists honestly; [USER_GUIDE.md](USER_GUIDE.md) explains the journey. Historical handoff files are background, not the current completion record.

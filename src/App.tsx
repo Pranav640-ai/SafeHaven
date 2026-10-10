@@ -24,12 +24,12 @@ type GuideKind = 'Flood' | 'Extreme heat' | 'Earthquake';
 type Dialog = 'profile' | 'help' | null;
 
 const features: { title: string; detail: string; icon: LucideIcon; art: string; accent: string; page: Page }[] = [
-  { title: 'Risk insights', detail: 'Warnings & reports', icon: ShieldAlert, art: '', accent: 'rose', page: 'risk' },
-  { title: 'Trip replanner', detail: 'Safer alternatives', icon: Navigation, art: '', accent: 'blue', page: 'replan' },
-  { title: 'Emergency guide', detail: 'Steps that help', icon: BookOpen, art: '', accent: 'amber', page: 'guide' },
-  { title: 'RescueMesh', detail: 'Stay connected', icon: Radio, art: '', accent: 'violet', page: 'mesh' },
-  { title: 'Safety beacon', detail: 'Meeting points', icon: MapPin, art: '', accent: 'teal', page: 'beacon' },
-  { title: 'Safety pack', detail: 'Things to keep', icon: Bookmark, art: '', accent: 'indigo', page: 'pack' },
+  { title: 'Risk insights', detail: 'Check before your visit', icon: ShieldAlert, art: '', accent: 'rose', page: 'risk' },
+  { title: 'Trip replanner', detail: 'Plan your dated activities', icon: Navigation, art: '', accent: 'blue', page: 'replan' },
+  { title: 'Emergency guide', detail: 'Find steps for an emergency', icon: BookOpen, art: '', accent: 'amber', page: 'guide' },
+  { title: 'RescueMesh', detail: 'Connect nearby without internet', icon: Radio, art: '', accent: 'violet', page: 'mesh' },
+  { title: 'Safety beacon', detail: 'Share a refuge location', icon: MapPin, art: '', accent: 'teal', page: 'beacon' },
+  { title: 'Safety pack', detail: 'Save for offline use', icon: Bookmark, art: '', accent: 'indigo', page: 'pack' },
 ];
 
 const guides: Record<GuideKind, {icon:LucideIcon; lead:string; steps:string[]}> = {
@@ -161,7 +161,7 @@ function NotificationToast({message}:{message:string}) {
 }
 
 export default function App(){
-  const [authenticated,setAuthenticated]=useState(false);
+  const [enteredApp,setEnteredApp]=useState(false);
 
 
   const [name,setName]=useState('Traveler');
@@ -186,9 +186,9 @@ export default function App(){
   const lastTop=useRef(0);
   const reduceMotion=useReducedMotion();
 
-  useEffect(()=>{if(!authenticated)return;setLoading(true);const t=window.setTimeout(()=>setLoading(false),page==='home'?640:420);return()=>window.clearTimeout(t)},[page,authenticated]);
+  useEffect(()=>{if(!enteredApp)return;setLoading(true);const t=window.setTimeout(()=>setLoading(false),page==='home'?640:420);return()=>window.clearTimeout(t)},[page,enteredApp]);
   useEffect(()=>{if(!toast)return;const t=window.setTimeout(()=>setToast(''),1600);return()=>window.clearTimeout(t)},[toast]);
-  const openDestination=(name:string)=>{go('risk');setSelectedDestination(name)};
+  const openDestination=(name:string)=>{go('risk');setSelectedDestination(name);window.history.replaceState({...window.history.state,destination:name},'')};
   const pendingScroll=useRef<number|null>(null);
   const navigationDepth=useRef(0);
   const languageNames:Record<string,string>={en:'English',hi:'Hindi',ta:'Tamil',fr:'French',es:'Spanish'};
@@ -216,6 +216,7 @@ export default function App(){
     const pop=(event:PopStateEvent)=>{
       const entry=event.state;
       navigationDepth.current=entry?.safehaven?entry.depth:0;
+      setSelectedDestination(entry?.destination||null);
       setPage(entry?.safehaven?entry.page:'home');setDialog(entry?.safehaven?entry.dialog:null);
       pendingScroll.current=entry?.scroll||0;setCompact(false);
     };
@@ -226,7 +227,7 @@ export default function App(){
     if(loading || pendingScroll.current===null)return;
     const timer=window.setTimeout(()=>{if(scrollRef.current){scrollRef.current.scrollTop=pendingScroll.current||0;lastTop.current=scrollRef.current.scrollTop;pendingScroll.current=null;}},250);
     return()=>window.clearTimeout(timer);
-  },[page,loading,dialog,authenticated]);
+  },[page,loading,dialog,enteredApp]);
   useEffect(()=>{
     const key=(event:KeyboardEvent)=>{if(event.key==='Escape' && dialog)closeDialog();};
     window.addEventListener('keydown',key);
@@ -245,7 +246,7 @@ export default function App(){
   const handleScroll=(event:UIEvent<HTMLDivElement>)=>{const y=event.currentTarget.scrollTop;const diff=y-lastTop.current;if(y<66)setCompact(false);else if(diff>15)setCompact(true);else if(diff< -16)setCompact(false);lastTop.current=y;};
 
   const tab:Page = ['language','privacy'].includes(page)?'profile':['risk','replan','guide','beacon','pack'].includes(page)?'explore':page;
-  const enter=(_guest:boolean)=>{navigationDepth.current=0;window.history.replaceState({safehaven:true,page:'home',scroll:0,depth:0,dialog:null},'');setAuthenticated(true);setPage('home');setToast('Welcome to SafeHaven');};
+  const enter=(_guest:boolean)=>{navigationDepth.current=0;window.history.replaceState({safehaven:true,page:'home',scroll:0,depth:0,dialog:null},'');setEnteredApp(true);setPage('home');setToast('Welcome to SafeHaven');};
 
   function login(){return <div className="login-screen">
     <section className="login-art"><div className="login-top"><Brand/><button className="login-skip" type="button" onClick={()=>enter(true)}>Skip</button></div>
@@ -261,9 +262,9 @@ export default function App(){
   function home(){return <>
     <header className="home-header"><button className="home-location" type="button" onClick={()=>go('explore')}><MapPin size={21}/><span><small>YOUR DESTINATION</small><strong>Explore a location <ChevronDown size={14}/></strong></span></button><div className="header-actions"><button className="avatar-button" type="button" onClick={()=>go('profile')} aria-label="Open profile"><span>{name.charAt(0).toUpperCase()}</span></button></div></header>
     <div className="home-welcome"><p>Welcome to SafeHaven</p><h1>A better way to be prepared.</h1></div>
-    <button type="button" className="hero-risk" onClick={()=>go('risk')}><img className="hero-risk-photo" src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1100&q=82" onError={e=>{e.currentTarget.style.display="none"}} alt="Mountain landscape" loading="eager"/><div className="hero-risk-bg"/><div className="hero-risk-top"><span className="hero-shield"><ShieldCheck size={24}/></span><span className="hero-label">DESTINATION SAFETY</span><ArrowRight size={20}/></div><h2>Know before<br/>you go.</h2><p>Check weather, reports and local guidance for your next stop.</p><span className="hero-link">Explore risk insights <ChevronRight size={16}/></span></button>
+    <button type="button" className="hero-risk" onClick={()=>go('risk')}><img className="hero-risk-photo" src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1100&q=82" onError={e=>{e.currentTarget.style.display="none"}} alt="Mountain landscape" loading="eager"/><div className="hero-risk-bg"/><div className="hero-risk-top"><span className="hero-shield"><ShieldCheck size={24}/></span><span className="hero-label">DESTINATION SAFETY</span></div><h2>Know before<br/>you go.</h2><p>Check weather, reports and local guidance for your next stop.</p><span className="hero-link">Check a destination <ChevronRight size={16}/></span></button>
     
-    <Heading title="What would you like to do?"/>
+    <Heading title="What would you like to do?" sub="Planning a trip? Start with a destination check, then build your itinerary and save your pack. Already there? Use guidance, check-in or SOS."/>
     <div className="feature-grid">{features.map((f,i)=><FeatureCard key={f.title} feature={f} index={i} open={()=>go(f.page)}/>)}</div>
     <section className="home-quick-section" aria-label="Quick safety actions">
       <Heading title="Quick actions" />
@@ -320,17 +321,17 @@ export default function App(){
     </>
   }
 
-  function risk(){return <RiskTool key={selectedDestination||"choose-destination"} destination={selectedDestination} back={back} notify={setToast}/>;}
+  function risk(){return <RiskTool onChoose={place=>{setSelectedDestination(place.name);window.history.replaceState({...window.history.state,destination:place.name},'')}} key={selectedDestination||"choose-destination"} destination={selectedDestination} back={back} notify={setToast} navigate={go}/>;}
 
-  function replan(){return <ReplanTool back={back} notify={setToast}/>;}
+  function replan(){return <ReplanTool back={back} notify={setToast} navigate={go}/>;}
 
-  function guidePage(){return <GuidanceTool back={back} notify={setToast}/>;}
+  function guidePage(){return <GuidanceTool back={back} notify={setToast} navigate={go}/>;}
 
   function mesh(){return <RescueMeshScreen mesh={meshApi} onBack={back} onGuide={()=>go('guide')}/>;}
   function sos(){return <RescueMeshScreen mesh={meshApi} onBack={back} initialTab="SOS" onGuide={()=>go('guide')} standaloneSOS/>;}
   function beacon(){return <RescueMeshScreen key="beacon" mesh={meshApi} onBack={back} initialTab="Beacons" onGuide={()=>go('guide')}/>;}
 
-  function pack(){return <PackTool initialSection={packSection.current} back={back} notify={setToast} checklist={checklist} toggleChecklist={title=>setChecklist(old=>old.includes(title)?old.filter(x=>x!==title):[...old,title])} nearbyShare={meshApi.available&&meshApi.state.peers.length>0?meshApi.sendCheckIn:undefined}/>;}
+  function pack(){return <PackTool initialSection={packSection.current} back={back} notify={setToast} navigate={go} checklist={checklist} toggleChecklist={title=>setChecklist(old=>old.includes(title)?old.filter(x=>x!==title):[...old,title])} nearbyShare={meshApi.available&&meshApi.state.peers.length>0?meshApi.sendCheckIn:undefined}/>;}
 
   function profile(){return <>
     <BackHeader title="Profile" back={back} action={<IconButton icon={Settings} label="Help and settings" onClick={()=>openDialog('help')}/>}/>
@@ -366,20 +367,20 @@ export default function App(){
         <AppRow icon={CircleHelp} title="Help & information" onClick={()=>openDialog('help')}/>
       </div>
     </section>
-    <button type="button" className="signout" onClick={()=>{setAuthenticated(false);setPage('home');navigationDepth.current=0;window.history.replaceState({safehaven:true,page:'home',scroll:0,depth:0,dialog:null},'');setName('Traveler');setToast('')}}>Back to welcome screen</button>
+    <button type="button" className="signout" onClick={()=>{setEnteredApp(false);setPage('home');navigationDepth.current=0;window.history.replaceState({safehaven:true,page:'home',scroll:0,depth:0,dialog:null},'');setName('Traveler');setToast('')}}>Back to welcome screen</button>
   </>}
   function languagePage(){return <><BackHeader title="Language settings" back={back}/><section className="content-section"><h2>Preferred language</h2><p>Used for safety guidance and report explanations. The rest of the interface currently remains in English.</p><label className="tool-field">Language<select aria-label="Preferred language" value={read('language',language)} onChange={event=>{setLanguage(event.target.value);setToast('Language preference saved');}}>{Object.entries(languageNames).map(([code,title])=><option key={code} value={code}>{title}</option>)}</select></label><p className="tool-muted">Hindi and Tamil have prepared translations. French and Spanish require the online AI service. Translations are unreviewed; English source text stays available.</p><button className="secondary-button" onClick={()=>go('guide')}>Preview safety guidance <ArrowRight size={17}/></button></section></>}
-  function privacy(){return <><BackHeader title="Privacy & sharing" back={back}/><section className="content-section"><h2>Your choices</h2><p>Contacts, plans, saved guidance and language preferences are stored on this device. Editing your display name lasts for this session.</p><p>Private group check-ins require consent and an online service. Nearby check-ins require a connected phone and separate consent. Beacons share your location only when you publish one.</p><p>Stopping RescueMesh disconnects peers and clears its in-memory SOS queue and beacons. Leaving a private group removes your membership from that group.</p><button className="secondary-button" onClick={()=>go('pack')}>Manage group sharing</button><button className="secondary-button" onClick={()=>go('mesh')}>Manage nearby connections</button></section></>}
+  function privacy(){return <><BackHeader title="Privacy & sharing" back={back}/><section className="content-section"><h2>Your choices</h2><p>Contacts, plans, saved guidance and language preferences are stored on this device. Editing your display name lasts for this session.</p><p>Private group check-ins require consent and an online service. Nearby check-ins require a connected phone and separate consent. Beacons share your location only when you publish one.</p><p>Stopping RescueMesh disconnects peers and removes saved pending SOS/check-ins and beacons. Pending messages are encrypted on this phone, survive an app restart and expire within 24 hours. No background delivery is guaranteed. Leaving a private group removes your membership from that group.</p><button className="secondary-button" onClick={()=>go('pack')}>Manage group sharing</button><button className="secondary-button" onClick={()=>go('mesh')}>Manage nearby connections</button></section></>}
   const content=()=>({home,explore,risk,replan,guide:guidePage,mesh,beacon,pack,profile,language:languagePage,privacy,sos}[page]());
   return <div className="preview-stage">
     <aside className="desktop-side"><Brand/><h1>Thoughtful design.<br/><span>Ready for the journey.</span></h1><p>Discover places, prepare for the unexpected, and keep your plans in one place.</p><div className="desktop-help"><Smartphone size={21}/><span>Choose a destination, review your trip, and save your safety essentials before you travel.</span></div><p className="desktop-disclaimer">Emergency information is source-dependent. Always check local authorities.</p></aside>
-    <main className={`phone-shell ${!authenticated?'phone-onboarding':''}`} aria-label="SafeHaven application">
+    <main className={`phone-shell ${!enteredApp?'phone-onboarding':''}`} aria-label="SafeHaven application">
       <div className="phone-scroll" ref={scrollRef} onScroll={handleScroll}>
-        {!authenticated ? login() : <AnimatePresence mode="wait" initial={false}><motion.div key={page} className="screen-content" initial={reduceMotion?false:{opacity:0,y:14,filter:'blur(3px)'}} animate={{opacity:1,y:0,filter:'blur(0px)'}} exit={reduceMotion?{}:{opacity:0,y:-9,filter:'blur(2px)'}} transition={{type:'spring',stiffness:310,damping:31,mass:.8}}>
+        {!enteredApp ? login() : <AnimatePresence mode="wait" initial={false}><motion.div key={page} className="screen-content" initial={reduceMotion?false:{opacity:0,y:14,filter:'blur(3px)'}} animate={{opacity:1,y:0,filter:'blur(0px)'}} exit={reduceMotion?{}:{opacity:0,y:-9,filter:'blur(2px)'}} transition={{type:'spring',stiffness:310,damping:31,mass:.8}}>
           {loading?<SkeletonScreen profile={page==='profile'}/>:content()}
         </motion.div></AnimatePresence>}
       </div>
-      {authenticated&&<nav className={`floating-dock ${compact?'dock-compact':''}`} aria-label="Main navigation">
+      {enteredApp&&<nav className={`floating-dock ${compact?'dock-compact':''}`} aria-label="Main navigation">
         {([{id:'home',label:'Home',icon:Home},{id:'explore',label:'Explore',icon:Compass}] as const).map(t=>{const Icon=t.icon;return <button key={t.id} type="button" aria-label={t.label} aria-current={tab===t.id?'page':undefined} onClick={()=>go(t.id)} className={`dock-item ${tab===t.id?'dock-active':''}`}><span className="dock-active-bg" aria-hidden="true"/><Icon size={22} strokeWidth={2.1}/><span>{t.label}</span></button>})}
         <motion.button type="button" className="dock-sos" aria-label="Emergency SOS" aria-current={page==='sos'?'page':undefined} onClick={()=>go('sos')} whileTap={{scale:.92}}><ShieldAlert size={21}/><small>SOS</small></motion.button>
         {([{id:'mesh',label:'Mesh',icon:Radio},{id:'profile',label:'Profile',icon:UserRound}] as const).map(t=>{const Icon=t.icon;return <button key={t.id} type="button" aria-label={t.label} aria-current={tab===t.id?'page':undefined} onClick={()=>go(t.id)} className={`dock-item ${tab===t.id?'dock-active':''}`}><span className="dock-active-bg" aria-hidden="true"/><Icon size={22} strokeWidth={2.1}/><span>{t.label}</span></button>})}

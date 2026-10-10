@@ -6,6 +6,7 @@ import com.getcapacitor.JSObject
 import com.google.android.gms.nearby.Nearby
 import com.google.android.gms.nearby.connection.*
 import org.json.JSONObject
+import org.json.JSONArray
 import java.util.UUID
 
 /**
@@ -29,6 +30,11 @@ class RescueMeshManager(
     private val discovered = linkedMapOf<String, String>()
     private val seen = LinkedHashSet<String>()
     private val pendingSOS = mutableListOf<JSONObject>()
+    private val carriedSOS = mutableListOf<JSONObject>()
+    private val pendingCheckIns = mutableListOf<JSONObject>()
+    private val checkInStore = linkedMapOf<String, JSONObject>()
+    private val queueStore = MeshQueueStore(context)
+    private var queueError: String? = null
     private val beaconStore = linkedMapOf<String, JSONObject>()
     private var ownBeaconId: String? = null
     private var name: String = "SafeHaven"
@@ -37,6 +43,41 @@ class RescueMeshManager(
     private var advertising = false
     private var discovering = false
 
+    init {
+        try {
+            val saved = queueStore.read()
+            identity = saved.optString("identity").ifBlank { identity }
+            name = saved.optString("name").ifBlank { name }
+            for ((key, target) in listOf("sos" to pendingSOS, "carried" to carriedSOS, "checkins" to pendingCheckIns)) {
+                val items = saved.optJSONArray(key) ?: JSONArray()
+                for (i in 0 until items.length()) {
+                    val packet = items.optJSONObject(i) ?: continue
+                    if (packet.optLong("expiresAt") > System.currentTimeMillis()) {
+                        target.add(packet); remember(packet.optString("id"))
+                    }
+                }
+            }
+            val checkins = saved.optJSONArray("receivedCheckins") ?: JSONArray()
+            for (i in 0 until checkins.length()) {
+                val p = checkins.optJSONObject(i) ?: continue
+                if (p.optLong("expiresAt") > System.currentTimeMillis()) checkInStore[p.optString("from")] = p
+            }
+        } catch (_: Exception) { queueError = "Saved queue could not be opened on this phone. Do not rely on previously queued messages." }
+    }
+    private fun persist() {
+        try { queueStore.write(JSONObject().put("identity", identity).put("name", name)
+            .put("receivedCheckins", JSONArray(checkInStore.values.toList()))
+            .put("sos", JSONArray(pendingSOS)).put("carried", JSONArray(carriedSOS)).put("checkins", JSONArray(pendingCheckIns)))
+            queueError = null
+        } catch (_: Exception) { queueError = "Unable to save the encrypted offline queue. Keep this app open and do not rely on later delivery."; event("error", JSObject().put("message", queueError)) }
+    }
+    private fun expireQueues() {
+        val now = System.currentTimeMillis()
+        val changed = pendingSOS.removeAll { it.optLong("expiresAt") <= now } or
+            carriedSOS.removeAll { it.optLong("expiresAt") <= now } or
+            pendingCheckIns.removeAll { it.optLong("expiresAt") <= now }
+        if (changed) persist()
+    }
     private fun event(type: String, payload: JSObject = JSObject()) {
         emit(type, payload)
     }
@@ -48,16 +89,19 @@ class RescueMeshManager(
     }
 
     fun state(): JSObject {
+        expireQueues()
         val p = JSArray()
         peers.forEach { (id, title) -> p.put(JSObject().put("id", id).put("name", title)) }
         val d = JSArray()
         discovered.forEach { (id, title) -> d.put(JSObject().put("id", id).put("name", title)) }
         val b = JSArray()
-        beaconStore.values.filter { it.optLong("expiresAt") > System.currentTimeMillis() }
+        beaconStore.values.filter { it.optLong("expiresAt") > System.currentTimeMillis() - 60 * 60_000L }
             .forEach { b.put(JSObject(it.toString())) }
         return JSObject().put("running", running).put("advertising", advertising)
             .put("discovering", discovering).put("peers", p).put("discovered", d)
             .put("beacons", b).put("queuedSOS", pendingSOS.size)
+            .put("queuedCheckIns", pendingCheckIns.size).put("carriedSOS", carriedSOS.size)
+            .put("queueError", queueError ?: "").put("checkIns", JSONArray(checkInStore.values.filter { it.optLong("expiresAt") > System.currentTimeMillis() }))
             .put("identity", identity).put("deviceName", name)
     }
 
@@ -68,6 +112,7 @@ class RescueMeshManager(
     }
 
     fun start(deviceName: String) {
+        queueError?.let { event("error", JSObject().put("message", it)) }
         name = deviceName.trim().take(32).ifEmpty { "SafeHaven" }
         if (running) { update(); return }
         running = true
@@ -84,12 +129,12 @@ class RescueMeshManager(
         update()
     }
 
-    fun stop() {
+    fun stop(clearQueue: Boolean = true) {
         client.stopAdvertising()
         client.stopDiscovery()
         client.stopAllEndpoints()
         peers.clear(); pending.clear(); discovered.clear()
-        pendingSOS.clear() // Stop means no queued SOS should be sent after a later restart.
+        if (clearQueue) { seen.clear(); pendingSOS.clear(); pendingCheckIns.clear(); carriedSOS.clear(); checkInStore.clear(); persist() }
         ownBeaconId = null; beaconStore.clear()
         running = false; advertising = false; discovering = false
         update()
@@ -133,6 +178,8 @@ class RescueMeshManager(
                 peers[endpointId] = endpointName ?: "Nearby device"
                 event("connected", JSObject().put("id", endpointId).put("name", peers[endpointId]))
                 flushSOS()
+                pendingCheckIns.forEach { transmit(it, endpointId) }
+                carriedSOS.forEach { transmit(it, endpointId) }
                 beaconStore.values.filter { it.optLong("expiresAt") > System.currentTimeMillis() }
                     .forEach { transmit(it, endpointId) }
             } else {
@@ -154,23 +201,40 @@ class RescueMeshManager(
             if (data.size > MAX_BYTES) return
             val packet = try { JSONObject(String(data, Charsets.UTF_8)) } catch (_: Exception) { return }
             val id = packet.optString("id")
-            if (packet.optInt("v") != 1 || id.isBlank() || !remember(id)) return
+            if (packet.optInt("v") != 1 || id.isBlank()) return
             val hops = packet.optInt("ttl", 0)
             if (hops < 0 || hops > MAX_HOPS) return
             val type = packet.optString("type")
             val expiry = packet.optLong("expiresAt", Long.MAX_VALUE)
             if (expiry <= System.currentTimeMillis()) return
+            if (packet.optLong("createdAt") <= 0 || packet.optLong("createdAt") > System.currentTimeMillis() + 5 * 60_000L) return
+            if (packet.optString("from") == identity && type != "ack") return
+            if (!remember(id)) return
 
             when (type) {
                 "chat", "sos", "checkin" -> {
+                    if (type == "checkin" && packet.optString("body") in listOf("safe", "needHelp", "unknown")) {
+                        val prev = checkInStore[packet.optString("from")]
+                        if (prev == null || prev.optLong("createdAt") < packet.optLong("createdAt")) {
+                            if (checkInStore.size >= 128) checkInStore.remove(checkInStore.keys.first())
+                            checkInStore[packet.optString("from")] = JSONObject(packet.toString()).put("expiresAt", minOf(expiry, System.currentTimeMillis() + 24 * 60 * 60_000L))
+                            persist()
+                        }
+                    }
+                    if (type == "sos" && hops > 0 && carriedSOS.size < 64) {
+                        carriedSOS.add(JSONObject(packet.toString()).put("ttl", hops - 1)
+                            .put("expiresAt", minOf(expiry, System.currentTimeMillis() + 24 * 60 * 60_000L)))
+                        persist()
+                    }
                     event("message", JSObject(packet.toString()).put("received", true))
                     val ack = makePacket("ack", "", 3).put("refId", id)
                     transmit(ack, endpointId) // Return the acknowledgement to the phone that sent this hop.
                 }
                 "beacon" -> {
-                    if (packet.has("latitude") && packet.has("longitude")) {
+                    if (packet.optDouble("latitude", Double.NaN) in -90.0..90.0 && packet.optDouble("longitude", Double.NaN) in -180.0..180.0 && expiry <= System.currentTimeMillis() + 185 * 60_000L) {
                         val previous = beaconStore[packet.optString("beaconId")]
                         if (previous == null || packet.optLong("createdAt") >= previous.optLong("createdAt")) {
+                            if (beaconStore.size >= 128) beaconStore.remove(beaconStore.keys.first())
                             beaconStore[packet.optString("beaconId")] = packet
                             event("beacon", JSObject(packet.toString()))
                         }
@@ -180,7 +244,12 @@ class RescueMeshManager(
                     beaconStore.remove(packet.optString("refId"))
                     event("beaconRemoved", JSObject().put("id", packet.optString("refId")))
                 }
-                "ack" -> event("ack", JSObject(packet.toString()))
+                "ack" -> {
+                    pendingSOS.removeAll { it.optString("id") == packet.optString("refId") }
+                    pendingCheckIns.removeAll { it.optString("id") == packet.optString("refId") }
+                    persist()
+                    event("ack", JSObject(packet.toString()))
+                }
                 else -> return
             }
             if (hops > 0) {
@@ -217,31 +286,28 @@ class RescueMeshManager(
         return JSObject().put("id", p.getString("id")).put("status", "offered")
     }
     fun checkIn(status: String): JSObject {
-        require(peers.isNotEmpty()) { "No connected phones" }
-        require(status in listOf("safe", "needHelp")) { "Invalid check-in state" }
-        val p = makePacket("checkin", status, MAX_HOPS)
-        remember(p.getString("id")); sendAll(p)
-        return JSObject().put("id", p.getString("id")).put("status", "offered")
+        require(status in listOf("safe", "needHelp", "unknown")) { "Invalid check-in state" }
+        val p = makePacket("checkin", status, MAX_HOPS).put("expiresAt", System.currentTimeMillis() + 24 * 60 * 60_000L)
+        pendingCheckIns.clear(); pendingCheckIns.add(p); checkInStore[identity] = p; persist(); check(queueError == null) { queueError ?: "Unable to save queue" }
+        remember(p.getString("id")); sendAll(p); update()
+        return JSObject().put("id", p.getString("id")).put("status", if (peers.isEmpty()) "queued-on-device" else "offered")
     }
     fun sos(text: String): JSObject {
         require(text.isNotBlank() && text.length <= 500) { "SOS must be 1–500 characters" }
-        val p = makePacket("sos", text.trim(), MAX_HOPS)
-        remember(p.getString("id"))
-        if (peers.isEmpty()) { pendingSOS.add(p); update(); return JSObject().put("id", p.getString("id")).put("status", "queued-in-memory") }
-        sendAll(p)
-        return JSObject().put("id", p.getString("id")).put("status", "offered")
+        require(pendingSOS.size < 20) { "Cancel an existing queued SOS before adding another" }
+        val p = makePacket("sos", text.trim(), MAX_HOPS).put("expiresAt", System.currentTimeMillis() + 24 * 60 * 60_000L)
+        pendingSOS.add(p); persist(); check(queueError == null) { queueError ?: "Unable to save queue" }; remember(p.getString("id")); sendAll(p); update()
+        return JSObject().put("id", p.getString("id")).put("status", if (peers.isEmpty()) "queued-on-device" else "offered")
     }
     fun cancelQueuedSOS(): JSObject {
         val removed = pendingSOS.size
-        pendingSOS.clear()
-        update()
+        pendingSOS.clear(); persist(); update()
         return JSObject().put("cancelled", removed)
     }
     private fun flushSOS() {
         if (peers.isEmpty()) return
-        val sending = pendingSOS.toList()
-        pendingSOS.clear()
-        sending.forEach { sendAll(it); event("queuedSOSOffered", JSObject().put("id", it.getString("id"))) }
+        expireQueues()
+        pendingSOS.toList().forEach { sendAll(it); event("queuedSOSOffered", JSObject().put("id", it.getString("id"))) }
         update()
     }
     fun beacon(text: String, lat: Double, lon: Double, minutes: Int): JSObject {

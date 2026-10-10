@@ -37,6 +37,8 @@ export type Report = {
     published_at: string | null;
     historical: boolean;
     distance_km: number | null;
+    latitude?: number;
+    longitude?: number;
     scope: string;
 };
 export type Incidents = {
@@ -56,9 +58,12 @@ export type Plan = {
     stops: {
         original: Stop;
         alternative: string;
+        alternative_date?:string;
+        alternative_kind?:Stop['kind'];
         changed: boolean;
         reasons: string[];
         assessment: string;
+        bulletins?: {id:string;title:string;source_url:string;trust:string}[];
         source: Source | null;
         fetched_at: string | null;
     }[];
@@ -99,11 +104,12 @@ export type Group = {
 const configured = (import.meta as ImportMeta & {
     env: Record<string, string>;
 }).env.VITE_API_BASE_URL || '';
+const apiBase=configured.replace(/\/+$/,'');
 export async function api<T>(path: string, body?: unknown, token?: string, method?: string): Promise<T> {
     const abort = new AbortController();
     const timeout = window.setTimeout(() => abort.abort(), 90000);
     try {
-        const response = await fetch(`${configured}/api${path}`, { method: method || (body === undefined ? 'GET' : 'POST'), headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) }, body: body === undefined ? undefined : JSON.stringify(body), signal: abort.signal, cache: 'no-store' });
+        const response = await fetch(`${apiBase}/api${path}`, { method: method || (body === undefined ? 'GET' : 'POST'), headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) }, body: body === undefined ? undefined : JSON.stringify(body), signal: abort.signal, cache: 'no-store' });
         if (!response.ok) {
             let message = 'Service unavailable. Please retry.';
             try {

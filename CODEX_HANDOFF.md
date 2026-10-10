@@ -1,3 +1,7 @@
+# Historical handoff
+
+For the current 10 October 2026 implementation and measured results use [FINAL_HANDOFF.md](FINAL_HANDOFF.md) and [FEATURE_AUDIT.md](FEATURE_AUDIT.md). Details below may describe an earlier version.
+
 # Codex engineering handoff — SafeHaven AI
 
 **As of 2026-10-10.** This file is an actionable handoff, not a claim of a completed or field-proven emergency system.
