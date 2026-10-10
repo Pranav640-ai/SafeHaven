@@ -1,6 +1,6 @@
-# Meridian
+# SafeHaven AI
 
-Canonical branch: ui. React/Vite travel-safety interface, FastAPI services and a Capacitor Android Nearby bridge. No account is required for guest preparation. Google sign-in and production hosting remain outstanding.
+Canonical branch: `ui`. React/Vite travel-safety interface, FastAPI services and a Capacitor Android Nearby bridge. Guest preparation requires no account. **Firebase Google web sign-in is wired into the login page**; production hosting and native Android OAuth validation remain outstanding.
 
 ## Start / takeover
 
@@ -21,6 +21,14 @@ npm run dev
 ```
 
 Vite normally serves http://localhost:5173; API http://127.0.0.1:8000. A built site (npm run build) is also served by the API. Keys stay in ignored backend/.env; never place private keys in frontend/APK.
+
+## Firebase Google authentication
+
+The shared web login in `src/GoogleLoginPage.tsx` uses Firebase Authentication (`signInWithPopup`) and the existing Firebase project configuration in `src/firebase.ts`. `src/App.tsx` tracks login persistence with `onAuthStateChanged` and implements `signOut`. The Google button is real; **Continue as guest** deliberately skips authentication. The `GoogleLoginPage` Git branch is an old Kotlin-only branch pointing to `main`, not the current React login implementation.
+
+To make sign-in work when deployed: in **Firebase Console → Authentication → Sign-in method**, enable Google, and in **Authentication → Settings → Authorized domains**, add each web hostname that hosts the frontend (localhost as applicable and your actual Vercel/custom domain). Maintain the existing Firebase project values unless migrating projects. Firebase web config identifiers are public client config, **not** service-account credentials. Never commit a Firebase Admin private key or service-account JSON.
+
+The current popup flow is intended for a normal web browser. **Android Capacitor WebView sign-in must be verified separately**; a native-compatible OAuth flow may be required. The UI layout is tested in `tests/auth-layout.spec.ts`, covering the desktop phone frame, full-bleed mobile viewport, buttons, guest entry and dock alignment.
 
 ## Android
 
