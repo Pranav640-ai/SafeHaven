@@ -1,26 +1,222 @@
-/* Standalone SafeHaven onboarding: intentionally scoped to avoid legacy login overrides. */
-.sh-login-stage{min-height:100dvh;display:grid;place-items:center;padding:24px;background:radial-gradient(ellipse at 22% 18%,#a6d5bd 0%,transparent 37%),radial-gradient(ellipse at 84% 85%,#4c9b7d 0%,transparent 44%),linear-gradient(145deg,#153e31 0%,#2e7056 54%,#184534 100%);font-family:'Nunito',sans-serif}
-.sh-login-phone{width:min(100%,390px);height:min(780px,calc(100dvh - 48px));min-height:580px;display:flex;flex-direction:column;overflow:hidden;isolation:isolate;position:relative;border-radius:35px;background:#f5f7f1;border:1px solid #ffffff70;box-shadow:0 26px 85px #0a2e2480,0 0 0 7px #ffffff13;color:#214c3d}
-.sh-login-hero{position:relative;min-height:0;flex:1 1 54%;display:flex;flex-direction:column;overflow:hidden;background:radial-gradient(ellipse at 50% 54%,#80bba2 0%,#367b62 50%,#164b3c 100%);color:white}
-.sh-login-hero:before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 48%,#e2f6db30,transparent 47%);pointer-events:none}
-.sh-login-brand{position:relative;z-index:1;display:flex;align-items:center;gap:10px;padding:27px 25px 0;font-family:'Raleway',sans-serif;font-size:20px;font-weight:500;letter-spacing:-.6px}
-.sh-brand-icon{width:37px;height:37px;display:grid;place-items:center;border-radius:12px;border:1px solid #ffffff65;background:#ffffff28}
-.sh-hero-art{width:260px;max-width:85%;height:175px;position:relative;margin:auto auto 0;flex-shrink:1;min-height:115px}
-.sh-orbit{position:absolute;top:56px;left:50%;width:230px;height:92px;border:1px solid #ffffff60;border-radius:50%;transform:translateX(-50%) rotate(-12deg)}
-.sh-orbit-two{width:192px;height:82px;top:64px;transform:translateX(-50%) rotate(17deg)}
-.sh-hero-shield{position:absolute;top:14px;left:50%;transform:translateX(-50%) rotate(-10deg);width:112px;height:122px;display:grid;place-items:center;border-radius:33px;background:linear-gradient(145deg,#dcebd6,#8fbca1);color:#326f58;box-shadow:0 16px 45px #143c3860,inset 0 2px #ffffff9c}
-.sh-orbit-chip{position:absolute;display:grid;place-items:center;border-radius:17px;box-shadow:0 12px 25px #143e3650;color:white}
-.sh-chip-left{width:47px;height:47px;left:8px;top:94px;background:linear-gradient(140deg,#b6d9c8,#76a996);transform:rotate(-12deg)}
-.sh-chip-right{width:50px;height:50px;right:6px;top:65px;background:linear-gradient(140deg,#efd9b9,#bd9c78);transform:rotate(14deg)}
-.sh-hero-copy{position:relative;z-index:1;text-align:center;padding:2px 15px 25px}
-.sh-hero-copy>span{font-size:9px;letter-spacing:.19em;font-weight:700;color:#e5f4e8}
-.sh-hero-copy h1{margin:11px 0 0;font-family:'Raleway',sans-serif;font-weight:500;font-size:31px;letter-spacing:-1.3px;line-height:1.18}
-.sh-hero-copy em{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.23em;font-weight:400;letter-spacing:0}
-.sh-login-panel{position:relative;z-index:2;flex:0 0 auto;min-height:290px;border-radius:28px 28px 0 0;margin-top:-14px;padding:25px 25px 20px;background:linear-gradient(180deg,#f9faf5,#eff3ea);box-shadow:0 -9px 26px #163f2b1c;display:flex;flex-direction:column}
-.sh-login-intro{text-align:center}.sh-login-intro h2{font-size:21px;font-weight:600;letter-spacing:-.65px;color:#255844}.sh-login-intro p{margin-top:6px;font-size:11px;color:#6b8879}
-.sh-login-actions{margin-top:24px}.sh-google-button,.sh-guest-button{width:100%;min-height:48px;border-radius:15px;display:flex;align-items:center;justify-content:center;gap:11px;font-size:12px;font-weight:700;transition:transform .18s,filter .18s}
-.sh-google-button{background:#fff;color:#285c48;border:1px solid #b7d4c3;box-shadow:0 4px 15px #24533c0b}.sh-google-button svg:last-child{margin-left:2px}.sh-guest-button{background:linear-gradient(110deg,#286c51,#4c9b78);color:#fff;box-shadow:0 8px 18px #2d7a5740}.sh-google-button:active,.sh-guest-button:active{transform:scale(.98)}.sh-google-button:disabled,.sh-guest-button:disabled{opacity:.6;cursor:wait}
-.sh-divider{display:flex;align-items:center;gap:14px;margin:13px 0;color:#91a69a;font-size:10px;text-transform:uppercase}.sh-divider span{height:1px;background:#d7e1d8;flex:1}.sh-login-note{text-align:center;font-size:10px;color:#7d9688;margin-top:auto;padding-top:17px}.sh-login-error{color:#a32e35;text-align:center;font-size:11px;margin-top:10px}
-@media(max-width:600px){.sh-login-stage{padding:12px}.sh-login-phone{width:min(100%,410px);height:calc(100dvh - 24px);min-height:0;border-radius:29px;box-shadow:0 12px 36px #0a2e244a}.sh-login-hero{flex-basis:53%}.sh-login-panel{min-height:285px}}
-@media(max-height:690px){.sh-login-stage{padding:9px}.sh-login-phone{height:calc(100dvh - 18px);min-height:0}.sh-login-brand{padding-top:18px}.sh-hero-art{height:125px}.sh-hero-shield{width:88px;height:92px;border-radius:26px;top:3px}.sh-hero-shield svg{width:49px}.sh-orbit{top:29px}.sh-orbit-two{top:38px}.sh-chip-left{top:60px}.sh-chip-right{top:43px}.sh-hero-copy{padding-bottom:19px}.sh-hero-copy h1{font-size:27px}.sh-login-panel{min-height:266px;padding-top:19px}.sh-login-actions{margin-top:18px}}
-@media(prefers-reduced-motion:reduce){.sh-google-button,.sh-guest-button{transition:none}}
+/* Firebase Google sign-in shares the same phone framing as the SafeHaven app.
+   Only the onboarding screen is affected by these scoped rules. */
+.sh-login-stage.preview-stage{
+  min-height:100dvh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:16px;
+  background:radial-gradient(ellipse at 55% 12%,#345c4c 0%,transparent 45%),#111916;
+  font-family:'Nunito',ui-sans-serif,system-ui,sans-serif;
+}
+.sh-login-phone.phone-shell{
+  display:flex;
+  flex-direction:column;
+  position:relative;
+  isolation:isolate;
+  flex:0 0 410px;
+  width:410px;
+  max-width:calc(100vw - 32px);
+  height:min(870px,calc(100dvh - 32px));
+  min-height:min(620px,calc(100dvh - 32px));
+  padding:0;
+  overflow-x:hidden;
+  overflow-y:auto;
+  overscroll-behavior-y:contain;
+  -webkit-overflow-scrolling:touch;
+  border:1px solid #547062;
+  border-radius:32px;
+  background:#eef0e9;
+  box-shadow:0 18px 85px #06191080;
+  color:#264a3c;
+}
+.sh-login-hero{
+  position:relative;
+  z-index:0;
+  flex:1 0 auto;
+  min-height:385px;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  background:radial-gradient(ellipse at 51% 56%,#92b9a4 0%,#4f8870 47%,#174637 100%);
+  color:#fff;
+}
+.sh-login-hero::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:radial-gradient(ellipse at 50% 49%,#edffe31f 0%,transparent 53%);
+}
+.sh-login-hero::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:linear-gradient(180deg,transparent 65%,#17463720 100%);
+}
+.sh-login-brand{
+  position:relative;
+  z-index:2;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-shrink:0;
+  padding:calc(28px + env(safe-area-inset-top)) 26px 0;
+  font-family:'Raleway',sans-serif;
+  font-size:21px;
+  font-weight:500;
+  letter-spacing:-.65px;
+}
+.sh-brand-icon{
+  width:38px;
+  height:38px;
+  display:grid;
+  place-items:center;
+  border:1px solid #f9fff45c;
+  border-radius:12px;
+  background:#f7fff02b;
+  color:#fff;
+}
+.sh-hero-art{
+  position:relative;
+  z-index:1;
+  flex:1 1 auto;
+  align-self:center;
+  width:min(270px,86%);
+  min-height:148px;
+  max-height:210px;
+  margin:15px auto 0;
+}
+.sh-orbit{
+  position:absolute;
+  width:230px;
+  max-width:92%;
+  height:94px;
+  left:50%;
+  top:50%;
+  border:1px solid #f5fff066;
+  border-radius:50%;
+  transform:translate(-50%,-50%) rotate(-12deg);
+}
+.sh-orbit-two{width:190px;height:81px;transform:translate(-50%,-50%) rotate(17deg)}
+.sh-hero-shield{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%) rotate(-8deg);
+  width:112px;
+  height:118px;
+  border-radius:32px;
+  display:grid;
+  place-items:center;
+  background:linear-gradient(145deg,#e5f2db,#97c6ad);
+  color:#2d7457;
+  box-shadow:0 17px 45px #143c3860,inset 0 2px #ffffffba;
+}
+.sh-orbit-chip{
+  position:absolute;
+  display:grid;
+  place-items:center;
+  border-radius:17px;
+  color:#fff;
+  box-shadow:0 10px 25px #103a2c40;
+}
+.sh-chip-left{width:47px;height:47px;top:55%;left:7%;background:linear-gradient(145deg,#9bd3bf,#5c9b81);transform:rotate(-11deg)}
+.sh-chip-right{width:49px;height:49px;top:25%;right:7%;background:linear-gradient(145deg,#e9d7b4,#bb9f77);transform:rotate(13deg)}
+.sh-hero-copy{
+  position:relative;
+  z-index:2;
+  flex-shrink:0;
+  text-align:center;
+  padding:0 18px 31px;
+}
+.sh-hero-copy>span{color:#ecfaed;font-size:9px;font-weight:600;letter-spacing:.18em}
+.sh-hero-copy h1{
+  margin:9px 0 0;
+  font-family:'Raleway',sans-serif;
+  font-size:clamp(27px,7.5vw,33px);
+  font-weight:500;
+  line-height:1.15;
+  letter-spacing:-.045em;
+  color:white;
+}
+.sh-hero-copy em{
+  font-family:'Cormorant Garamond',Georgia,serif;
+  font-style:italic;
+  font-size:1.28em;
+  font-weight:400;
+  letter-spacing:0;
+}
+.sh-login-panel{
+  position:relative;
+  z-index:3;
+  flex:0 0 auto;
+  display:flex;
+  flex-direction:column;
+  min-height:310px;
+  margin-top:-12px;
+  padding:26px 26px calc(20px + env(safe-area-inset-bottom));
+  border-radius:29px 29px 0 0;
+  background:linear-gradient(180deg,#f9faf6,#eff1e9);
+  box-shadow:0 -9px 26px #153f2a18;
+  color:#224b3b;
+}
+.sh-login-intro{text-align:center}
+.sh-login-intro h2{font-size:22px;font-weight:500;letter-spacing:-.035em;line-height:1.23;color:#235642}
+.sh-login-intro p{font-size:12px;line-height:1.5;margin-top:8px;color:#627f70}
+.sh-login-actions{margin-top:22px}
+.sh-google-button,.sh-guest-button{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  width:100%;
+  min-height:49px;
+  padding:11px 13px;
+  border-radius:15px;
+  font-family:'Nunito',sans-serif;
+  font-size:13px;
+  font-weight:700;
+  transition:transform .18s ease,box-shadow .18s ease,filter .18s ease;
+}
+.sh-google-button{border:1px solid #b3cfbf;background:#fff;color:#24503f;box-shadow:0 5px 18px #2a57400b}
+.sh-google-button svg:last-child{margin-left:2px}
+.sh-guest-button{background:linear-gradient(125deg,#255e48,#3e8d6e);color:#fff;box-shadow:0 8px 20px #275d4730}
+.sh-google-button:active,.sh-guest-button:active{transform:scale(.98)}
+.sh-google-button:focus-visible,.sh-guest-button:focus-visible{outline:2px solid #24775d;outline-offset:3px}
+.sh-google-button:disabled,.sh-guest-button:disabled{cursor:wait;opacity:.65}
+.sh-divider{display:flex;align-items:center;gap:14px;margin:13px 0;color:#879a8b;font-size:11px;text-transform:uppercase}
+.sh-divider span{flex:1;height:1px;background:#d6e0d6}
+.sh-login-error{margin-top:10px;font-size:12px;line-height:1.45;text-align:center;color:#ae303b}
+.sh-login-note{margin-top:auto;padding-top:17px;text-align:center;font-size:11px;color:#768e7e}
+@media(max-width:719px){
+  .sh-login-stage.preview-stage{display:block;padding:0;background:#eef0e9}
+  .sh-login-phone.phone-shell{
+    flex:none;
+    width:100vw;
+    max-width:100vw;
+    min-height:100dvh;
+    height:100dvh;
+    border:0;
+    border-radius:0;
+    box-shadow:none;
+  }
+}
+@media(max-height:720px){
+  .sh-login-hero{min-height:320px}
+  .sh-hero-art{min-height:116px;max-height:155px;margin-top:6px}
+  .sh-hero-shield{width:92px;height:96px;border-radius:26px}
+  .sh-hero-shield svg{width:51px}
+  .sh-hero-copy{padding-bottom:20px}
+  .sh-login-panel{min-height:285px;padding-top:21px}
+  .sh-login-actions{margin-top:18px}
+}
+@media(max-width:350px){
+  .sh-login-brand{padding-left:19px;padding-right:19px}
+  .sh-login-panel{padding-left:19px;padding-right:19px}
+  .sh-login-hero{min-height:325px}
+}
+@media(prefers-reduced-motion:reduce){
+  .sh-google-button,.sh-guest-button{transition:none}
+}
