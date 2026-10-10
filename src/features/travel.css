@@ -24,3 +24,4 @@
 .place-search>.tool-inline{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center}
 .place-search>.tool-inline>input,.place-search>.tool-inline>.secondary-button{height:46px;min-height:46px;margin:0;box-sizing:border-box}
 .tool-inline>.tool-field input,.tool-inline>.tool-field select{min-height:44px}
+.place-search>.tool-inline>.secondary-button:only-child{grid-column:1/-1}

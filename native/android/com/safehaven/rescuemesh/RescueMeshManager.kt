@@ -104,7 +104,7 @@ class RescueMeshManager(
             .forEach { b.put(JSObject(it.toString())) }
         return JSObject().put("running", running).put("advertising", advertising)
             .put("discovering", discovering).put("role", role).put("peers", p).put("discovered", d)
-            .put("beacons", b).put("queuedSOS", pendingSOS.size)
+            .put("beacons", b).put("ownBeaconId", ownBeaconId ?: "").put("queuedSOS", pendingSOS.size)
             .put("queuedCheckIns", pendingCheckIns.size).put("carriedSOS", carriedSOS.size)
             .put("queueError", queueError ?: "").put("checkIns", JSONArray(checkInStore.values.filter { it.optLong("expiresAt") > System.currentTimeMillis() }))
             .put("identity", identity).put("deviceName", name).put("allowUnverified", allowUnverified)

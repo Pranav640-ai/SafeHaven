@@ -10,6 +10,8 @@ import './mesh/mesh.css';
 import { RiskTool, ReplanTool, GuidanceTool, PackTool } from './features/TravelTools';
 import { SavedAreaWarnings } from './features/AreaWarnings';
 import type {Place} from './services/api';
+import {PlaceSearch} from './features/PlaceSearch';
+import {save} from './services/storage';
 import { useSaved, read } from './services/storage';
 import {
   ArrowLeft, ArrowRight, Bell, Bookmark,
@@ -300,7 +302,8 @@ export default function App(){
     const matched=destinations.filter(d=>(d.name+' '+d.region+' '+d.label).toLowerCase().includes(query.toLowerCase())&&(destinationMood==='All'||d.mood===destinationMood));
     return <><BackHeader title="Explore" back={back}/>
       <div className="explore-intro"><span className="eyebrow">DISCOVER PLACES</span><h2>Where to next?</h2><p>Find places worth exploring. Check conditions before making plans.</p></div>
-      <div className="search-field explore-search"><Search size={21}/><input placeholder="Search a place or region" value={query} onChange={e=>setQuery(e.target.value)} aria-label="Search destinations"/>{query&&<button type="button" aria-label="Clear search" onClick={()=>setQuery('')}><X size={17}/></button>}</div>
+      <div className="search-field explore-search"><Search size={21}/><input placeholder="Search a place or region" maxLength={100} value={query} onChange={e=>setQuery(e.target.value)} aria-label="Search destinations"/>{query&&<button type="button" aria-label="Clear search" onClick={()=>setQuery('')}><X size={17}/></button>}</div>
+      <PlaceSearch query={query} onQueryChange={setQuery} hideInput select={p=>{save('destination',p);save(`destination:${p.name}`,p);openDestination(p.name)}}/>
       <div className="explore-editorial" role="img" aria-label="Mountains and lakes scenic photograph"><div className="explore-editorial-art"/><div className="explore-editorial-shade"/><span className="explore-overline"><Compass size={15}/> THE OUTDOORS</span><div><h3>Take the scenic route.</h3><p>Great trips start with a little preparation.</p></div></div>
       <section className="explore-section"><Heading title="Find your kind of place"/><div className="explore-moods" role="group" aria-label="Filter destinations">{[
         {name:'All',icon:Compass},{name:'Mountains',icon:Mountain},{name:'Nature',icon:Trees},{name:'Coast',icon:Waves}

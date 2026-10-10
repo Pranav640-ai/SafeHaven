@@ -178,3 +178,18 @@ Choose Nearby help network on two physical phones and start discovery on both. N
 The emulator script deliberately selects known-partner mode for its code test. Its previous radio errors are not resolved by the mode change. Default help-mode physical acceptance remains required. No background service or long-range discovery is implemented.
 
 Current visual/scope reference: [AGENTS.md](AGENTS.md), [UI_CHECKLIST.md](UI_CHECKLIST.md) and [FEATURE_CHECKLIST.md](FEATURE_CHECKLIST.md). The six Home and three trip-card styled SVG illustrations are fixed; historical emoji artwork must not replace them.
+
+## Updated APK acceptance: contacts, check-in and beacon
+
+Current online backend: https://safehaven-production-9f5d.up.railway.app. Nearby radios operate independently of this backend. Install the same android/app/build/outputs/apk/debug/app-debug.apk on both physical phones as an update; keep saved data. Android Studio is optional.
+
+1. Open Meridian on both phones; guest access is enough for Mesh. Keep apps foreground, Bluetooth/Wi-Fi/Location on and accept requested Nearby/location permissions. In Mesh → Nearby, set distinct names, choose Two phones: host on A and Two phones: join on B. Start A, then B. Both must show the counterpart connected.
+2. Chats: A sends a unique message to B; B replies. Verify actual received text and peer acknowledgement on each sender. A visible outgoing bubble alone is not delivery.
+3. SOS: send a clearly labelled test request (do not call emergency numbers). Verify B receives the test and A gets peer acknowledgement. Test a disconnected queued request/cancel separately; cancellation cannot retract delivered copies.
+4. Safety pack → Nearby check-in: explicitly grant status-sharing consent, then send safe/need-help status. Verify the counterpart's received check-in. These statuses are independent of private online groups.
+5. Home → Safety beacon on A: enter a meeting-point label, optional capacity and expiry; tap Share my location temporarily and allow GPS access. B opens Beacons: verify label, sender, expiry and GPS point. On B, tap Show approximate distance & bearing. Approximate/denied permissions and compass availability must be handled visibly; bearing is not a safe route.
+6. On A, Stop sharing beacon. Verify removal on connected B; disconnected peers may retain their copy until withdrawal is relayed or expiry. Repeat reconnection with active beacon and verify no duplicated entries. Expiry acceptance requires waiting for the configured expiry; no browser clock fixture counts as physical acceptance.
+7. Turn mobile data off while keeping Bluetooth/Wi-Fi/Location on and repeat chat/check-in/beacon reception to confirm independence from internet. Reconnect before online weather/Google/group checks.
+8. Profile → Contacts: edit a saved number, confirm the tel link opens the phone dialler, restart and check it remains saved. Google sign-in: test a real account, cancellation, restart persistence and sign-out separately.
+
+Record device models/Android versions, permission choices, successful receipts and any Nearby error codes. After two-phone acceptance, proceed to deployment configuration and the online buddy plan in BUDDY_SYSTEM_PLAN.md. Multi-hop/force-stop/background delivery remain separate acceptance gates.

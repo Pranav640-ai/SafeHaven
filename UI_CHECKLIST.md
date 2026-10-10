@@ -50,3 +50,7 @@ Latest validation: three focused browser checks passed for fixed SVG artwork (6 
 - [x] Combined newer Google welcome/auth with the earlier Meridian shell, Motion page/toast transitions, history/scroll restoration and destination chooser. Restored alignment, dock morph and outline shimmer overrides.
 - [x] Google profile email/sign-out and guest route preserved; fixed six Home + three trip SVGs and Mesh Host/Join code remain intact.
 - [ ] Live native Google account acceptance after Firebase Android project/certificate configuration.
+
+- [x] Fixed Home/trip artwork, icons and navigation remain intact in the locations/contacts/beacon update.
+- [x] Added only functional destination selection, contact editor/category and beacon connection action/state handling.
+- [ ] Physical two-phone beacon/check-in/SOS/chat acceptance remains pending.

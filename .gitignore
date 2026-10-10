@@ -16,3 +16,4 @@ backend/data/
 test-results/
 native/google-services.json
 native/google-services*.json
+!.env.production.example

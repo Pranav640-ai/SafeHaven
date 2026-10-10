@@ -12,7 +12,7 @@ export type MeshMessage = {
   body: string; createdAt: number; received: boolean; status?: string;
 };
 export type MeshState = {
-  role?: 'auto'|'host'|'join'; running: boolean; advertising: boolean; discovering: boolean; peers: MeshPeer[];
+  ownBeaconId?: string; role?: 'auto'|'host'|'join'; running: boolean; advertising: boolean; discovering: boolean; peers: MeshPeer[];
   discovered: MeshPeer[]; beacons: MeshBeacon[]; queuedSOS: number; queuedCheckIns: number; carriedSOS: number; queueError: string; checkIns: MeshMessage[];
   identity: string; deviceName: string; allowUnverified: boolean;
 };
@@ -82,6 +82,8 @@ export function useRescueMesh() {
     })().catch(e => {if(mounted)setError(String(e))});
     return () => {mounted = false; listeners.forEach(l => void l.remove());};
   }, []);
+
+  useEffect(()=>{setOwnBeacon(state.ownBeaconId||null)},[state.ownBeaconId]);
 
   const attempt = async <T,>(action: () => Promise<T>): Promise<T> => {
     setError('');

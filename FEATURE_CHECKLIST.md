@@ -54,3 +54,9 @@ Auth integration: Firebase browser popup/session and Android Credential Managerâ
 
 - [x] Activity-type/hourly risk evidence, provider coverage and reported-event context from feature/backend integrated into Risk Overview. Prototype estimates only; official/local coverage/calibration gates remain open.
 - [x] Ranked OSM nearby alternative discovery integrated into Trip replanner; selected suggestion fills draft only and keeps saved bookings/approval state. Venue availability/access/safety still require confirmation.
+
+- [x] Profile contacts: persistent edit/category/call/delete, legacy-contact compatibility and duplicate-number prevention.
+- [x] Explore API search beyond presets; exact coordinates and validated timezone shared with Risk/Replanner.
+- [x] Beacon connection shortcut, capacity validation and native own-sharing state recovery. Radio acceptance remains open.
+- [x] Railway URL recorded and online APK origin configured locally. Health succeeded; deployed intelligence routes and AI/news configuration were absent at inspection.
+- [ ] Online buddy invitations/chat: intentionally deferred until physical Mesh verification; see BUDDY_SYSTEM_PLAN.md.
