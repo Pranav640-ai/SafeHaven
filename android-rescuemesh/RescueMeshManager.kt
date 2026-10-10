@@ -9,8 +9,9 @@ import com.google.gson.Gson
 
 class RescueMeshManager(
     private val context: Context,
-    private val deviceName: String
-) {
+    private val deviceName: String,
+    private val database: RescueMeshDatabase
+){
 
     companion object {
         private const val TAG = "RescueMesh"
