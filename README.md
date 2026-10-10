@@ -2,7 +2,7 @@
 
 A travel-safety companion that brings destination intelligence, flexible trip planning, offline essentials and nearby communication into one experience.
 
-**[Open the live demo](https://safehaven-production-4131.up.railway.app)**
+**[Open the live demo](https://safehaven-production-3da2.up.railway.app)**
 
 ## From planning to travelling
 
@@ -120,6 +120,6 @@ Source coverage, configured providers and device capabilities determine which on
 
 ## Submission links
 
-- **Live demo:** [Open Meridian](https://safehaven-production-4131.up.railway.app)
+- **Live demo:** [Open Meridian](https://safehaven-production-3da2.up.railway.app)
 - **Video submission:** Link to be added. <!-- Replace this line with the final video URL. -->
 - **Android APK:** [Download Meridian](https://github.com/Pranav640-ai/SafeHaven/raw/refs/heads/ui/downloads/Meridian.apk)

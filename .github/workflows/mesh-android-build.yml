@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     env:
-      VITE_API_BASE_URL: https://safehaven-production-4131.up.railway.app
+      VITE_API_BASE_URL: https://safehaven-production-3da2.up.railway.app
       GOOGLE_WEB_CLIENT_ID: ${{ vars.GOOGLE_WEB_CLIENT_ID }}
     steps:
       - uses: actions/checkout@v4
