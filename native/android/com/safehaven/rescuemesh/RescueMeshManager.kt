@@ -1,6 +1,7 @@
 package com.safehaven.rescuemesh
 
 import android.content.Context
+import com.google.android.gms.common.api.ApiException
 import com.getcapacitor.JSArray
 import com.getcapacitor.JSObject
 import com.google.android.gms.nearby.Nearby
@@ -43,6 +44,9 @@ class RescueMeshManager(
     private var running = false
     private var advertising = false
     private var discovering = false
+    private var role = "auto"
+    private var session = 0
+    private val connecting = mutableSetOf<String>()
 
     init {
         try {
@@ -99,7 +103,7 @@ class RescueMeshManager(
         beaconStore.values.filter { it.optLong("expiresAt") > System.currentTimeMillis() - 60 * 60_000L }
             .forEach { b.put(JSObject(it.toString())) }
         return JSObject().put("running", running).put("advertising", advertising)
-            .put("discovering", discovering).put("peers", p).put("discovered", d)
+            .put("discovering", discovering).put("role", role).put("peers", p).put("discovered", d)
             .put("beacons", b).put("queuedSOS", pendingSOS.size)
             .put("queuedCheckIns", pendingCheckIns.size).put("carriedSOS", carriedSOS.size)
             .put("queueError", queueError ?: "").put("checkIns", JSONArray(checkInStore.values.filter { it.optLong("expiresAt") > System.currentTimeMillis() }))
@@ -108,30 +112,54 @@ class RescueMeshManager(
 
     private fun update() = event("state", state())
     private fun failure(action: String, e: Exception) {
-        event("error", JSObject().put("action", action).put("message", e.message ?: "Nearby operation failed"))
+        val code = (e as? ApiException)?.statusCode
+        val hint = when (code) {
+            8011, 8012 -> "Turn on Bluetooth and Wi-Fi on both phones, then stop and start Nearby again."
+            else -> "Check Nearby devices/location permissions and Google Play services, then retry."
+        }
+        event("error", JSObject().put("action", action).put("statusCode", code ?: -1)
+            .put("message", "$action failed${code?.let { " ($it)" } ?: ""}: ${e.message ?: "Nearby unavailable"}. $hint"))
         update()
     }
 
-    fun start(deviceName: String, helpNetwork: Boolean = false) {
+    fun start(deviceName: String, helpNetwork: Boolean = false, connectionRole: String = "auto") {
+        require(connectionRole in listOf("auto", "host", "join")) { "Choose automatic, host or join" }
         queueError?.let { event("error", JSObject().put("message", it)) }
-        name = deviceName.trim().take(32).ifEmpty { "Meridian" }
         if (running) { update(); return }
+        name = deviceName.trim().take(32).ifEmpty { "Meridian" }
         allowUnverified = helpNetwork
+        role = connectionRole
         running = true
-        client.startAdvertising(
-            name, SERVICE, connections,
-            AdvertisingOptions.Builder().setStrategy(Strategy.P2P_CLUSTER).build()
-        ).addOnSuccessListener { advertising = true; update() }
-            .addOnFailureListener { advertising = false; failure("advertise", it) }
-        client.startDiscovery(
-            SERVICE, discovery,
-            DiscoveryOptions.Builder().setStrategy(Strategy.P2P_CLUSTER).build()
-        ).addOnSuccessListener { discovering = true; update() }
-            .addOnFailureListener { discovering = false; failure("discover", it) }
+        val generation = ++session
+        // Explicit host/join avoids both phones requesting each other simultaneously.
+        // A separate service prevents a two-phone client joining a cluster session.
+        val service = if (role == "auto") SERVICE else "$SERVICE.two-phone.v1"
+        val strategy = if (role == "auto") Strategy.P2P_CLUSTER else Strategy.P2P_POINT_TO_POINT
+        fun startupFailed(action: String, e: Exception) {
+            if (generation != session) return
+            stop(false)
+            failure(action, e)
+        }
+        fun discover() {
+            client.startDiscovery(service, discovery, DiscoveryOptions.Builder().setStrategy(strategy).build())
+                .addOnSuccessListener { if (generation == session) { discovering = true; update() } }
+                .addOnFailureListener { startupFailed("Discovery", it) }
+        }
+        if (role == "join") discover()
+        else client.startAdvertising(name, service, connections, AdvertisingOptions.Builder().setStrategy(strategy).build())
+            .addOnSuccessListener {
+                if (generation == session) {
+                    advertising = true
+                    if (role == "auto") discover()
+                    update()
+                }
+            }.addOnFailureListener { startupFailed("Advertising", it) }
         update()
     }
 
     fun stop(clearQueue: Boolean = true) {
+        ++session
+        connecting.clear()
         client.stopAdvertising()
         client.stopDiscovery()
         client.stopAllEndpoints()
@@ -155,11 +183,11 @@ class RescueMeshManager(
 
     private val discovery = object : EndpointDiscoveryCallback() {
         override fun onEndpointFound(endpointId: String, info: DiscoveredEndpointInfo) {
-            if (!running) return
+            if (!running || peers.containsKey(endpointId) || pending.containsKey(endpointId) || !connecting.add(endpointId)) return
             discovered[endpointId] = info.endpointName
             event("discovered", JSObject().put("id", endpointId).put("name", info.endpointName))
             client.requestConnection(name, endpointId, connections)
-                .addOnFailureListener { failure("connect", it) }
+                .addOnFailureListener { connecting.remove(endpointId); if (running) failure("Connection request", it) }
             update()
         }
         override fun onEndpointLost(endpointId: String) {
@@ -171,16 +199,22 @@ class RescueMeshManager(
     private val connections = object : ConnectionLifecycleCallback() {
         override fun onConnectionInitiated(endpointId: String, info: ConnectionInfo) {
             if (!running) { client.rejectConnection(endpointId); return }
+            connecting.add(endpointId)
             pending[endpointId] = info.endpointName
             if (allowUnverified) { accept(endpointId); return }
             event("connectionRequest", JSObject().put("id", endpointId)
                 .put("name", info.endpointName).put("code", info.authenticationDigits))
         }
         override fun onConnectionResult(endpointId: String, resolution: ConnectionResolution) {
+            connecting.remove(endpointId)
             if (!running) { pending.remove(endpointId); client.disconnectFromEndpoint(endpointId); return }
             val endpointName = pending.remove(endpointId) ?: discovered[endpointId]
             if (resolution.status.statusCode == ConnectionsStatusCodes.STATUS_OK) {
                 peers[endpointId] = endpointName ?: "Nearby device"
+                if (role != "auto") {
+                    client.stopDiscovery(); client.stopAdvertising()
+                    discovering = false; advertising = false
+                }
                 event("connected", JSObject().put("id", endpointId).put("name", peers[endpointId]))
                 flushSOS()
                 pendingCheckIns.forEach { transmit(it, endpointId) }
@@ -194,7 +228,8 @@ class RescueMeshManager(
             update()
         }
         override fun onDisconnected(endpointId: String) {
-            peers.remove(endpointId)
+            peers.remove(endpointId); pending.remove(endpointId); connecting.remove(endpointId)
+            if (role != "auto" && running) stop(false)
             event("disconnected", JSObject().put("id", endpointId))
             update()
         }

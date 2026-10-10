@@ -47,3 +47,5 @@ Checked means the stated V1 capability exists in code and has the evidence recor
 - [ ] Real AI/photo/push provider acceptance; first-use Android permission denial/approximate-location tests.
 
 The item-by-item technical evidence and exact feature locations are in FEATURE_AUDIT.md. Keep unchecked items unchecked until their stated dependency or acceptance test is actually completed.
+
+Two-phone repair: optional Host/Join point-to-point implementation added alongside the existing automatic cluster network. Physical connectivity and delivery gates above remain unchecked.

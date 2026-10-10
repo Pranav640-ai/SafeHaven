@@ -43,3 +43,6 @@ Current decision audit. Checked items have been inspected in code; automation ev
 Additional features are visible only where useful and supported. Empty sourced feeds explain missing coverage; they are not filled with sample data. Do not remove a core disabled native control merely because a browser cannot operate the radio.
 
 Latest validation: three focused browser checks passed for fixed SVG artwork (6 + 3), duplicate removal/legacy note retention, Profile edit/settings, dialog Back/SOS and all Home/core routes. TypeScript strict unused checks, production web build and final Android build passed. APK assets match dist and the package installed on 5558/5560. Physical Mesh/production acceptance gaps remain unchanged.
+
+- [x] Nearby adds optional two-phone Host/Join setup without replacing the automatic help network, known-partner mode or fixed icons/widgets. Native startup failures reset to Stopped; two-phone waiting/connected state is explicit.
+- [ ] Physical Host/Join pairing, bidirectional acknowledged chat/SOS and reconnect acceptance; instructions in MESH_TEST_GUIDE.md.

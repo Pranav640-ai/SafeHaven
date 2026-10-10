@@ -42,9 +42,15 @@ test('Approving a proposal updates the original and keeps a no-changes proposed 
 });
 
 test('Nearby help mode does not require travellers to meet or compare codes',async({page})=>{
- await page.goto('/');await page.getByRole('button',{name:'Continue as guest'}).click();await page.getByRole('button',{name:'Mesh',exact:true}).click();
+ await page.goto('/');await page.getByRole('button',{name:/Continue as guest|Explore as guest/}).click();await page.getByRole('button',{name:'Mesh',exact:true}).click();
  await page.getByRole('tab',{name:'Nearby',exact:true}).click();
  await expect(page.getByLabel('Connection mode')).toHaveValue('help');
+ await expect(page.getByLabel('Connection setup')).toHaveValue('auto');
+ await page.getByLabel('Connection setup').selectOption('host');
+ await expect(page.getByText(/Choose Host on one phone and Join on the other/)).toBeVisible();
+ await page.getByLabel('Connection setup').selectOption('join');
+ await expect(page.getByLabel('Connection setup')).toHaveValue('join');
+ await page.getByLabel('Connection setup').selectOption('auto');
  await expect(page.getByText(/You do not need to meet or exchange codes/)).toBeVisible();
  await expect(page.getByText(/Names and messages are unverified/)).toBeVisible();
  await page.getByLabel('Connection mode').selectOption('verified');

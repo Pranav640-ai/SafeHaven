@@ -12,7 +12,7 @@ export type MeshMessage = {
   body: string; createdAt: number; received: boolean; status?: string;
 };
 export type MeshState = {
-  running: boolean; advertising: boolean; discovering: boolean; peers: MeshPeer[];
+  role?: 'auto'|'host'|'join'; running: boolean; advertising: boolean; discovering: boolean; peers: MeshPeer[];
   discovered: MeshPeer[]; beacons: MeshBeacon[]; queuedSOS: number; queuedCheckIns: number; carriedSOS: number; queueError: string; checkIns: MeshMessage[];
   identity: string; deviceName: string; allowUnverified: boolean;
 };
@@ -22,7 +22,7 @@ export type SendReceipt = { id: string; status: 'offered' | 'queued-on-device' |
 type EventNames = 'state' | 'error' | 'connectionRequest' | 'connected' | 'disconnected' |
   'message' | 'ack' | 'beacon' | 'beaconRemoved' | 'queuedSOSOffered' | 'connectionFailed' | 'compass';
 interface NativeRescueMesh {
-  start(options: {deviceName: string;allowUnverified:boolean}): Promise<MeshState>;
+  start(options: {deviceName: string;allowUnverified:boolean;role:'auto'|'host'|'join'}): Promise<MeshState>;
   stop(): Promise<MeshState>;
   getState(): Promise<MeshState>;
   accept(options: {id: string}): Promise<void>;
@@ -89,8 +89,8 @@ export function useRescueMesh() {
     try {return await action();} catch (e) {setError(e instanceof Error ? e.message : String(e));throw e;}
   };
   const refresh = () => attempt(async () => {const s = await native.getState();setState(s);return s;});
-  const start = async (deviceName: string, allowUnverified=false) => attempt(async () => {
-    const result = await native.start({deviceName,allowUnverified});setState(result);return result;
+  const start = async (deviceName: string, allowUnverified=false, role:'auto'|'host'|'join'='auto') => attempt(async () => {
+    const result = await native.start({deviceName,allowUnverified,role});setState(result);return result;
   });
   const stop = async () => attempt(async () => {const s=await native.stop();setState(s);setRequests([]);setOwnBeacon(null);setMessages(list=>list.map(m=>m.type==='sos'&&m.status==='Queued on this phone · expires within 24 hours'?{...m,status:'Cancelled — network stopped'}:m));return s;});
   const approve = (id: string) => attempt(async () => {await native.accept({id});setRequests(p=>p.filter(x=>x.id!==id));});

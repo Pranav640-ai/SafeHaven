@@ -1,6 +1,10 @@
 package com.safehaven.rescuemesh
 
 import android.Manifest
+import android.bluetooth.BluetoothManager
+import android.location.LocationManager
+import com.google.android.gms.common.GoogleApiAvailability
+import com.google.android.gms.common.ConnectionResult
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -107,7 +111,15 @@ class RescueMeshPlugin : Plugin() {
     }
     private fun launch(call: PluginCall) {
         try {
-            mesh.start(call.getString("deviceName") ?: "Meridian", call.getBoolean("allowUnverified", false) ?: false)
+            val playServices = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context)
+            require(playServices == ConnectionResult.SUCCESS) { "Google Play services needs installation or an update (status $playServices)." }
+            val bluetooth = context.getSystemService(android.content.Context.BLUETOOTH_SERVICE) as BluetoothManager
+            require(bluetooth.adapter?.isEnabled == true) { "Turn on Bluetooth, then start Nearby again." }
+            if (Build.VERSION.SDK_INT <= 32) {
+                val location = context.getSystemService(android.content.Context.LOCATION_SERVICE) as LocationManager
+                require(location.isProviderEnabled(LocationManager.GPS_PROVIDER) || location.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) { "Turn on phone Location, then start Nearby again." }
+            }
+            mesh.start(call.getString("deviceName") ?: "Meridian", call.getBoolean("allowUnverified", false) ?: false, call.getString("role") ?: "auto")
             call.resolve(mesh.state())
         } catch (e: Exception) { call.reject(e.message ?: "Cannot start Nearby", null, e) }
     }

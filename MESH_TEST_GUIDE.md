@@ -2,6 +2,26 @@
 
 Use the `ui` branch and the generated `android/` project. Historical Kotlin snippets in `ANDROID_MESH_SETUP.md` are not the current app.
 
+## Two physical phones — no Android Studio needed
+
+Start with this two-phone test before the multi-phone acceptance below. The built APK is `android/app/build/outputs/apk/debug/app-debug.apk`. Transfer **the same APK** to both Android phones by USB/file sharing and tap it in Files. Allow installation from that file app when Android asks. Install over the previous app to preserve data; do not uninstall it first. Both phones need Google Play services. No backend, Google sign-in, SIM, mobile data or shared Wi-Fi network is needed for nearby chat.
+
+1. Turn on Bluetooth, Wi-Fi and phone Location on both phones; keep them 1–2 metres apart. Wi-Fi must be enabled, but internet is not required. Keep both screens unlocked and Meridian in the foreground.
+2. Open **Mesh → Nearby** on phone A. Choose **Two phones: host** under Connection setup and give it a recognisable name such as Phone A. Leave Connection mode as **Nearby help network**. Tap **Start Nearby discovery** and grant the requested Nearby devices/location permissions. It should show **Waiting for phone**.
+3. On phone B, choose **Two phones: join**, name it Phone B, and start. These roles use the same dedicated service and point-to-point strategy. Two hosts or two joiners will not connect. The automatic network uses a different service; do not mix it with these roles.
+4. Wait for **Connected** and the other phone's name on both screens. Open Chats; send `Hello from A`, then `Hello from B`. Both must receive the correct message. Check the sender shows **Peer acknowledged**, not just Offered.
+5. Turn off mobile data to repeat the messages. Leave Bluetooth/Wi-Fi/Location on. This verifies that chat does not depend on the API or internet.
+6. Test SOS only with your consenting test partner: send a labelled test message and confirm receipt/acknowledgement. It does not call emergency services. Stop discovery on either phone; both should lose the link. Restart the host then join to test reconnection. A two-phone disconnection requires an explicit restart.
+7. If no link appears within about 30 seconds, stop on both, check permissions in Android Settings and radio switches, then start Host first and Join second. If Android shows a permanent permission denial, enable it in Settings. Update Google Play services if requested. Record the exact in-app error, both phone models and Android versions. Startup failures now return to Stopped, so retry is available. If no error appears and discovery stalls, capture logs below; do not mark delivery as working.
+
+Automatic nearby network remains the default and keeps multi-phone relay code. Host/join is a separate, simpler first acceptance path; no three-phone relay claim applies to point-to-point mode. Known-partner code comparison is still optional through Connection mode. Help-network names are unverified.
+
+### Implementation references and evidence
+
+Reviewed Google's [Nearby Connections WalkieTalkie sample](https://github.com/android/connectivity-samples/tree/main/NearbyConnectionsWalkieTalkie), [connection lifecycle guidance](https://developers.google.com/nearby/connections/android/manage-connections), [advertising/discovery guidance](https://developers.google.com/nearby/connections/android/discover-devices), and [permission requirements](https://developers.google.com/nearby/connections/android/get-started). The sample repository is archived; current API documentation supplies the permission/lifecycle guidance. Meridian adapts the connection tracking and separate advertiser/discoverer pattern in its existing Kotlin bridge; no whole third-party app was imported.
+
+Fixes: suppress duplicate requests while an endpoint is connecting/pending/connected; serialise automatic advertising then discovery; clear failed startup state without deleting queued SOS/check-ins; check Play services/Bluetooth/older Android Location first; stop radio discovery/advertising once a two-phone link succeeds; display waiting/connected states and actionable error status codes. Builds/UI checks do not prove physical radio delivery. Physical acceptance remains unchecked until the two phones actually exchange acknowledged messages.
+
 ## 1. Install the packaged app on both devices
 
 Run these commands in PowerShell from `C:\Users\asus\SafeHaven`:

@@ -140,3 +140,9 @@ Latest validation: three focused browser checks passed for fixed SVG artwork (6 
 ## Meridian rename
 
 The product name is now Meridian throughout visible web/Android copy, installation metadata, notifications and current documentation. Web build and focused branding browser checks passed; Android debug build and packaged launcher/manifest/assets checks passed. Compatibility identifiers (com.safehaven.ai, native package and Nearby service, saved-data keys and database filenames) remain unchanged to preserve upgrades and data. GitHub repository and existing local folder remain SafeHaven. The shield-check app icon, layouts, widgets, fonts and animations are unchanged.
+
+## Two-phone Nearby repair
+
+Mesh → Nearby now offers Automatic nearby network (existing default), Two phones: host, and Two phones: join. The latter share a separate point-to-point service; never mix roles with the automatic cluster service. Follow the physical-phone/no-Studio instructions at the top of MESH_TEST_GUIDE.md. Duplicate request suppression, startup failure reset preserving queued data, radio/Play services checks and two-phone connected/waiting states are implemented. Google sample/API references are in that guide. Physical pairing/chat/SOS ACK remains unverified; no phones were attached during this repair. Existing automatic help participation, UI artwork and message/relay formats remain intact.
+
+Repair validation: TypeScript/production web and Android debug builds passed. One focused browser check passed for Host/Join controls, automatic help default and known-partner mode. APK assets match the current dist and its Capacitor config has no live-preview server. No physical radios were available; pairing/delivery remains unverified.

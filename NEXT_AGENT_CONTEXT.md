@@ -45,3 +45,9 @@ Latest UI decision: two duplicate Home preparation widgets removed (mini-checkli
 Latest validation: three focused browser checks passed for fixed SVG artwork (6 + 3), duplicate removal/legacy note retention, Profile edit/settings, dialog Back/SOS and all Home/core routes. TypeScript strict unused checks, production web build and final Android build passed. APK assets match dist and the package installed on 5558/5560. Physical Mesh/production acceptance gaps remain unchanged.
 
 Product rename: the visible name is Meridian (including Android launcher, PWA, notifications and API messages). Existing com.safehaven.ai / com.safehaven.rescuemesh identifiers, saved-data keys, database filenames and GitHub/workspace paths intentionally remain compatible. Do not rename those without a migration. App icon remains the licensed Lucide shield-check; native/resources is copied by android:sync.
+
+## Two-phone Nearby repair
+
+Mesh → Nearby now offers Automatic nearby network (existing default), Two phones: host, and Two phones: join. The latter share a separate point-to-point service; never mix roles with the automatic cluster service. Follow the physical-phone/no-Studio instructions at the top of MESH_TEST_GUIDE.md. Duplicate request suppression, startup failure reset preserving queued data, radio/Play services checks and two-phone connected/waiting states are implemented. Google sample/API references are in that guide. Physical pairing/chat/SOS ACK remains unverified; no phones were attached during this repair. Existing automatic help participation, UI artwork and message/relay formats remain intact.
+
+Repair validation: TypeScript/production web and Android debug builds passed. One focused browser check passed for Host/Join controls, automatic help default and known-partner mode. APK assets match the current dist and its Capacitor config has no live-preview server. No physical radios were available; pairing/delivery remains unverified.
