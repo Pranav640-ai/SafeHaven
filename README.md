@@ -1,133 +1,125 @@
 # Meridian
 
-Travel planning and safety essentials, with offline nearby communication for Android.
+A travel-safety companion that brings destination intelligence, flexible trip planning, offline essentials and nearby communication into one experience.
 
-- **Live demo:** [safehaven-production-4131.up.railway.app](https://safehaven-production-4131.up.railway.app)
-- **Submission source:** [GitHub — ui branch](https://github.com/Pranav640-ai/SafeHaven/tree/ui)
-- **Android:** [Download latest Meridian APK](https://github.com/Pranav640-ai/SafeHaven/raw/refs/heads/ui/downloads/Meridian.apk) · [SHA-256 checksum](downloads/Meridian.apk.sha256)
-- **Video submission:** To be added. <!-- Replace with the final video submission URL. -->
+**[Open the live demo](https://safehaven-production-4131.up.railway.app)**
 
-Use the **ui** branch for the integrated website, FastAPI backend, native plugins and packaged APK. Historical branches are not the submission build.
+## From planning to travelling
 
-## Features
+Choose a destination and travel date, review weather and source reports, then build an itinerary. Compare proposed changes before accepting them and prepare a safety pack for offline access. During the trip, use guidance, companion check-ins, local observations or Android nearby communication according to your situation.
 
-| Feature | Implemented experience |
-|---|---|
-| Explore | Search towns/cities beyond preset cards or select an exact labelled coordinate/timezone. Home retains your destination. |
-| Risk insights | Dated weather, outdoor/indoor/water activity evidence, coverage, uncertainty and nearby disaster-report context. |
-| Reports | Timestamped source references, historical/local-relevance labels and source-linked explanations. |
-| Trip replanner | Dated activities, fixed bookings, preferences, forecast/published-area signals, Original/Proposed comparison, editable suggestions and explicit approve/reject. Approved trips persist locally. |
-| Nearby alternatives | Real OSM candidates with distance and information gaps; selecting one fills a draft without overwriting bookings. |
-| Incident reporting | Consented category/severity/coordinate observations, nearby filtering, public-evidence checks and owner deletion. Active reports also appear in Map and relevant risk/trip reviews. |
-| Map and routes | Source/community markers, published warning polygons, selected points, OSRM route comparisons and available sourced assistance listings. |
-| Photo review | Consented AI observations of visible road conditions and uncertainty, when the provider is configured. |
-| Guidance and languages | Source-linked Flood/Extreme heat/Earthquake instructions, English comparison, supported-language content, step focus, installed-voice read-aloud and bounded source questions. |
-| Safety pack | Offline contacts, itinerary, briefing, guidance, phrases and preparation details. Profile → Contacts supports categories, edit/call/delete and duplicate prevention. |
-| Online private groups | Private invites, consented check-ins, refresh, offline queued retry/cancellation and membership removal. |
-| Nearby Mesh | Android Bluetooth/Wi-Fi Nearby discovery, automatic help mode, optional known-partner pairing, two-phone Host/Join, chat and peer receipt acknowledgements. |
-| SOS and check-ins | Separately consented nearby requests/status. Bounded encrypted pending queues expire within 24 hours; queued/offered/acknowledged states remain distinct. |
-| Safety beacons | Temporary unverified GPS meeting points with capacity/expiry/withdrawal. Receivers request approximate bearing/distance; your own beacon has no arrow to itself. |
-| Document vault | Profile → Document vault: passphrase-encrypted local passport/visa/insurance images/PDFs and contacts snapshots, offline viewing and auto-lock. |
-| Fake call and decoy | Home shortcut: caller name, immediate/delayed simulated call, optional local ringtone, answer/end/cancel and blank screen. No real call is placed. |
-| Notifications/response | In-app warnings, optional configured browser web push, signed publisher bulletins and a protected response dashboard with isolated simulation. |
-| Authentication | Firebase browser Google popup, native Android Credential Manager login, persistent session/sign-out and guest access. |
+## Features and functionality
 
-## User journey
+### Destination exploration and selection
 
-1. Sign in or continue as guest → **Explore** → select destination/date.
-2. **Risk insights** → review Overview, Weather, Reports and Map, including sources and coverage.
-3. **Trip replanner** → add activities/bookings → compare proposals/reasons → explicitly approve or reject.
-4. **Safety pack** → prepare offline essentials; **Profile → Document vault** → store encrypted private copies.
-5. During travel: Guidance, online group status or incident reports; Android Nearby for chat, SOS, check-ins and beacons.
+Explore searches towns and cities beyond the featured destination cards. Results identify the region and country so travellers can distinguish places with similar names. For trails, landmarks or places missing from search, an exact labelled coordinate and timezone can be selected. The chosen destination is retained on Home and reused in its risk review.
 
-## Install and demonstrate Android
+### Destination risk insights
 
-Download the APK on two Android phones with Google Play services. Allow installation from the browser/file app when Android asks. Install over the existing app to retain data; Android Studio is not required for testing the packaged APK.
+A dated overview combines rain, wind, temperature and forecast planning signals with source reports and local context. Outdoor, indoor and water activities can be examined separately through hourly evidence, an explicit planning window and source-coverage information. Unknown or unavailable information stays visible rather than being presented as a safe result.
 
-1. Keep both apps open; enable Bluetooth, Wi-Fi and Location and grant Nearby/location permissions.
-2. **Mesh → Nearby**: distinct names, **Nearby help network** on both.
-3. A selects **Two phones: host** and starts; B selects **Two phones: join** and starts. Both should show the counterpart connected.
-4. Exchange unique messages both ways; confirm received text and **Peer acknowledged**, not just an outgoing bubble.
-5. A shares a beacon; B opens Beacons → **Show approximate distance & bearing**. A should not see an arrow to itself. Withdraw and check B.
-6. Use clearly labelled test SOS/check-ins without contacting emergency numbers. Repeat chat with mobile data off, keeping Bluetooth/Wi-Fi/Location on.
+Nearby disaster records show source links, timestamps and distance to the event centre. Historical reports and unconfirmed local impact are distinguished from current instructions. Forecast scores are model estimates, not disaster probabilities or official travel clearance.
 
-Mesh, vault, decoy and saved essentials are independent of Railway. Fresh forecasts, public reporting, online groups and Google login need internet. Host/Join and automatic cluster modes use separate services; do not mix them across phones. The APK is a debug-signed evaluation build. The owner reports native Google login working; radio range, multi-hop, background behavior and full native PDF/audio lifecycle acceptance remain device-dependent.
+### Source reports and public evidence
 
-## Data and scope
+Travellers can read timestamped reports and open their original sources. Source-linked explanations preserve uncertainty and can use the preferred supported language.
 
-Forecasts are planning estimates, not disaster probabilities or clearance. No threshold, empty reports or no loaded route intersections does not establish safety. Official instructions take priority. Public incident checks use Open-Meteo/USGS/GDACS/GDELT as context; they do not verify a report. Date-relevant observations within 10 km do not independently change plans or risk scores. Reports expire after 24 hours.
+Public evidence checks compare a community observation with Open-Meteo weather context, nearby USGS earthquake records, GDACS disaster reports and GDELT news discovery. Results show available evidence, check time and unavailable providers. Related weather, news or nearby events provide context; they do not independently verify the submitted incident.
 
-The vault uses Web Crypto AES-256-GCM, PBKDF2-SHA256 (600,000 iterations), random salt/IV and encrypted IndexedDB. Keys/passphrases are not persisted. It locks when hidden, left or idle for two minutes. **No password recovery/cloud sync.** Limits: 20 items, 5 MB each, approximately 30 MB total. Contacts snapshots are separate from the Safety pack's original list; imported originals remain in their original location. Native PDF preview briefly uses private cache and removes temporary files after rendering/startup recovery. Screenshots, compromised devices and system backup policy are outside this at-rest protection; no independent security audit is claimed.
+### Trip planning and minimal-disruption replanning
 
-Source/directory coverage and translations require maintenance/review. Nearby identities are unverified; Google login does not authenticate Mesh peers or grant operator roles. Not included: online buddy chat, downloaded offline street maps, native FCM/SMS, Mesh voice calls or automatic rescue dispatch.
+Travellers create dated outdoor, water and indoor activities alongside fixed bookings. Trip review considers forecast signals, applicable published warning areas and travel preferences. AI-assisted suggestions are available when the provider is configured, with a labelled forecast-rule fallback.
 
-## Run locally
+The **Original plan** and **Proposed plan** remain separate before approval. Each proposal provides reasons and can be edited, approved or rejected. Approval updates the saved Original; the Proposed view then shows no pending changes. Rejection preserves the Original. Fixed bookings are retained, and proposed dates stay within the entered trip window.
 
-Requirements: Node.js 22+, Python 3.12+ and a modern browser.
+### Nearby activity alternatives
 
-```powershell
-git clone --branch ui https://github.com/Pranav640-ai/SafeHaven.git
-cd SafeHaven
-npm ci
-python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r backend/requirements.lock.txt
-# First setup only; preserve an existing .env with private keys:
-Copy-Item backend/.env.example backend/.env
-npm run api
-```
+The replanner discovers real OpenStreetMap candidates near the selected destination. Suggestions include straight-line distance, ranking explanations and information gaps such as unconfirmed opening hours or accessibility. Selecting a candidate fills the activity draft for review; it does not automatically overwrite a booking, save a stop or approve a change.
 
-In another terminal, run `npm run dev`; open `http://localhost:5173`. Vite proxies `/api` to `http://127.0.0.1:8000`. `npm run build` creates the production site, also served by FastAPI.
+### Community incident reporting
 
-## Railway deployment
+A Home shortcut lets travellers publish observations with a category, estimated severity, description and selected coordinates. Supported categories include flood, landslide, road blockage, fire, weather and other incidents. Publishing requires explicit consent because the description and coordinates become public.
 
-Keep the existing service/domain; set its GitHub source branch to **ui**, repository root directory to the root and use the supplied **Dockerfile**. It builds the frontend and serves it with FastAPI on Railway's `PORT`. `railway.json` checks `/api/health`. Website/backend share one public domain.
+Travellers can filter nearby reports, request public-evidence checks and remove their own submissions. Reports expire after 24 hours. Active, date-relevant observations also appear in the destination Map and in risk/trip context within 10 km. Unverified observations do not independently change a plan or its risk score.
 
-Attach a persistent volume at `/data`; the image uses `DATABASE_PATH=/data/safehaven.db`. Configure private server variables as needed:
+### Local conditions map and route comparison
 
-- `GEMINI_API_KEY` / `GEMINI_MODEL`: AI suggestions/translations/photo review. Forecast replanning retains a labelled rule-based fallback.
-- `GNEWS_API_KEY`: additional news coverage.
-- `CORS_ORIGINS`: exact frontend origins, including Android `https://localhost`/`http://localhost` and actual separate/local frontend origins.
-- `SAFETY_ADMIN_TOKEN`, `ALERT_SIGNING_KEY`: protected response tools and publisher signing.
-- `SAFETY_DIRECTORY_PATH`, `OFFICIAL_SOURCE_HOSTS`: maintained assistance/consular directory and issuer configuration.
-- `VAPID_*`, `PUSH_ALLOWED_HOSTS`: optional browser web push.
+The map displays the selected destination, source-event markers, community observations, published warning areas and available sourced assistance listings. Travellers can select a point manually or explicitly request their device location.
 
-Other overrides are in `backend/.env.example`. Never commit private environment values, user databases, Firebase service-account keys or publisher private keys.
+Road-route comparison checks returned OSRM routes against loaded warning polygons and presents intersections alongside distance. Assistance and consular listings retain source/update information where maintained data is available. A clear map or route without a matching loaded warning is not a guarantee of safety.
 
-[Health](https://safehaven-production-4131.up.railway.app/api/health) · [API reference](https://safehaven-production-4131.up.railway.app/docs). On 10 October 2026, the website/health and intelligence/incident-evidence routes were available; Gemini/news configuration flags were false at inspection.
+### Consented road-photo assessment
 
-**Routine redeployment keeps the same domain when the service/domain setting is retained.** If you change it, update README/submission URLs, Firebase authorized domains, frontend origins and Android API base, then rebuild the APK. The old `safehaven-production-9f5d.up.railway.app` domain is obsolete.
+With a configured AI provider, travellers can submit a resized road image after explicit consent. The result describes visible conditions, concern and uncertainty. It does not certify passability, infer reliable flood depth or guarantee road safety.
 
-## Google sign-in
+### Emergency guidance and language support
 
-Use Firebase project **safe-havenai**, with Google enabled under Authentication → Sign-in method.
+Source-linked guidance covers Flood, Extreme heat and Earthquake. Travellers can read the full instructions or focus on one step at a time, compare English source text, save guidance and use read-aloud when the appropriate voice is installed.
 
-**Laptop/website:** Authentication → Settings → Authorized domains → add **safehaven-production-4131.up.railway.app**, hostname only (no `https://`, path or port). Add `localhost` for local development and the actual address-bar hostname/IP when applicable. Reload and retry. Do not replace Firebase's configured `authDomain` with Railway just to fix this error. [Official Google sign-in setup](https://firebase.google.com/docs/auth/web/google-signin).
+English, prepared Hindi/Tamil content and provider-dependent French/Spanish translations are supported, with translation labels and limitations. Critical travel phrases remain available in the safety pack. Bounded source questions help explain the selected guidance without presenting the feature as unrestricted emergency advice.
 
-**Android:** package **com.safehaven.ai**, registered signing certificate and ignored `native/google-services.json`. Bundled APK SHA-1: **BB:56:F3:6B:F2:4A:1D:1F:A5:67:F3:D4:8B:28:72:4B:BA:BC:6C:76**. Sync reads its public Web OAuth client; `GOOGLE_WEB_CLIENT_ID` is an optional build variable. Another machine/release key needs its own fingerprint registration. CI can read the public Web OAuth client from the GitHub repository variable `GOOGLE_WEB_CLIENT_ID`; each CI signing key must also be registered for real account acceptance. Native login uses Credential Manager → Google token → Firebase session; browser login uses popup. Server token/role enforcement is separate.
+### Offline safety pack and emergency contacts
 
-## Build Android / refresh APK
+The safety pack brings together saved contacts, approved itinerary, destination briefing, prepared guidance, phrases and preparation details. Saved information includes timestamps so a snapshot is not confused with a live alert.
 
-Install Android Studio/SDK and JDK 21. Tracked sources/resources are in `native/`; root `android/` is generated/ignored. Keep existing package and saved-data keys for compatibility.
+Profile → Contacts supports contact categories, editing, duplicate-number prevention, deletion and dialler access. Preparation checklist items are marked manually. Previously saved essentials remain available without internet; fresh data requires a connection. Downloaded offline street maps are not included.
 
-Create ignored `.env.production` (a public example is provided):
+### Private online companion groups
 
-```dotenv
-VITE_API_BASE_URL=https://safehaven-production-4131.up.railway.app
-```
+Travellers create or join a private group using an invitation and explicit consent. Members share selected safe/need-help/unknown statuses with timestamps and refresh their companions' updates. Offline status changes can be queued, synchronized or cancelled; leaving removes membership and the shared status.
 
-```powershell
-npm run android:init  # Fresh native project only
-npm run android:sync # Successful web build, asset sync and tracked plugins
-$env:JAVA_HOME='C:\Path\To\JDK21'
-.\android\gradlew.bat -p android :app:assembleDebug --no-daemon '-Pandroid.injected.testOnly=false'
-```
+Group status sharing does not silently send GPS. These internet-based groups are separate from Nearby Mesh and are not a one-to-one buddy-chat service.
 
-macOS/Linux: `./android/gradlew -p android :app:assembleDebug --no-daemon`. Output: `android/app/build/outputs/apk/debug/app-debug.apk`. Copy the verified build to `downloads/Meridian.apk` and regenerate `downloads/Meridian.apk.sha256` together. APK needs a reachable HTTPS API base; the hosted site uses relative same-origin `/api`. Play Store release requires release signing/certificate registration.
+### Offline Android Nearby Mesh
 
-## Architecture and validation
+Nearby Mesh connects participating Android phones through Bluetooth/Wi-Fi Nearby without relying on the deployed backend or mobile data. It supports automatic nearby help participation, optional known-partner pairing and a dedicated two-phone Host/Join mode.
 
-`src/features/`: planning, reports, conditions, guidance, pack, vault/decoy/response. `src/services/`: API/storage/auth/crypto. `src/mesh/` and `native/android/`: Nearby UI/native radio, Google auth, speech and PDF preview. `backend/`: FastAPI/safety/groups/push/intelligence. `scripts/`, `tests/`, `.github/workflows/`: setup/build and focused validation.
+Connected travellers exchange messages with peer receipt acknowledgements. Queued, offered and acknowledged states are kept distinct. Automatic help participation begins only after discovery is explicitly started; nearby display names remain unverified. Google account login does not automatically authenticate a radio participant.
 
-Recent feature checks passed: five incident/backend and four vault/decoy/report/beacon browser checks, web/Android builds and APK asset verification. Browser native-bridge fixtures do not prove physical radio delivery or native PDF/audio behavior. Submission cleanup uses type/build/artifact checks without repeating the entire suite.
+### SOS and nearby check-ins
 
-When needed: `.venv/Scripts/python.exe -m pytest backend/test_incident_integration.py -q`; Playwright `tests/personal-safety.spec.ts` against a local preview/API with `TEST_BASE_URL` configured. The Lucide shield-check icon's source and ISC attribution remain in `native/icon-source/`.
+The separate SOS page sends assistance requests to nearby participants. Status check-ins require their own sharing consent. Bounded encrypted pending SOS/check-in queues expire within 24 hours, and acknowledgement is shown only when a peer confirms receipt.
+
+Cancelling a pending request cannot retract a copy already received or relayed. This is traveller-to-traveller communication, not automatic contact with emergency services or guaranteed rescue dispatch.
+
+### Temporary safety beacons
+
+A participant can voluntarily share a GPS meeting point, optional capacity and an expiry time, then withdraw it. Receiving phones can request approximate distance and bearing toward that point. The publishing phone does not show an arrow to its own beacon.
+
+Beacons are self-reported, unverified meeting points rather than certified shelters. Bearing is a straight-line direction, not a safe walking route. Offline peers may retain a copy until withdrawal reaches them or the beacon expires.
+
+### Encrypted offline document vault
+
+Profile → Document vault stores passport, visa, insurance and other document images/PDFs, plus explicit snapshots of emergency contacts. Labels and content are encrypted locally using passphrase-based AES-256-GCM authenticated encryption. The passphrase/key is not persisted.
+
+Documents can be unlocked and viewed without internet. The vault locks when hidden, left or idle for two minutes. It supports up to 20 items, 5 MB per file and approximately 30 MB total, including offline native PDF page previews.
+
+There is no password recovery or app-level cloud sync. Contacts snapshots are separate from the Safety pack's original list, and imported original files remain in their original locations. This protects stored vault data; it does not claim protection against a compromised device or unrestricted screenshots of unlocked content.
+
+### Fake call and blank decoy
+
+A Home shortcut opens a locally simulated incoming-call screen with a chosen caller name, immediate/delayed start and optional ringtone. Travellers can answer, view a call timer, decline, end or cancel the scheduled call. No real call is placed and no contact is notified.
+
+A blank-screen option provides a quiet local decoy with a Return control. Both features work offline while the app is open, and their controls appear above the navigation dock.
+
+### Google sign-in and guest access
+
+The website uses Firebase Google sign-in; Android uses a native account chooser to establish the Firebase session. Profile shows the signed-in account, session persistence and sign-out are supported, and guest entry preserves access to local preparation and Nearby tools.
+
+Account sign-in does not automatically synchronize locally saved trips/documents or grant response-team privileges.
+
+### Notifications, signed bulletins and response tools
+
+In-app notifications provide access to destination warnings. Configured supported browsers can opt into destination web push. Publisher bulletins carry source links, affected-area geometry, expiry and signature validation; a publisher signature is not itself proof of official authority.
+
+A protected response workspace supports report review, source-linked publication and delivery metrics. Its isolated scenario simulator evaluates hypothetical areas/routes and virtual check-ins without changing live reports, groups or trips or sending real notifications. Native FCM and SMS are not included.
+
+## Evaluation scope
+
+Source coverage, configured providers and device capabilities determine which online results, translations, voices and directory entries are available. Missing coverage is shown explicitly. Mesh range, multi-hop/background behavior and native lifecycle behavior require physical-device evaluation; foreground message delivery is not a promise of universal connectivity. Local official instructions take priority over model estimates and community observations.
+
+## Submission links
+
+- **Live demo:** [Open Meridian](https://safehaven-production-4131.up.railway.app)
+- **Video submission:** Link to be added. <!-- Replace this line with the final video URL. -->
+- **Android APK:** [Download Meridian](https://github.com/Pranav640-ai/SafeHaven/raw/refs/heads/ui/downloads/Meridian.apk)
