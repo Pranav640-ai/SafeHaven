@@ -1,6 +1,6 @@
 ## Latest UI cleanup
 
-Validation: TypeScript and production web build passed. All 18 browser checks passed, including native touch taps at the SOS/Mesh boundary on 320, 375, 390 and 430 px screens before and after scrolling. Home, Mesh and SOS screenshots were inspected.
+Validation: TypeScript and production web build passed. All 18 browser checks passed, including native touch taps at the SOS/Mesh boundary on 320, 375, 390 and 430 px screens before and after scrolling. Home, Mesh and SOS screenshots were inspected. Android sync and debug APK assembly passed; reinstall the updated APK to see the cleanup.
 
 Home Risk insights now asks the user to choose a destination; Explore cards still open their named place. The mobile dock uses five stable columns with separate touch targets and visible labels while scrolling. Mesh tab content renders directly rather than waiting for a tab animation. Developer preview instructions and the obsolete SOS modal were removed. Field/button/header alignment has been normalized. USER_GUIDE.md explains the complete navigation. Real two-phone mesh delivery still requires the acceptance checks in MESH_TEST_GUIDE.md; Google sign-in remains assigned to a teammate.
 
