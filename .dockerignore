@@ -9,3 +9,4 @@ backend/data
 test-results
 __pycache__
 native/google-services*
+downloads

@@ -18,7 +18,7 @@ import {
   BookOpen, CheckCheck, ChevronDown, ChevronRight, CircleHelp,
   CloudRain, Compass, Home,
   Menu, Languages, LockKeyhole, Map, MapPin, Navigation, Phone, Radio, Search, Settings,
-  Shield, ShieldAlert, ShieldCheck, Smartphone, ThermometerSun,
+  ShieldAlert, ShieldCheck, Smartphone, ThermometerSun,
   X, Zap, Pencil, Mountain, Waves, Trees, UserRound, CalendarCheck2, FolderOpen, type LucideIcon,
 } from 'lucide-react';
 

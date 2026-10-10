@@ -1,6 +1,6 @@
 # Meridian repository instructions
 
-Read NEXT_AGENT_CONTEXT.md, UI_CHECKLIST.md, FEATURE_CHECKLIST.md and FINAL_HANDOFF.md before changes. Canonical branch is ui; old design branches and historical Kotlin handoffs are references.
+Read README.md before changes. Canonical branch is ui. README is the single public feature/setup/submission document; do not recreate historical handoff/checklist files unless requested.
 
 ## Fixed visual elements
 
@@ -8,6 +8,6 @@ Preserve the six Home SVG illustrations: ShieldAlert, Navigation, BookOpen, Radi
 
 Keep the static grid/spotlights, sage/ivory theme, Raleway/Nunito/editorial font roles, outline shimmer, dock animation and separate SOS/Mesh hit targets. UI changes should be limited to requested functionality/copy or removal of a demonstrated duplicate. The redundant Home mini-checklist and trip-note editor were removed; preparation belongs to Safety pack. Retain legacy saved notes and avoid deleting user data.
 
-Use the checklists to record code present versus tested/production ready. Do not fabricate official data, shelters, routes, peers, authentication or delivery. Mesh help mode auto-accepts only after explicit discovery start; participants stay unverified. Known-partner code comparison is optional. Physical delivery is still unverified.
+Keep README accurate about implementation versus tested/production readiness. Do not fabricate official data, shelters, routes, peers, authentication or delivery. Mesh help mode auto-accepts only after explicit discovery start; participants stay unverified. Known-partner code comparison is optional. Do not infer radio range or multi-hop delivery from UI/bridge tests.
 
-Run focused checks for affected behavior; do not repeatedly run the entire suite for cosmetic changes. Build web before syncing Android assets, stop on build failure, and verify APK assets. Tracked native sources are native/android; root android is generated. Never commit local secrets. Update authoritative docs and takeover context when behavior changes.
+Run focused checks for affected behavior; do not repeatedly run the entire suite for cosmetic changes. Build web before syncing Android assets, stop on build failure, and verify APK assets. Tracked native sources are native/android; root android is generated. Never commit local secrets. Update README when behavior, build/deployment setup or packaged APK changes.
