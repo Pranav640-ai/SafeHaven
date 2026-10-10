@@ -1048,3 +1048,18 @@ h1,h2,h3,h4,.brand{font-weight:500}
 @media(max-width:350px){.floating-dock,.floating-dock.dock-compact{gap:2px;padding:5px;height:68px}.floating-dock .dock-item>span:not(.dock-active-bg){font-size:9px}}
 
 .feature-card strong{min-height:30px;display:flex;align-items:center;line-height:15px}.feature-detail{min-height:36px;line-height:12px}.journey-next{margin-top:16px;min-height:48px}
+
+/* Restore the existing dock morph without overlapping its five touch targets. */
+.floating-dock{transition:width .32s cubic-bezier(.2,.8,.2,1),height .32s,padding .32s}
+.floating-dock.dock-compact{width:min(calc(100% - 44px),350px);height:60px;padding:5px;gap:2px}
+.floating-dock.dock-compact>.dock-item{height:48px;gap:0}
+.floating-dock.dock-compact .dock-item>span:not(.dock-active-bg){max-height:0;opacity:0;line-height:0;transform:translateY(-5px);transition:opacity .2s,max-height .2s,transform .2s}
+.floating-dock.dock-compact .dock-sos small{display:none}
+.floating-dock.dock-compact>.dock-sos{height:44px;width:44px}
+.home-location{min-width:0}.home-destination-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:135px}.header-actions{flex-shrink:0;gap:4px}
+/* One outline shimmer for loading on every page; typography stays unchanged. */
+.loading-scene .react-loading-skeleton{background:transparent!important;border:1px solid #a1b39770}
+.loading-scene .react-loading-skeleton::after{inset:0;transform:none;padding:1px;border-radius:inherit;background:linear-gradient(100deg,transparent 15%,#649b7e 48%,#e8eee2 53%,transparent 80%);background-size:240% 100%;mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);mask-composite:exclude;animation:outline-shimmer 1.4s linear infinite}
+@keyframes outline-shimmer{from{background-position:160% 0}to{background-position:-80% 0}}
+@media(max-width:350px){.home-destination-name{max-width:95px}.floating-dock.dock-compact{height:58px}}
+@media(prefers-reduced-motion:reduce){.floating-dock,.floating-dock.dock-compact{transition:none}.loading-scene .react-loading-skeleton::after{animation:none}}

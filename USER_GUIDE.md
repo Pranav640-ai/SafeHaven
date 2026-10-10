@@ -2,7 +2,7 @@
 
 1. Enter as guest. Your preparation stays on this device.
 2. Planning a visit? Home → Check a destination → search/select → choose travel date → review Weather, Reports and Map. Save a briefing. Explore tiles open their named places.
-3. Plan activities: Trip replanner → dated stops/preferences → review changes → compare original/proposal → edit or accept. Fixed bookings stay fixed.
+3. Plan activities: Trip replanner → dated stops/preferences → review changes → compare original/proposal → edit or approve. Approval updates Original; Proposed then shows no pending changes, with reasons retained. Fixed bookings stay fixed.
 4. Prepare Safety pack while connected: save guidance, contacts, meeting point and itinerary. Reopen the pack offline; check saved timestamps.
 5. Already at a location? Risk → Map → select a point or explicitly use location. Reports require public consent; routes consider only available hazard data.
 6. Need instructions? Emergency guide → hazard/language → source-linked steps, one-step view, listening or source questions. Translations need review; English comparison is available.

@@ -21,7 +21,7 @@ import com.getcapacitor.annotation.PermissionCallback
 @CapacitorPlugin(
     name = "RescueMesh",
     permissions = [
-        Permission(alias = "location", strings = [Manifest.permission.ACCESS_FINE_LOCATION]),
+        Permission(alias = "location", strings = [Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION]),
         Permission(alias = "bluetooth", strings = [
             Manifest.permission.BLUETOOTH_SCAN,
             Manifest.permission.BLUETOOTH_CONNECT,
@@ -72,7 +72,7 @@ class RescueMeshPlugin : Plugin() {
     @PluginMethod fun stopCompass(call: PluginCall) { stopCompassSensor(); call.resolve() }
 
     private fun aliasesForVersion(): Array<String> = when {
-        Build.VERSION.SDK_INT >= 33 -> arrayOf("bluetooth", "wifi")
+        Build.VERSION.SDK_INT >= 33 -> arrayOf("bluetooth", "wifi", "location")
         Build.VERSION.SDK_INT >= 31 -> arrayOf("bluetooth", "location")
         else -> arrayOf("location")
     }
@@ -81,13 +81,13 @@ class RescueMeshPlugin : Plugin() {
         val required = when {
             Build.VERSION.SDK_INT >= 33 -> listOf(
                 Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT,
-                Manifest.permission.BLUETOOTH_ADVERTISE, Manifest.permission.NEARBY_WIFI_DEVICES
+                Manifest.permission.BLUETOOTH_ADVERTISE, Manifest.permission.NEARBY_WIFI_DEVICES, Manifest.permission.ACCESS_COARSE_LOCATION
             )
             Build.VERSION.SDK_INT >= 31 -> listOf(
                 Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT,
-                Manifest.permission.BLUETOOTH_ADVERTISE, Manifest.permission.ACCESS_FINE_LOCATION
+                Manifest.permission.BLUETOOTH_ADVERTISE, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION
             )
-            else -> listOf(Manifest.permission.ACCESS_FINE_LOCATION)
+            else -> listOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
         }
         return required.any { ContextCompat.checkSelfPermission(context, it) != PackageManager.PERMISSION_GRANTED }
     }

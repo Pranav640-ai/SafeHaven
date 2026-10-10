@@ -8,12 +8,14 @@ import { RescueMeshScreen } from './mesh/RescueMeshScreen';
 import { useRescueMesh } from './mesh/useRescueMesh';
 import './mesh/mesh.css';
 import { RiskTool, ReplanTool, GuidanceTool, PackTool } from './features/TravelTools';
+import { SavedAreaWarnings } from './features/AreaWarnings';
+import type {Place} from './services/api';
 import { useSaved, read } from './services/storage';
 import {
   AlertCircle, AlertTriangle, ArrowLeft, ArrowRight, Bell, Bookmark,
   BookOpen, Check, CheckCheck, ChevronDown, ChevronRight, CircleHelp,
   Clock3, CloudRain, Compass, Download, Globe2, Heart, Home,
-  Languages, LocateFixed, LockKeyhole, Map, MapPin, MessageCircle,
+  Menu, Languages, LocateFixed, LockKeyhole, Map, MapPin, MessageCircle,
   Navigation, Phone, Plus, Radio, RefreshCw, Search, Send, Settings,
   Shield, ShieldAlert, ShieldCheck, Smartphone, Sun, ThermometerSun,
   Users, WifiOff, X, Zap, FileText, Save, Leaf, Mountain, Waves, Trees, BatteryCharging, Crosshair, Wifi, Signal, LifeBuoy, UserRound, CalendarCheck2, FolderOpen, type LucideIcon,
@@ -21,15 +23,15 @@ import {
 
 type Page = 'home' | 'explore' | 'risk' | 'replan' | 'guide' | 'mesh' | 'beacon' | 'pack' | 'profile' | 'language' | 'privacy' | 'sos';
 type GuideKind = 'Flood' | 'Extreme heat' | 'Earthquake';
-type Dialog = 'profile' | 'help' | null;
+type Dialog = 'profile' | 'help' | 'alerts' | 'menu' | null;
 
 const features: { title: string; detail: string; icon: LucideIcon; art: string; accent: string; page: Page }[] = [
-  { title: 'Risk insights', detail: 'Check before your visit', icon: ShieldAlert, art: '', accent: 'rose', page: 'risk' },
-  { title: 'Trip replanner', detail: 'Plan your dated activities', icon: Navigation, art: '', accent: 'blue', page: 'replan' },
-  { title: 'Emergency guide', detail: 'Find steps for an emergency', icon: BookOpen, art: '', accent: 'amber', page: 'guide' },
-  { title: 'RescueMesh', detail: 'Connect nearby without internet', icon: Radio, art: '', accent: 'violet', page: 'mesh' },
-  { title: 'Safety beacon', detail: 'Share a refuge location', icon: MapPin, art: '', accent: 'teal', page: 'beacon' },
-  { title: 'Safety pack', detail: 'Save for offline use', icon: Bookmark, art: '', accent: 'indigo', page: 'pack' },
+  { title: 'Risk insights', detail: 'Check before your visit', icon: ShieldAlert, art: '🌩️', accent: 'rose', page: 'risk' },
+  { title: 'Trip replanner', detail: 'Plan your dated activities', icon: Navigation, art: '🧭', accent: 'blue', page: 'replan' },
+  { title: 'Emergency guide', detail: 'Find steps for an emergency', icon: BookOpen, art: '🚨', accent: 'amber', page: 'guide' },
+  { title: 'RescueMesh', detail: 'Connect nearby without internet', icon: Radio, art: '📡', accent: 'violet', page: 'mesh' },
+  { title: 'Safety beacon', detail: 'Share a refuge location', icon: MapPin, art: '📍', accent: 'teal', page: 'beacon' },
+  { title: 'Safety pack', detail: 'Save for offline use', icon: Bookmark, art: '🎒', accent: 'indigo', page: 'pack' },
 ];
 
 const guides: Record<GuideKind, {icon:LucideIcon; lead:string; steps:string[]}> = {
@@ -74,7 +76,7 @@ function FeatureCard({feature, index, open}: {feature:typeof features[number];in
   const Icon = feature.icon;
   return <motion.button type="button" className={`feature-card tint-${feature.accent}`} onClick={open}
     initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} transition={{delay:index*.035,duration:.28}} whileTap={{scale:.96}}>
-    <span className="feature-art" aria-hidden="true"><span className="feature-halo"/><span className="feature-illustration"><Icon size={43} strokeWidth={1.55}/></span><span className="feature-corner-icon"><Icon size={15} strokeWidth={2}/></span></span>
+    <span className="feature-art" aria-hidden="true"><span className="feature-halo"/><span className="feature-illustration">{feature.art||<Icon size={43} strokeWidth={1.55}/>}</span><span className="feature-corner-icon"><Icon size={15} strokeWidth={2}/></span></span>
     <strong>{feature.title}</strong><span className="feature-detail">{feature.detail}</span>
   </motion.button>;
 }
@@ -129,13 +131,13 @@ function SwipeRow({children, label}:{children:ReactNode;label:string}) {
 }
 function Carousel({items,onOpen}: {items:{kicker:string;title:string;subtitle:string;icon:LucideIcon;art:string;tint:string;page:Page}[];onOpen:(page:Page)=>void}) {
   return <SwipeRow label="Featured stories">{items.map(x=>{const Icon=x.icon;return <div className="native-carousel-item" key={x.title}>
-    <button type="button" onClick={()=>onOpen(x.page)} className={`carousel-card carousel-${x.tint}`}><span className="carousel-overline">{x.kicker}</span><span className="carousel-art" aria-hidden="true"><span className="carousel-art-illustration"><Icon size={58} strokeWidth={1.35}/></span><Icon className="carousel-art-symbol" size={24}/></span><h3>{x.title}</h3><p>{x.subtitle}</p></button>
+    <button type="button" onClick={()=>onOpen(x.page)} className={`carousel-card carousel-${x.tint}`}><span className="carousel-overline">{x.kicker}</span><span className="carousel-art" aria-hidden="true"><span className="carousel-art-illustration">{x.art||<Icon size={58} strokeWidth={1.35}/>}</span><Icon className="carousel-art-symbol" size={24}/></span><h3>{x.title}</h3><p>{x.subtitle}</p></button>
   </div>})}</SwipeRow>;
 }
 function AppRow({icon:Icon,title,subtitle,end,onClick,tone='default'}:{icon:LucideIcon;title:string;subtitle?:string;end?:ReactNode;onClick:()=>void;tone?:string}) {
   return <button type="button" className="app-row" onClick={onClick}><span className={`row-icon row-${tone}`}><Icon size={20}/></span><span className="row-body"><strong>{title}</strong>{subtitle&&<small>{subtitle}</small>}</span>{end??<ChevronRight size={18} className="row-chevron"/>}</button>;
 }
-function Modal({kind,close,person,saveName}: {kind:Dialog;close:()=>void;person:string;saveName:(s:string)=>void}) {
+function Modal({kind,close,person,saveName,navigate,checkDestination}: {kind:Dialog;close:()=>void;person:string;saveName:(s:string)=>void;navigate:(p:Page)=>void;checkDestination:()=>void}) {
   const [draft,setDraft]=useState(person);
   useEffect(()=>setDraft(person),[person,kind]);
   return <AnimatePresence>{kind && <motion.div className="modal-backdrop" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} onClick={close}>
@@ -143,6 +145,8 @@ function Modal({kind,close,person,saveName}: {kind:Dialog;close:()=>void;person:
       initial={{y:'100%'}} animate={{y:0}} exit={{y:'100%'}} transition={{type:'spring',stiffness:340,damping:34}}>
       <div className="sheet-handle"/><IconButton icon={X} onClick={close} label="Close dialog" className="sheet-close"/>
       {kind==='profile'&&<><h2>Edit display name</h2><p>Your display name is saved until you close the app.</p><label className="field-label" htmlFor="profile-name">Display name</label><input className="form-input" id="profile-name" maxLength={32} value={draft} onChange={e=>setDraft(e.target.value)}/><button className="primary-button" type="button" onClick={()=>{saveName(draft.trim()||'Traveler');close()}}>Save changes</button></>}
+      {kind==='alerts'&&<><h2>Destination warnings</h2><p>Review saved notices and check the latest information for your destination.</p><SavedAreaWarnings/><button className="primary-button" onClick={checkDestination}>Check latest warnings</button></>}
+      {kind==='menu'&&<><h2>Your travel tools</h2><AppRow icon={Navigation} title="My trip plan" subtitle="Compare and approve proposed changes" onClick={()=>navigate('replan')}/><AppRow icon={Bookmark} title="Safety pack" onClick={()=>navigate('pack')}/><AppRow icon={Languages} title="Language settings" onClick={()=>navigate('language')}/><AppRow icon={CircleHelp} title="How to use SafeHaven" onClick={()=>navigate('guide')}/></>}
       {kind==='help'&&<><h2>About SafeHaven</h2><p>Start with Explore to choose a destination and check its weather and reports. Add your activities in Trip replanner, then save contacts and guidance in Safety pack. On Android, open Mesh → Nearby to pair phones using matching codes. Use SOS to ask connected travelers for help.</p><button className="primary-button" type="button" onClick={close}>Understood</button></>}
     </motion.section>
   </motion.div>}</AnimatePresence>;
@@ -186,7 +190,7 @@ export default function App(){
   const lastTop=useRef(0);
   const reduceMotion=useReducedMotion();
 
-  useEffect(()=>{if(!enteredApp)return;setLoading(true);const t=window.setTimeout(()=>setLoading(false),page==='home'?640:420);return()=>window.clearTimeout(t)},[page,enteredApp]);
+  useEffect(()=>{if(!enteredApp)return;setLoading(true);const t=window.setTimeout(()=>setLoading(false),640);return()=>window.clearTimeout(t)},[page,enteredApp]);
   useEffect(()=>{if(!toast)return;const t=window.setTimeout(()=>setToast(''),1600);return()=>window.clearTimeout(t)},[toast]);
   const openDestination=(name:string)=>{go('risk');setSelectedDestination(name);window.history.replaceState({...window.history.state,destination:name},'')};
   const pendingScroll=useRef<number|null>(null);
@@ -259,8 +263,8 @@ export default function App(){
     </section>
   </div>}
 
-  function home(){return <>
-    <header className="home-header"><button className="home-location" type="button" onClick={()=>go('explore')}><MapPin size={21}/><span><small>YOUR DESTINATION</small><strong>Explore a location <ChevronDown size={14}/></strong></span></button><div className="header-actions"><button className="avatar-button" type="button" onClick={()=>go('profile')} aria-label="Open profile"><span>{name.charAt(0).toUpperCase()}</span></button></div></header>
+  function home(){const currentPlace=read<Place|null>('destination',null);return <>
+    <header className="home-header"><button className="home-location" type="button" onClick={()=>currentPlace?openDestination(currentPlace.name):go('explore')}><MapPin size={21}/><span><small>YOUR DESTINATION</small><strong><span className="home-destination-name">{currentPlace?.name||'Choose a location'}</span> <ChevronDown size={14}/></strong></span></button><div className="header-actions"><IconButton icon={Bell} onClick={()=>openDialog('alerts')} label="Notifications"/><IconButton icon={Menu} onClick={()=>openDialog('menu')} label="Open menu"/><button className="avatar-button" type="button" onClick={()=>go('profile')} aria-label="Open profile"><span>{name.charAt(0).toUpperCase()}</span></button></div></header>
     <div className="home-welcome"><p>Welcome to SafeHaven</p><h1>A better way to be prepared.</h1></div>
     <button type="button" className="hero-risk" onClick={()=>go('risk')}><img className="hero-risk-photo" src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1100&q=82" onError={e=>{e.currentTarget.style.display="none"}} alt="Mountain landscape" loading="eager"/><div className="hero-risk-bg"/><div className="hero-risk-top"><span className="hero-shield"><ShieldCheck size={24}/></span><span className="hero-label">DESTINATION SAFETY</span></div><h2>Know before<br/>you go.</h2><p>Check weather, reports and local guidance for your next stop.</p><span className="hero-link">Check a destination <ChevronRight size={16}/></span></button>
     
@@ -296,9 +300,9 @@ export default function App(){
     </section>
     <section className="home-section"><Heading title="For your next trip" right={<button className="section-link" onClick={()=>go('explore')}>See all <ChevronRight size={15}/></button>}/>
       <Carousel onOpen={go} items={[
-        {kicker:'DESTINATION CHECK',title:'Before you leave',subtitle:'Review known conditions',icon:MapPin,art:'',tint:'indigo',page:'risk'},
-        {kicker:'YOUR ITINERARY',title:'Plans can change',subtitle:'Compare alternatives',icon:Navigation,art:'',tint:'violet',page:'replan'},
-        {kicker:'STAY IN TOUCH',title:'Keep your group close',subtitle:'Explore offline chat',icon:Radio,art:'',tint:'teal',page:'mesh'},
+        {kicker:'DESTINATION CHECK',title:'Before you leave',subtitle:'Review known conditions',icon:MapPin,art:'🌍',tint:'indigo',page:'risk'},
+        {kicker:'YOUR ITINERARY',title:'Plans can change',subtitle:'Compare alternatives',icon:Navigation,art:'🧭',tint:'violet',page:'replan'},
+        {kicker:'STAY IN TOUCH',title:'Keep your group close',subtitle:'Explore offline chat',icon:Radio,art:'📡',tint:'teal',page:'mesh'},
       ]}/>
 
     </section>
@@ -385,7 +389,7 @@ export default function App(){
         <motion.button type="button" className="dock-sos" aria-label="Emergency SOS" aria-current={page==='sos'?'page':undefined} onClick={()=>go('sos')} whileTap={{scale:.92}}><ShieldAlert size={21}/><small>SOS</small></motion.button>
         {([{id:'mesh',label:'Mesh',icon:Radio},{id:'profile',label:'Profile',icon:UserRound}] as const).map(t=>{const Icon=t.icon;return <button key={t.id} type="button" aria-label={t.label} aria-current={tab===t.id?'page':undefined} onClick={()=>go(t.id)} className={`dock-item ${tab===t.id?'dock-active':''}`}><span className="dock-active-bg" aria-hidden="true"/><Icon size={22} strokeWidth={2.1}/><span>{t.label}</span></button>})}
       </nav>}
-      <Modal kind={dialog} close={closeDialog} person={name} saveName={setName}/>
+      <Modal kind={dialog} close={closeDialog} person={name} saveName={setName} navigate={go} checkDestination={()=>{const place=read<Place|null>('destination',null);if(place)openDestination(place.name);else go('risk')}}/>
       <AnimatePresence mode="wait">{toast&&<NotificationToast key={toast} message={toast}/>}</AnimatePresence>
     </main>
   </div>
