@@ -172,7 +172,7 @@ export default function App(){
 
   const [name,setName]=useState('Traveler');
   const [page,setPage]=useState<Page>('home');
-  const [loading,setLoading]=useState(false);
+  const [loading,setLoading]=useState(true);
   const [dialog,setDialog]=useState<Dialog>(null);
   const [compact,setCompact]=useState(false);
   const [toast,setToast]=useState('');
@@ -193,6 +193,9 @@ export default function App(){
       setFirebaseUser(user);
       setIsAuthenticated(Boolean(user));
       if (user?.displayName) setName(user.displayName);
+      setAuthLoading(false);
+    }, (error) => {
+      console.error('Firebase authentication listener failed:', error.code || error.message);
       setAuthLoading(false);
     });
 
@@ -426,7 +429,8 @@ export default function App(){
     <div className="preview-stage">
       <main className="phone-shell">
         <div className="phone-scroll" onScroll={handleScroll} ref={scrollRef}>
-          <div className="screen-content">
+          <div className="screen-content" aria-busy={loading}>
+      {loading ? <SkeletonScreen profile={page==='profile'}/> : <>
       {page === 'home' && home()}
       {page === 'explore' && explore()}
       {page === 'risk' && risk()}
@@ -448,6 +452,7 @@ export default function App(){
         </div>
       </>}
       {page === 'sos' && sos()}
+      </>}
           </div>
         </div>
       <nav className={`floating-dock ${compact?'dock-compact':''}`} aria-label="Main navigation">
@@ -468,7 +473,6 @@ export default function App(){
         })}
       </nav>
       <Modal kind={dialog} close={closeDialog} person={name} saveName={setName} navigate={go} checkDestination={()=>openDestination(read<Place|null>('destination',null)?.name||'Manali')}/>
-      {loading && <SkeletonScreen profile={page==='profile'} />}
       {toast && <NotificationToast message={toast} />}
       </main>
     </div>
