@@ -205,6 +205,7 @@ export default function App(){
   const rememberScroll=()=>window.history.replaceState({...window.history.state,scroll:scrollRef.current?.scrollTop||0},'');
   const go=(p:Page)=>{
     if(p===page && !dialog)return;
+    setLoading(true);
     if(p!=='pack')packSection.current=null;
     if(p==='risk')setSelectedDestination(null);
     rememberScroll();
@@ -225,6 +226,7 @@ export default function App(){
     const pop=(event:PopStateEvent)=>{
       const entry=event.state;
       navigationDepth.current=entry?.safehaven?entry.depth:0;
+      setLoading(true);
       setSelectedDestination(entry?.destination||null);
       setPage(entry?.safehaven?entry.page:'home');setDialog(entry?.safehaven?entry.dialog:null);
       pendingScroll.current=entry?.scroll||0;setCompact(false);
