@@ -40,3 +40,14 @@ test('Approving a proposal updates the original and keeps a no-changes proposed 
  await expect(page.getByRole('heading',{name:'Museum visit',exact:true})).toBeVisible();
  await page.getByRole('tab',{name:'Proposed plan'}).click();await expect(page.getByRole('button',{name:'Approve changes'})).toBeDisabled();
 });
+
+test('Nearby help mode does not require travellers to meet or compare codes',async({page})=>{
+ await page.goto('/');await page.getByRole('button',{name:'Explore as guest'}).click();await page.getByRole('button',{name:'Mesh',exact:true}).click();
+ await page.getByRole('tab',{name:'Nearby',exact:true}).click();
+ await expect(page.getByLabel('Connection mode')).toHaveValue('help');
+ await expect(page.getByText(/You do not need to meet or exchange codes/)).toBeVisible();
+ await expect(page.getByText(/Names and messages are unverified/)).toBeVisible();
+ await page.getByLabel('Connection mode').selectOption('verified');
+ await expect(page.getByText(/For a known travel partner/)).toBeVisible();
+ await expect(page.getByRole('button',{name:'Start Nearby discovery'})).toBeDisabled();
+});

@@ -112,3 +112,5 @@ The original teammate Kotlin experiments are on **`main/android-rescuemesh/`**, 
 ## Current product handoff
 
 Use [FINAL_HANDOFF.md](FINAL_HANDOFF.md) for website/Android setup, hosting, Google sign-in and testing. [FEATURE_AUDIT.md](FEATURE_AUDIT.md) covers both feature lists honestly; [USER_GUIDE.md](USER_GUIDE.md) explains the journey. Historical handoff files are background, not the current completion record.
+
+Next-agent starting context: [NEXT_AGENT_CONTEXT.md](NEXT_AGENT_CONTEXT.md). Mesh help mode connects participating phones without comparing codes; known-partner mode retains code comparison. Physical delivery acceptance remains outstanding.

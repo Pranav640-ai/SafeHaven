@@ -14,7 +14,7 @@ export type MeshMessage = {
 export type MeshState = {
   running: boolean; advertising: boolean; discovering: boolean; peers: MeshPeer[];
   discovered: MeshPeer[]; beacons: MeshBeacon[]; queuedSOS: number; queuedCheckIns: number; carriedSOS: number; queueError: string; checkIns: MeshMessage[];
-  identity: string; deviceName: string;
+  identity: string; deviceName: string; allowUnverified: boolean;
 };
 export type ConnectionRequest = { id: string; name: string; code: string };
 export type SendReceipt = { id: string; status: 'offered' | 'queued-on-device' | 'local-only' | 'none' };
@@ -22,7 +22,7 @@ export type SendReceipt = { id: string; status: 'offered' | 'queued-on-device' |
 type EventNames = 'state' | 'error' | 'connectionRequest' | 'connected' | 'disconnected' |
   'message' | 'ack' | 'beacon' | 'beaconRemoved' | 'queuedSOSOffered' | 'connectionFailed' | 'compass';
 interface NativeRescueMesh {
-  start(options: {deviceName: string}): Promise<MeshState>;
+  start(options: {deviceName: string;allowUnverified:boolean}): Promise<MeshState>;
   stop(): Promise<MeshState>;
   getState(): Promise<MeshState>;
   accept(options: {id: string}): Promise<void>;
@@ -41,7 +41,7 @@ const native = registerPlugin<NativeRescueMesh>('RescueMesh');
 const available = Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'android';
 const empty: MeshState = {
   running: false, advertising: false, discovering: false, peers: [], discovered: [],
-  beacons: [], queuedSOS: 0, queuedCheckIns:0,carriedSOS:0,queueError:'',checkIns:[], identity: '', deviceName: '',
+  beacons: [], queuedSOS: 0, queuedCheckIns:0,carriedSOS:0,queueError:'',checkIns:[], identity: '', deviceName: '',allowUnverified:false,
 };
 
 export function useRescueMesh() {
@@ -63,22 +63,21 @@ export function useRescueMesh() {
       const l = await native.addListener(event, detail => { if (mounted) cb(detail); });
       if (mounted) listeners.push(l); else void l.remove();
     };
+    const syncState=()=>void native.getState().then(s=>{if(mounted)setState(s)}).catch(e=>{if(mounted)setError(String(e))});
     void (async () => {
       await listen('state', e => {setState(e as MeshState);if(e.queueError)setError(e.queueError)});
       await listen('compass', e=>setHeading(e.available?e.heading:null));
       await listen('connectionRequest', e => setRequests(list =>
-        list.some(p => p.id === e.id) ? list : [...list, e as ConnectionRequest]));
+        [...list.filter(p=>p.id!==e.id),e as ConnectionRequest]));
       await listen('message', e => setMessages(list =>
         list.some(p => p.id === e.id) ? list : [...list, {...e, received: true} as MeshMessage]));
       await listen('ack', e => {acknowledged.current.add(e.refId);if(acknowledged.current.size>1000)acknowledged.current.delete(acknowledged.current.values().next().value!);setMessages(list => list.map(m => m.id===e.refId?{...m,status:'Peer acknowledged'}:m))});
-      await listen('beacon', () => void native.getState().then(setState));
-      await listen('beaconRemoved', () => void native.getState().then(setState));
+      for(const event of ['beacon','beaconRemoved'] as const)await listen(event,syncState);
       await listen('queuedSOSOffered', e => setMessages(list => list.map(m =>
         m.id === e.id ? {...m, status: 'Offered to nearby peers'} : m)));
       await listen('error', e => setError(e.message||'Nearby connection could not be completed.'));
-      await listen('connectionFailed', e => setError(e.message || 'Connection failed'));
-      await listen('disconnected', () => void native.getState().then(setState));
-      await listen('connected', () => void native.getState().then(setState));
+      await listen('connectionFailed', e => {setRequests(list=>list.filter(p=>p.id!==e.id));setError(e.message || 'Connection failed')});
+      for(const event of ['disconnected','connected'] as const)await listen(event,e=>{setRequests(list=>list.filter(p=>p.id!==e.id));if(event==='connected')setError('');syncState()});
       await native.getState().then(s => {if (mounted) setState(s)});
     })().catch(e => {if(mounted)setError(String(e))});
     return () => {mounted = false; listeners.forEach(l => void l.remove());};
@@ -90,8 +89,8 @@ export function useRescueMesh() {
     try {return await action();} catch (e) {setError(e instanceof Error ? e.message : String(e));throw e;}
   };
   const refresh = () => attempt(async () => {const s = await native.getState();setState(s);return s;});
-  const start = async (deviceName: string) => attempt(async () => {
-    const result = await native.start({deviceName});setState(result);return result;
+  const start = async (deviceName: string, allowUnverified=false) => attempt(async () => {
+    const result = await native.start({deviceName,allowUnverified});setState(result);return result;
   });
   const stop = async () => attempt(async () => {const s=await native.stop();setState(s);setRequests([]);setOwnBeacon(null);setMessages(list=>list.map(m=>m.type==='sos'&&m.status==='Queued on this phone · expires within 24 hours'?{...m,status:'Cancelled — network stopped'}:m));return s;});
   const approve = (id: string) => attempt(async () => {await native.accept({id});setRequests(p=>p.filter(x=>x.id!==id));});

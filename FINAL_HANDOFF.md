@@ -12,7 +12,7 @@ Already travelling: Risk → Map → explicitly use location or select a point �
 
 Preparing: Safety pack → contacts, hotel/meeting point, itinerary, saved briefing, prepared guidance, phrases, consular lookup. Prepare while online, then reopen offline. Saved reports have timestamps/expiry. Private group create/join → explicit status-sharing consent → check-in → retry queued status or leave. This is separate from Nearby sharing.
 
-Emergency: SOS opens its own screen; select guidance/contacts or consent to a short Nearby SOS. Without connections, an Android SOS can queue on this phone for up to 24 hours. Mesh → Nearby → start discovery → compare pairing digits on both devices → accept → chat/check-in/beacon. Delivery ACK is a peer receipt, not rescue dispatch. Browser Mesh shows controls and explains disabled native actions.
+Emergency: SOS opens its own screen; select guidance/contacts or consent to a short Nearby SOS. Without connections, an Android SOS can queue on this phone for up to 24 hours. Mesh → Nearby → start discovery → choose Nearby help network and start discovery → automatic participation → chat/check-in/beacon. Known-partner mode retains code comparison. Delivery ACK is a peer receipt, not rescue dispatch. Browser Mesh shows controls and explains disabled native actions.
 
 Language: Profile → Language settings or Guidance language selector. English/Hindi/Tamil plus configured AI French/Spanish and offline phrase bank are present. Prepared/generated translations require qualified review. Guidance listening requires browser support or an installed native offline voice.
 
@@ -85,7 +85,7 @@ Verify backend ID tokens (signature, issuer, audience, expiry), map stable user 
 
 ## Mesh acceptance and refinement
 
-Use MESH_TEST_GUIDE.md. Automatic preliminary command after building: `npm run test:mesh -- emulator-5554 emulator-5556`. It only selects explicit running emulators, installs APK, grants test permissions, compares codes and tests real native ACKs. No stubs. First-use permission prompts still need a separate manual test. Keep Wi-Fi and Bluetooth radios on while internet is disconnected.
+Use MESH_TEST_GUIDE.md. Automatic preliminary command after building: `npm run test:mesh -- emulator-5558 emulator-5560`. It only selects explicit running emulators, installs APK, grants test permissions, selects known-partner mode, compares codes and tests real native ACKs. No stubs. First-use permission prompts still need a separate manual test. Keep Wi-Fi and Bluetooth radios on while internet is disconnected.
 
 Required physical tests: pair/reject codes, two-way chat ACK, SOS ACK, queued SOS cancellation, force-stop/reopen then reconnect within 24h, expiry, explicit Stop clearing pending local items, safe/need-help consent, GPS permission denial, beacon capacity/expiry/withdraw, compass/sensor fallback, native offline voice, Android Back and app upgrades. Three phones: A↔B then B↔C with A out of range; verify one delivery and bounded TTL/dedup/expiry. Cancellation cannot retract a copy already relayed by a peer. Queues are encrypted with Android Keystore; no background service or delivery after termination is promised. Uninstall/clear app data removes local state.
 
@@ -116,3 +116,15 @@ Final selected-pair attempt: timed out after 60 seconds with `8012: STATUS_ENDPO
 Home shows the saved destination and opens its check, with notification and menu controls restored. Card/carousel artwork was recovered from prior repository code; existing fonts remain unchanged. The dock compact animation is restored with five separate targets, and every page uses the same outline shimmer/timing. Mesh/SOS/beacon header activation badges and repetitive install copy were removed in favour of concrete next actions. Native location requests now include coarse + fine location, including the modern Nearby permission path; the merged manifest has both permissions without a max-SDK limit.
 
 Trip approval updates the saved Original, keeps Proposed selectable with no pending changes and preserves approval reasons. Six focused browser checks passed (Home controls/selected destination, approval/reload, four mobile dock sizes). Web and Android builds passed; final APK asset equality was checked and the package installed on 5558/5560. First-use permission denial/approximate-location acceptance and physical Mesh transport still require device acceptance; previous pairing limitations remain.
+
+## Latest Mesh participation model
+
+The default Nearby help network connects participating phones automatically when discovery is explicitly started. Travellers do not need to find each other first or exchange codes. The native start call carries allowUnverified=true; connection initiation calls acceptConnection only while the network is running. Known-partner mode passes false and retains code comparison. Participation is foreground/best effort and radio-range limited; it is not a long-range locator or rescue dispatch. SOS, check-in and precise location still have their existing separate sharing consent.
+
+Anonymous connections and self-reported names are unverified. They must not be presented as trusted rescuers or authenticated private group members. Google cautions that skipping token authentication leaves connections unauthenticated; future application-level signatures/pre-established trust are needed for trustworthy remote identity. See [Nearby connection/authentication documentation](https://developers.google.com/nearby/connections/android/manage-connections).
+
+Cleanup removed compiler-confirmed unused imports/dead DemoNote, consolidated repeated state refresh handlers, replaced stale pairing codes instead of ignoring updates, cleared ended requests, preserved pending names until resolution and ignored connection callbacks after Stop. The historical style layers were not broadly rewritten because current widget/artwork/animation preservation is a user requirement.
+
+New help mode still needs physical two-phone automatic connection, ACK, three-phone relay and abuse-control acceptance. The prior emulator pairing failures remain unresolved evidence; enabling auto-accept is not proof that those radio I/O failures are fixed. Use NEXT_AGENT_CONTEXT.md as the takeover starting point.
+
+Final cleanup verification: TypeScript noUnusedLocals/noUnusedParameters passed; production web and Android debug builds passed; APK assets match dist; package installed on 5558/5560. Two focused browser checks passed for default help-mode copy/selection and the separate SOS route. Automatic radio pairing and delivery were not claimed as verified.

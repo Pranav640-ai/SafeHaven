@@ -12,13 +12,12 @@ import { SavedAreaWarnings } from './features/AreaWarnings';
 import type {Place} from './services/api';
 import { useSaved, read } from './services/storage';
 import {
-  AlertCircle, AlertTriangle, ArrowLeft, ArrowRight, Bell, Bookmark,
+  ArrowLeft, ArrowRight, Bell, Bookmark,
   BookOpen, Check, CheckCheck, ChevronDown, ChevronRight, CircleHelp,
-  Clock3, CloudRain, Compass, Download, Globe2, Heart, Home,
-  Menu, Languages, LocateFixed, LockKeyhole, Map, MapPin, MessageCircle,
-  Navigation, Phone, Plus, Radio, RefreshCw, Search, Send, Settings,
-  Shield, ShieldAlert, ShieldCheck, Smartphone, Sun, ThermometerSun,
-  Users, WifiOff, X, Zap, FileText, Save, Leaf, Mountain, Waves, Trees, BatteryCharging, Crosshair, Wifi, Signal, LifeBuoy, UserRound, CalendarCheck2, FolderOpen, type LucideIcon,
+  CloudRain, Compass, Home,
+  Menu, Languages, LockKeyhole, Map, MapPin, Navigation, Phone, Radio, Search, Settings,
+  Shield, ShieldAlert, ShieldCheck, Smartphone, ThermometerSun,
+  X, Zap, FileText, Save, Mountain, Waves, Trees, UserRound, CalendarCheck2, FolderOpen, type LucideIcon,
 } from 'lucide-react';
 
 type Page = 'home' | 'explore' | 'risk' | 'replan' | 'guide' | 'mesh' | 'beacon' | 'pack' | 'profile' | 'language' | 'privacy' | 'sos';
@@ -68,9 +67,6 @@ function Heading({title, sub, right}: {title:string;sub?:string;right?:ReactNode
 }
 function BackHeader({title, back, action}: {title:string;back:()=>void;action?:ReactNode}) {
   return <header className="back-header"><IconButton icon={ArrowLeft} onClick={back} label="Go back"/><h1>{title}</h1><div className="back-header-action">{action}</div></header>;
-}
-function DemoNote({children}: {children:ReactNode}) {
-  return <p className="demo-note"><AlertCircle size={15}/><span>{children}</span></p>;
 }
 function FeatureCard({feature, index, open}: {feature:typeof features[number];index:number;open:()=>void}) {
   const Icon = feature.icon;
@@ -147,7 +143,7 @@ function Modal({kind,close,person,saveName,navigate,checkDestination}: {kind:Dia
       {kind==='profile'&&<><h2>Edit display name</h2><p>Your display name is saved until you close the app.</p><label className="field-label" htmlFor="profile-name">Display name</label><input className="form-input" id="profile-name" maxLength={32} value={draft} onChange={e=>setDraft(e.target.value)}/><button className="primary-button" type="button" onClick={()=>{saveName(draft.trim()||'Traveler');close()}}>Save changes</button></>}
       {kind==='alerts'&&<><h2>Destination warnings</h2><p>Review saved notices and check the latest information for your destination.</p><SavedAreaWarnings/><button className="primary-button" onClick={checkDestination}>Check latest warnings</button></>}
       {kind==='menu'&&<><h2>Your travel tools</h2><AppRow icon={Navigation} title="My trip plan" subtitle="Compare and approve proposed changes" onClick={()=>navigate('replan')}/><AppRow icon={Bookmark} title="Safety pack" onClick={()=>navigate('pack')}/><AppRow icon={Languages} title="Language settings" onClick={()=>navigate('language')}/><AppRow icon={CircleHelp} title="How to use SafeHaven" onClick={()=>navigate('guide')}/></>}
-      {kind==='help'&&<><h2>About SafeHaven</h2><p>Start with Explore to choose a destination and check its weather and reports. Add your activities in Trip replanner, then save contacts and guidance in Safety pack. On Android, open Mesh → Nearby to pair phones using matching codes. Use SOS to ask connected travelers for help.</p><button className="primary-button" type="button" onClick={close}>Understood</button></>}
+      {kind==='help'&&<><h2>About SafeHaven</h2><p>Start with Explore to choose a destination and check its weather and reports. Add your activities in Trip replanner, then save contacts and guidance in Safety pack. On Android, open Mesh → Nearby to join the nearby help network without exchanging codes. Participants are unverified. Use SOS to ask connected travelers for help.</p><button className="primary-button" type="button" onClick={close}>Understood</button></>}
     </motion.section>
   </motion.div>}</AnimatePresence>;
 }

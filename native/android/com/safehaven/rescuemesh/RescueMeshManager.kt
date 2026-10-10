@@ -27,6 +27,7 @@ class RescueMeshManager(
     private val client = Nearby.getConnectionsClient(context)
     private val peers = linkedMapOf<String, String>()
     private val pending = linkedMapOf<String, String>()
+    private var allowUnverified = false
     private val discovered = linkedMapOf<String, String>()
     private val seen = LinkedHashSet<String>()
     private val pendingSOS = mutableListOf<JSONObject>()
@@ -102,7 +103,7 @@ class RescueMeshManager(
             .put("beacons", b).put("queuedSOS", pendingSOS.size)
             .put("queuedCheckIns", pendingCheckIns.size).put("carriedSOS", carriedSOS.size)
             .put("queueError", queueError ?: "").put("checkIns", JSONArray(checkInStore.values.filter { it.optLong("expiresAt") > System.currentTimeMillis() }))
-            .put("identity", identity).put("deviceName", name)
+            .put("identity", identity).put("deviceName", name).put("allowUnverified", allowUnverified)
     }
 
     private fun update() = event("state", state())
@@ -111,10 +112,11 @@ class RescueMeshManager(
         update()
     }
 
-    fun start(deviceName: String) {
+    fun start(deviceName: String, helpNetwork: Boolean = false) {
         queueError?.let { event("error", JSObject().put("message", it)) }
         name = deviceName.trim().take(32).ifEmpty { "SafeHaven" }
         if (running) { update(); return }
+        allowUnverified = helpNetwork
         running = true
         client.startAdvertising(
             name, SERVICE, connections,
@@ -136,12 +138,12 @@ class RescueMeshManager(
         peers.clear(); pending.clear(); discovered.clear()
         if (clearQueue) { seen.clear(); pendingSOS.clear(); pendingCheckIns.clear(); carriedSOS.clear(); checkInStore.clear(); persist() }
         ownBeaconId = null; beaconStore.clear()
-        running = false; advertising = false; discovering = false
+        running = false; advertising = false; discovering = false; allowUnverified = false
         update()
     }
 
     fun accept(endpointId: String) {
-        require(pending.remove(endpointId) != null) { "No pending authentication request" }
+        require(pending.containsKey(endpointId)) { "No pending authentication request" }
         client.acceptConnection(endpointId, payloadCallback)
             .addOnFailureListener { failure("accept", it) }
     }
@@ -168,11 +170,14 @@ class RescueMeshManager(
 
     private val connections = object : ConnectionLifecycleCallback() {
         override fun onConnectionInitiated(endpointId: String, info: ConnectionInfo) {
+            if (!running) { client.rejectConnection(endpointId); return }
             pending[endpointId] = info.endpointName
+            if (allowUnverified) { accept(endpointId); return }
             event("connectionRequest", JSObject().put("id", endpointId)
                 .put("name", info.endpointName).put("code", info.authenticationDigits))
         }
         override fun onConnectionResult(endpointId: String, resolution: ConnectionResolution) {
+            if (!running) { pending.remove(endpointId); client.disconnectFromEndpoint(endpointId); return }
             val endpointName = pending.remove(endpointId) ?: discovered[endpointId]
             if (resolution.status.statusCode == ConnectionsStatusCodes.STATUS_OK) {
                 peers[endpointId] = endpointName ?: "Nearby device"
@@ -184,7 +189,7 @@ class RescueMeshManager(
                     .forEach { transmit(it, endpointId) }
             } else {
                 event("connectionFailed", JSObject().put("id", endpointId)
-                    .put("message", "Connection rejected or unsuccessful"))
+                    .put("message", "Connection could not complete (${resolution.status.statusCode}). Try discovery again."))
             }
             update()
         }

@@ -61,6 +61,7 @@ try{
   await page.getByRole('button',{name:'Mesh',exact:true}).dispatchEvent('click');
   await expect(page.getByRole('heading',{name:'RescueMesh',exact:true})).toBeVisible();
   await page.getByRole('tab',{name:'Nearby',exact:true}).dispatchEvent('click');
+  await page.getByLabel('Connection mode').selectOption('verified');
   await fill(page.getByLabel('Name shown to other phones'),`MESH TEST ${i?'B':'A'}`);
   await expect(page.getByRole('button',{name:'Start Nearby discovery'})).toBeEnabled();
   record('native-bridge-ready',{serial,sdk});

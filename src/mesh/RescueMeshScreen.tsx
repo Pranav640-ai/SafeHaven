@@ -1,12 +1,13 @@
 import {useEffect, useState} from 'react';
-import {ArrowLeft, CheckCircle2, ChevronRight, CircleHelp, MapPin, MessageCircle,
-  RadioTower, Navigation, Send, ShieldAlert, ShieldCheck, Users, WifiOff, X} from 'lucide-react';
+import {ArrowLeft, CheckCircle2, MapPin, MessageCircle,
+  RadioTower, Navigation, Send, ShieldAlert, ShieldCheck, Users, X} from 'lucide-react';
 import type {MeshController, MeshBeacon} from './useRescueMesh';
 
 type Tab = 'Chats'|'Nearby'|'Beacons'|'SOS';
 export function RescueMeshScreen({mesh,onBack,onGuide,standaloneSOS=false,initialTab='Chats'}:
   {mesh:MeshController;onBack:()=>void;onGuide?:()=>void;standaloneSOS?:boolean;initialTab?:Tab}) {
   const [tab,setTab] = useState<Tab>(initialTab);
+  const [connectionMode,setConnectionMode]=useState<'help'|'verified'>('help');
   const [deviceName,setDeviceName]=useState('SafeHaven traveler');
   const [draft,setDraft]=useState('');
   const [beaconText,setBeaconText]=useState('Community meeting point');
@@ -33,9 +34,9 @@ export function RescueMeshScreen({mesh,onBack,onGuide,standaloneSOS=false,initia
     {!standaloneSOS&&<div className="mesh-tabs" role="tablist" aria-label="RescueMesh sections">{(['Chats','Nearby','Beacons','SOS'] as const).map(t=><button key={t} type="button" role="tab" aria-selected={tab===t} onClick={()=>setTab(t)} className={tab===t?'selected':''}>{t}</button>)}</div>}
     <section key={tab} className="mesh-live-section">
     {tab==='Chats'&&<>
-      <div className="mesh-live-sectionhead"><h3>Group messages</h3><span>{connected?`${connected} linked phones`:'No active link'}</span></div>
+      <div className="mesh-live-sectionhead"><h3>Nearby messages</h3><span>{connected?`${connected} linked phones`:'No active link'}</span></div>
       <div className="mesh-live-chat" aria-live="polite">
-        {mesh.messages.filter(m=>m.type==='chat'||m.type==='checkin').length===0 && <div className="mesh-live-empty"><MessageCircle size={32}/><h4>Your chat starts here</h4><p>Open Nearby on both phones, start discovery and compare the code. Once paired, your messages appear here.</p></div>}
+        {mesh.messages.filter(m=>m.type==='chat'||m.type==='checkin').length===0 && <div className="mesh-live-empty"><MessageCircle size={32}/><h4>Your chat starts here</h4><p>Open Nearby and join the help network. Participating phones can connect without meeting first; messages appear here when a link is available.</p></div>}
         {mesh.messages.filter(m=>m.type==='chat'||m.type==='checkin').map(m=><div key={m.id} className={`mesh-live-bubble ${m.received?'received':'sent'}`}><strong>{m.received?m.fromName:'You'}</strong><p>{m.type==='checkin'?`Check-in: ${m.body}`:m.body}</p><small>{m.received?'Received over Nearby':m.status||'Sending'}</small></div>)}
       </div>
       <form className="mesh-live-compose" onSubmit={e=>{e.preventDefault();if(!draft.trim())return;const text=draft.trim();run(async()=>{await mesh.sendChat(text);setDraft('')})}}><input aria-label="Message" value={draft} maxLength={500} onChange={e=>setDraft(e.target.value)} placeholder="Message nearby phones" disabled={!mesh.available||connected===0}/><button type="submit" disabled={!linked||busy||!draft.trim()} aria-label="Send message"><Send size={19}/></button></form>
@@ -44,12 +45,13 @@ export function RescueMeshScreen({mesh,onBack,onGuide,standaloneSOS=false,initia
     </>}
     {tab==='Nearby'&&<>
       <div className="mesh-live-sectionhead"><h3>Phone connections</h3><span>{mesh.state.discovering?'Searching':mesh.state.running?'Discovery unavailable':'Stopped'}</span></div>
+      {!mesh.state.running&&<label className="mesh-live-field">Connection mode<select aria-label="Connection mode" value={connectionMode} onChange={e=>setConnectionMode(e.target.value as 'help'|'verified')}><option value="help">Nearby help network</option><option value="verified">Pair with a known traveller</option></select></label>}
       {!mesh.state.running&&<label className="mesh-live-field">Name shown to other phones<input disabled={!mesh.available||busy} value={deviceName} maxLength={32} onChange={e=>setDeviceName(e.target.value)}/></label>}
-      <button type="button" className="primary-button mesh-live-cta" disabled={!mesh.available||busy} onClick={()=>run(()=>mesh.state.running?mesh.stop():mesh.start(deviceName))}>{mesh.state.running?'Stop discovery':'Start Nearby discovery'}</button>
-      <p className="mesh-live-hint">Keep this screen open on both phones. Compare the authentication digits before accepting.</p>
+      <button type="button" className="primary-button mesh-live-cta" disabled={!mesh.available||busy} onClick={()=>run(()=>mesh.state.running?mesh.stop():mesh.start(deviceName,connectionMode==='help'))}>{mesh.state.running?'Stop discovery':'Start Nearby discovery'}</button>
+      <p className="mesh-live-hint">{(mesh.state.running?mesh.state.allowUnverified:connectionMode==='help')?'Starting discovery allows nearby participants to connect automatically. You do not need to meet or exchange codes. Names and messages are unverified; share only what you choose.':'For a known travel partner, compare the code through a channel you trust and approve on both phones.'}</p>
       {mesh.requests.map(p=><div className="mesh-live-peer-request" key={p.id}><div><strong>{p.name}</strong><p>Compare on both devices: <b>{p.code}</b></p></div><div className="mesh-live-actions"><button type="button" onClick={()=>run(()=>mesh.approve(p.id))} disabled={busy}><CheckCircle2 size={16}/> Codes match</button><button type="button" onClick={()=>run(()=>mesh.reject(p.id))} disabled={busy}><X size={16}/> Reject</button></div></div>)}
-      {mesh.state.peers.map(p=><div key={p.id} className="mesh-live-peer"><ShieldCheck size={20}/><span><strong>{p.name}</strong><small>Connected</small></span></div>)}
-      {!mesh.state.peers.length&&!mesh.requests.length&&<div className="mesh-live-empty"><Users size={30}/><h4>No connected phones</h4><p>{mesh.state.running?'Searching for other SafeHaven phones nearby.':'Start discovery on two Android phones.'}</p></div>}
+      {mesh.state.peers.map(p=><div key={p.id} className="mesh-live-peer"><ShieldCheck size={20}/><span><strong>{p.name}</strong><small>Connected · self-reported name</small></span></div>)}
+      {!mesh.state.peers.length&&!mesh.requests.length&&<div className="mesh-live-empty"><Users size={30}/><h4>No connected phones</h4><p>{mesh.state.running?'Searching for other SafeHaven phones nearby.':'Start discovery to find participating phones within radio range.'}</p></div>}
       <section className="tool-card"><h3>Nearby check-in</h3><p className="mesh-live-hint">Share your name and chosen status with participating phones, separately from your private online group. No location is included. A disconnected check-in stays encrypted on this phone until sent or expired.</p><label className="mesh-live-confirm"><input type="checkbox" disabled={!mesh.available} checked={checkinConsent} onChange={e=>setCheckinConsent(e.target.checked)}/>I agree to share my name and chosen status nearby.</label><div className="mesh-live-actions">{(['safe','needHelp','unknown'] as const).map(status=><button key={status} disabled={!mesh.available||!checkinConsent||busy} onClick={()=>run(async()=>{await mesh.sendCheckIn(status);setCheckinConsent(false)})}>{status==='safe'?"I'm safe":status==='needHelp'?'Need help':'Status unknown'}</button>)}</div><p className="mesh-live-hint">Check-ins awaiting receipt: {mesh.state.queuedCheckIns||0}</p>{(mesh.state.checkIns||[]).map(m=><div className="mesh-live-peer" key={m.from}><Users size={18}/><span><strong>{m.fromName}</strong><p>{m.body==='safe'?"I'm safe":m.body==='needHelp'?'Need help':'Status unknown'}</p><small>Last status {new Date(m.createdAt).toLocaleString()}</small></span></div>)}</section>
     </>}
     {tab==='Beacons'&&<>

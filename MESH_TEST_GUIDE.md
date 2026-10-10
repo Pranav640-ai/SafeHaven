@@ -31,10 +31,10 @@ $meshAdb='C:\Users\asus\AppData\Local\Android\Sdk\platform-tools\adb.exe'
 & $meshAdb -s emulator-5556 install -r .\android\app\build\outputs\apk\debug\app-debug.apk
 ```
 
-## 2. Pair A and B
+## 2. Pair A and B in known-partner mode
 
 1. Start SafeHaven on both, choose **Explore as guest**, then **Mesh → Nearby**.
-2. While stopped, set the visible device names to `TEST A` and `TEST B`.
+2. Select **Pair with a known traveller** on both devices. While stopped, set the visible device names to `TEST A` and `TEST B`.
 3. Turn Bluetooth and Wi-Fi radios on. On older Android versions also turn on system Location. Keep both apps in the foreground, devices unlocked and initially within 1–2 metres.
 4. Tap **Start Nearby discovery** on both. Grant the requested Nearby/Bluetooth permissions. Android 12 may also request location; beacon publishing requests location separately.
 5. Both devices should show a pairing request and authentication digits. Compare the digits on both screens. Tap **Codes match** on both only when identical. The code length comes from Google Nearby; do not rely on a particular digit count.
@@ -150,3 +150,9 @@ Pending SOS, carried SOS and the latest queued nearby check-in now use encrypted
 Automated runs with more than two devices must pass explicit serials and select pairing requests by counterpart name, not the first visible request. The current harness filters MESH TEST A/B and compares matching digits. Prefer stopping unrelated discovery manually before an isolated pair test; do not accept a different phone just to make the test pass.
 
 Latest measured attempt (10 October): final APK installed on 5558/5560, disconnected SOS queue/cancel and hardware Back passed. Selected-pair discovery timed out with STATUS_ENDPOINT_IO_ERROR (8012). Connected message/SOS ACK and physical/multi-hop acceptance remain unverified.
+
+## Automatic nearby help network acceptance (current default)
+
+Choose Nearby help network on two physical phones and start discovery on both. No code comparison dialog should be required: onConnectionInitiated accepts a connection only while the participant has started that mode. Check that both phones show the other as connected with a self-reported name, then verify two-way chat ACK, queued SOS ACK and explicit check-in/location consent. Test unknown participants, disconnect/reconnect, Stop while a connection is pending, force-stop persistence and three-phone store/carry/forward. All received content stays unverified; do not infer rescuer identity from a display name.
+
+The emulator script deliberately selects known-partner mode for its code test. Its previous radio errors are not resolved by the mode change. Default help-mode physical acceptance remains required. No background service or long-range discovery is implemented.
