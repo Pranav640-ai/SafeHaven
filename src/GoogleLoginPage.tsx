@@ -12,6 +12,15 @@ interface GoogleLoginPageProps {
 export default function GoogleLoginPage({ onLoginSuccess, onGuestContinue }: GoogleLoginPageProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const firebaseMessage = (code?: string) => {
+    switch (code) {
+      case 'auth/popup-blocked': return 'Allow pop-ups in your browser, then try again.';
+      case 'auth/unauthorized-domain': return 'This website is not on Firebase’s authorized domain list.';
+      case 'auth/operation-not-allowed': return 'Google sign-in must be enabled in Firebase Authentication.';
+      case 'auth/network-request-failed': return 'Unable to connect. Check your internet and try again.';
+      default: return 'Google sign-in failed. Please try again.';
+    }
+  };
 
   async function handleGoogleLogin() {
     setError('');
@@ -21,8 +30,8 @@ export default function GoogleLoginPage({ onLoginSuccess, onGuestContinue }: Goo
       onLoginSuccess?.(result.user);
     } catch (err: unknown) {
       const code = (err as { code?: string })?.code;
-      if (code !== 'auth/popup-closed-by-user') {
-        setError(code === 'auth/popup-blocked' ? 'Allow pop-ups to sign in with Google.' : 'Google sign-in failed. Please try again.');
+      if (code !== 'auth/popup-closed-by-user' && code !== 'auth/cancelled-popup-request') {
+        setError(firebaseMessage(code));
       }
     } finally {
       setLoading(false);
@@ -30,8 +39,8 @@ export default function GoogleLoginPage({ onLoginSuccess, onGuestContinue }: Goo
   }
 
   return (
-    <div className="sh-login-stage">
-      <main className="sh-login-phone">
+    <div className="preview-stage sh-login-stage">
+      <main className="phone-shell sh-login-phone" aria-busy={loading}>
         <section className="sh-login-hero" aria-label="SafeHaven welcome">
           <div className="sh-login-brand"><span className="sh-brand-icon"><ShieldCheck size={23} strokeWidth={2}/></span><span>SafeHaven</span></div>
           <div className="sh-hero-art" aria-hidden="true">
