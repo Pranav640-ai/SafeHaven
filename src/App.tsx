@@ -19,7 +19,13 @@ import {
   Shield, ShieldAlert, ShieldCheck, Smartphone, ThermometerSun,
   X, Zap, Pencil, Mountain, Waves, Trees, UserRound, CalendarCheck2, FolderOpen, type LucideIcon,
 } from 'lucide-react';
+import GoogleLoginPage from "./GoogleLoginPage";
 
+function App() {
+  return <GoogleLoginPage />;
+}
+
+export default App;
 type Page = 'home' | 'explore' | 'risk' | 'replan' | 'guide' | 'mesh' | 'beacon' | 'pack' | 'profile' | 'language' | 'privacy' | 'sos';
 type GuideKind = 'Flood' | 'Extreme heat' | 'Earthquake';
 type Dialog = 'profile' | 'help' | 'alerts' | 'menu' | 'settings' | null;
