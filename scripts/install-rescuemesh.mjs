@@ -112,3 +112,16 @@ const appName = JSON.parse(fs.readFileSync(path.join(android, 'app/src/main/asse
 const escapedAppName = appName.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
 patch(path.join(android, 'app/src/main/res/values/strings.xml'), source =>
   source.replace(/(<string name="(?:app_name|title_activity_main)">)[\s\S]*?(<\/string>)/g, (_match, start, end) => `${start}${escapedAppName}${end}`));
+
+// Credential Manager account chooser is independent of Nearby/Mesh.
+patch(appGradle, source => {
+  for (const dependency of ['androidx.credentials:credentials:1.3.0', 'androidx.credentials:credentials-play-services-auth:1.3.0', 'com.google.android.libraries.identity.googleid:googleid:1.1.1']) {
+    if (!source.includes(dependency)) source = source.replace(/dependencies\s*\{/, match => `${match}\n    implementation "${dependency}"`);
+  }
+  return source;
+});
+patch(main, source => {
+  if (source.includes('registerPlugin(MeridianAuthPlugin')) return source;
+  if (main.endsWith('.kt')) return source.replace('import com.safehaven.rescuemesh.RescueMeshPlugin', 'import com.safehaven.rescuemesh.MeridianAuthPlugin\nimport com.safehaven.rescuemesh.RescueMeshPlugin').replace('registerPlugin(RescueMeshPlugin::class.java)', 'registerPlugin(MeridianAuthPlugin::class.java)\n        registerPlugin(RescueMeshPlugin::class.java)');
+  return source.replace('import com.safehaven.rescuemesh.RescueMeshPlugin;', 'import com.safehaven.rescuemesh.MeridianAuthPlugin;\nimport com.safehaven.rescuemesh.RescueMeshPlugin;').replace('registerPlugin(RescueMeshPlugin.class);', 'registerPlugin(MeridianAuthPlugin.class);\n        registerPlugin(RescueMeshPlugin.class);');
+});

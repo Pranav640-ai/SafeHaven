@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 
-test('Firebase sign-in keeps the same desktop phone frame as SafeHaven',async({page})=>{
+test('Firebase sign-in keeps the same desktop phone frame as Meridian',async({page})=>{
   await page.setViewportSize({width:1440,height:900});
   await page.goto('/');
   const phone=page.locator('.sh-login-phone.phone-shell');

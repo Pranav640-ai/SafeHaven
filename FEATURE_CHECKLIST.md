@@ -41,7 +41,7 @@ Checked means the stated V1 capability exists in code and has the evidence recor
 ## Release gates - still open
 
 - [ ] Deploy persistent HTTPS API and configure/rebuild online Android API origin.
-- [ ] Teammate Google sign-in plus server token validation/operator roles.
+- [ ] Live Google account acceptance/native registration plus server token validation/operator roles.
 - [ ] Physical two/three-phone Mesh delivery and abuse/trust acceptance.
 - [ ] Maintained official/directory feeds and reviewed translations.
 - [ ] Real AI/photo/push provider acceptance; first-use Android permission denial/approximate-location tests.
@@ -49,3 +49,5 @@ Checked means the stated V1 capability exists in code and has the evidence recor
 The item-by-item technical evidence and exact feature locations are in FEATURE_AUDIT.md. Keep unchecked items unchecked until their stated dependency or acceptance test is actually completed.
 
 Two-phone repair: optional Host/Join point-to-point implementation added alongside the existing automatic cluster network. Physical connectivity and delivery gates above remain unchecked.
+
+Auth integration: Firebase browser popup/session and Android Credential Manager→Firebase token exchange are implemented. Live browser/native account acceptance, Firebase Android registration and backend token/role enforcement remain required. Guest offline Mesh is retained.

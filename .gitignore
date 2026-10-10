@@ -14,3 +14,4 @@ __pycache__/
 backend/data/
 *.db
 test-results/
+native/google-services.json

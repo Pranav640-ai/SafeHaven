@@ -19,9 +19,11 @@ import {
   Shield, ShieldAlert, ShieldCheck, Smartphone, ThermometerSun,
   X, Zap, Pencil, Mountain, Waves, Trees, UserRound, CalendarCheck2, FolderOpen, type LucideIcon,
 } from 'lucide-react';
-import GoogleLoginPage from "./GoogleLoginPage";
-import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
+
+import GoogleLoginPage from './GoogleLoginPage';
+import { onAuthStateChanged, type User } from 'firebase/auth';
 import { auth } from './firebase';
+import { signOutGoogle } from './services/googleAuth';
 
 type Page = 'home' | 'explore' | 'risk' | 'replan' | 'guide' | 'mesh' | 'beacon' | 'pack' | 'profile' | 'language' | 'privacy' | 'sos';
 type GuideKind = 'Flood' | 'Extreme heat' | 'Earthquake';
@@ -60,7 +62,7 @@ const destinations = [
 ];
 
 function Brand({ compact = false }: {compact?:boolean}) {
-  return <span className={`brand ${compact ? 'brand-small' : ''}`}><span className="brand-symbol"><ShieldCheck size={compact ? 19 : 25} strokeWidth={2.5}/></span><span>SafeHaven</span></span>;
+  return <span className={`brand ${compact ? 'brand-small' : ''}`}><span className="brand-symbol"><ShieldCheck size={compact ? 19 : 25} strokeWidth={2.5}/></span><span>meridian</span></span>;
 }
 function IconButton({ icon: Icon, onClick, label, className = '' }: {icon:LucideIcon;onClick:()=>void;label:string;className?:string}) {
   return <button type="button" aria-label={label} className={`icon-button ${className}`} onClick={onClick}><Icon size={21} strokeWidth={1.9}/></button>;
@@ -88,7 +90,7 @@ function SkeletonScreen({ profile = false }: {profile?:boolean}) {
     <Skeleton height={38} width="52%" {...c}/><Skeleton height={145} borderRadius={20} {...c}/>
   </div>;
 }
-
+/* Native momentum scrolling, with a small springy pull past either edge. */
 function SwipeRow({children, label}:{children:ReactNode;label:string}) {
   const ref = useRef<HTMLDivElement>(null);
   const overshoot = useMotionValue(0);
@@ -145,9 +147,9 @@ function Modal({kind,close,person,saveName,navigate,checkDestination}: {kind:Dia
       <div className="sheet-handle"/><IconButton icon={X} onClick={close} label="Close dialog" className="sheet-close"/>
       {kind==='profile'&&<><h2>Edit display name</h2><p>Your display name is saved until you close the app.</p><label className="field-label" htmlFor="profile-name">Display name</label><input className="form-input" id="profile-name" maxLength={32} value={draft} onChange={e=>setDraft(e.target.value)}/><button className="primary-button" type="button" onClick={()=>{saveName(draft.trim()||'Traveler');close()}}>Save changes</button></>}
       {kind==='alerts'&&<><h2>Destination warnings</h2><p>Review saved notices and check the latest information for your destination.</p><SavedAreaWarnings/><button className="primary-button" onClick={checkDestination}>Check latest warnings</button></>}
-      {kind==='menu'&&<><h2>Your travel tools</h2><AppRow icon={Navigation} title="My trip plan" subtitle="Compare and approve proposed changes" onClick={()=>navigate('replan')}/><AppRow icon={Bookmark} title="Safety pack" onClick={()=>navigate('pack')}/><AppRow icon={Languages} title="Language settings" onClick={()=>navigate('language')}/><AppRow icon={CircleHelp} title="How to use SafeHaven" onClick={()=>navigate('guide')}/></>}
+      {kind==='menu'&&<><h2>Your travel tools</h2><AppRow icon={Navigation} title="My trip plan" subtitle="Compare and approve proposed changes" onClick={()=>navigate('replan')}/><AppRow icon={Bookmark} title="Safety pack" onClick={()=>navigate('pack')}/><AppRow icon={Languages} title="Language settings" onClick={()=>navigate('language')}/><AppRow icon={CircleHelp} title="How to use Meridian" onClick={()=>navigate('guide')}/></>}
       {kind==='settings'&&<><h2>Settings</h2><AppRow icon={Languages} title="Language" subtitle="Choose your guidance language" onClick={()=>navigate('language')}/><AppRow icon={LockKeyhole} title="Privacy & sharing" subtitle="Manage consent and saved information" onClick={()=>navigate('privacy')}/></>}
-      {kind==='help'&&<><h2>About SafeHaven</h2><p>Start with Explore to choose a destination and check its weather and reports. Add your activities in Trip replanner, then save contacts and guidance in Safety pack. On Android, open Mesh → Nearby to join the nearby help network without exchanging codes. Participants are unverified. Use SOS to ask connected travelers for help.</p><button className="primary-button" type="button" onClick={close}>Understood</button></>}
+      {kind==='help'&&<><h2>About Meridian</h2><p>Start with Explore to choose a destination and check its weather and reports. Add your activities in Trip replanner, then save contacts and guidance in Safety pack. On Android, open Mesh → Nearby to join the nearby help network without exchanging codes. Participants are unverified. Use SOS to ask connected travelers for help.</p><button className="primary-button" type="button" onClick={close}>Understood</button></>}
     </motion.section>
   </motion.div>}</AnimatePresence>;
 }
@@ -165,14 +167,14 @@ function NotificationToast({message}:{message:string}) {
 }
 
 export default function App(){
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isGuest, setIsGuest] = useState(false);
-  const [authLoading, setAuthLoading] = useState(true);
-  const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
+  const [enteredApp,setEnteredApp]=useState(false);
+  const [firebaseUser,setFirebaseUser]=useState<User|null>(null);
+  const [authLoading,setAuthLoading]=useState(true);
+
 
   const [name,setName]=useState('Traveler');
   const [page,setPage]=useState<Page>('home');
-  const [loading,setLoading]=useState(true);
+  const [loading,setLoading]=useState(false);
   const [dialog,setDialog]=useState<Dialog>(null);
   const [compact,setCompact]=useState(false);
   const [toast,setToast]=useState('');
@@ -188,21 +190,12 @@ export default function App(){
   const lastTop=useRef(0);
   const reduceMotion=useReducedMotion();
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setFirebaseUser(user);
-      setIsAuthenticated(Boolean(user));
-      if (user?.displayName) setName(user.displayName);
-      setAuthLoading(false);
-    }, (error) => {
-      console.error('Firebase authentication listener failed:', error.code || error.message);
-      setAuthLoading(false);
-    });
-
-    return unsubscribe;
-  }, []);
-
-  useEffect(()=>{setLoading(true);const t=window.setTimeout(()=>setLoading(false),640);return()=>window.clearTimeout(t)},[page]);
+  useEffect(()=>onAuthStateChanged(auth,user=>{
+    setFirebaseUser(user);
+    if(user){setName(user.displayName||'Traveler');setEnteredApp(true);}
+    setAuthLoading(false);
+  },()=>setAuthLoading(false)),[]);
+  useEffect(()=>{if(!enteredApp)return;setLoading(true);const t=window.setTimeout(()=>setLoading(false),640);return()=>window.clearTimeout(t)},[page,enteredApp]);
   useEffect(()=>{if(!toast)return;const t=window.setTimeout(()=>setToast(''),1600);return()=>window.clearTimeout(t)},[toast]);
   const openDestination=(name:string)=>{go('risk');setSelectedDestination(name);window.history.replaceState({...window.history.state,destination:name},'')};
   const pendingScroll=useRef<number|null>(null);
@@ -243,7 +236,7 @@ export default function App(){
     if(loading || pendingScroll.current===null)return;
     const timer=window.setTimeout(()=>{if(scrollRef.current){scrollRef.current.scrollTop=pendingScroll.current||0;lastTop.current=scrollRef.current.scrollTop;pendingScroll.current=null;}},250);
     return()=>window.clearTimeout(timer);
-  },[page,loading,dialog]);
+  },[page,loading,dialog,enteredApp]);
   useEffect(()=>{
     const key=(event:KeyboardEvent)=>{if(event.key==='Escape' && dialog)closeDialog();};
     window.addEventListener('keydown',key);
@@ -255,18 +248,20 @@ export default function App(){
   };
   useEffect(()=>{
     if(!Capacitor.isNativePlatform())return;
+    // Keep one native listener; its action reads the current page/dialog through the ref.
     const listener=NativeApp.addListener('backButton',()=>nativeBackAction.current());
     return()=>{void listener.then(handle=>handle.remove());};
   },[]);
   const handleScroll=(event:UIEvent<HTMLDivElement>)=>{const y=event.currentTarget.scrollTop;const diff=y-lastTop.current;if(y<66)setCompact(false);else if(diff>15)setCompact(true);else if(diff< -16)setCompact(false);lastTop.current=y;};
 
   const tab:Page = ['language','privacy'].includes(page)?'profile':['risk','replan','guide','beacon','pack'].includes(page)?'explore':page;
+  const enter=(_guest:boolean)=>{navigationDepth.current=0;window.history.replaceState({safehaven:true,page:'home',scroll:0,depth:0,dialog:null},'');setEnteredApp(true);setPage('home');setToast('Welcome to Meridian');};
 
   function home(){const currentPlace=read<Place|null>('destination',null);return <>
     <header className="home-header"><button className="home-location" type="button" onClick={()=>currentPlace?openDestination(currentPlace.name):go('explore')}><MapPin size={21}/><span><small>YOUR DESTINATION</small><strong><span className="home-destination-name">{currentPlace?.name||'Choose a location'}</span> <ChevronDown size={14}/></strong></span></button><div className="header-actions"><IconButton icon={Bell} onClick={()=>openDialog('alerts')} label="Notifications"/><IconButton icon={Menu} onClick={()=>openDialog('menu')} label="Open menu"/><button className="avatar-button" type="button" onClick={()=>go('profile')} aria-label="Open profile"><span>{name.charAt(0).toUpperCase()}</span></button></div></header>
-    <div className="home-welcome"><p>Welcome to SafeHaven</p><h1>A better way to be prepared.</h1></div>
+    <div className="home-welcome"><p>Welcome to Meridian</p><h1>A better way to be prepared.</h1></div>
     <button type="button" className="hero-risk" onClick={()=>go('risk')}><img className="hero-risk-photo" src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1100&q=82" onError={e=>{e.currentTarget.style.display="none"}} alt="Mountain landscape" loading="eager"/><div className="hero-risk-bg"/><div className="hero-risk-top"><span className="hero-shield"><ShieldCheck size={24}/></span><span className="hero-label">DESTINATION SAFETY</span></div><h2>Know before<br/>you go.</h2><p>Check weather, reports and local guidance for your next stop.</p><span className="hero-link">Check a destination <ChevronRight size={16}/></span></button>
-    
+
     <Heading title="What would you like to do?" sub="Planning a trip? Start with a destination check, then build your itinerary and save your pack. Already there? Use guidance, check-in or SOS."/>
     <div className="feature-grid">{features.map((f,i)=><FeatureCard key={f.title} feature={f} index={i} open={()=>go(f.page)}/>)}</div>
     <section className="home-quick-section" aria-label="Quick safety actions">
@@ -294,8 +289,9 @@ export default function App(){
         {kicker:'YOUR ITINERARY',title:'Plans can change',subtitle:'Compare alternatives',icon:Navigation,tint:'violet',page:'replan'},
         {kicker:'STAY IN TOUCH',title:'Keep your group close',subtitle:'Explore offline chat',icon:Radio,tint:'teal',page:'mesh'},
       ]}/>
+
     </section>
-  </>};
+  </>}
 
   function explore(){
     const matched=destinations.filter(d=>(d.name+' '+d.region+' '+d.label).toLowerCase().includes(query.toLowerCase())&&(destinationMood==='All'||d.mood===destinationMood));
@@ -310,7 +306,8 @@ export default function App(){
         {matched.length>0?<SwipeRow label="Destination cards">{matched.map((d,i)=><button key={d.name} type="button" className="destination-tile" onClick={()=>openDestination(d.name)}><span className={`destination-photo destination-photo-${i%5}`} style={{backgroundImage:`linear-gradient(180deg,transparent 25%,#09110fdb 100%),url('${d.image}')`}}/><span className="destination-tile-copy"><span>{d.label}</span><strong>{d.name}</strong><small>{d.region}<ArrowRight size={14}/></small></span></button>)}</SwipeRow>:<div className="empty-feature empty-compact"><Search size={26}/><h3>No matches here</h3><p>Try another region or category.</p></div>}
       </section>
       <section className="explore-section"><Heading title="Check before you go" sub="Useful tools for your next stop"/><div className="explore-tools"><button type="button" onClick={()=>go('risk')}><span><ShieldCheck size={22}/></span><strong>Risk overview</strong><small>Understand report sources</small><ArrowRight size={17}/></button><button type="button" onClick={()=>go('guide')}><span><BookOpen size={22}/></span><strong>Safety essentials</strong><small>Guidance for common hazards</small><ArrowRight size={17}/></button></div></section>
-    </>;
+
+    </>
   }
 
   function risk(){return <RiskTool onChoose={place=>{setSelectedDestination(place.name);window.history.replaceState({...window.history.state,destination:place.name},'')}} key={selectedDestination||"choose-destination"} destination={selectedDestination} back={back} notify={setToast} navigate={go}/>;}
@@ -330,7 +327,7 @@ export default function App(){
     <section className="profile-revamp" aria-label="Your profile">
       <div className="profile-revamp-top">
         <div className="profile-revamp-avatar"><UserRound size={32} strokeWidth={1.5}/></div>
-        <div className="profile-revamp-person"><span>YOUR ACCOUNT</span><h2>{name}</h2><p>{isAuthenticated ? 'Google Account' : 'Guest account'}</p></div>
+        <div className="profile-revamp-person"><span>YOUR ACCOUNT</span><h2>{name}</h2><p>{firebaseUser?.email||'Guest account'}</p></div>
         <button type="button" className="profile-revamp-edit" onClick={()=>openDialog('profile')} aria-label="Edit profile"><Pencil size={18}/></button>
       </div>
       <div className="profile-revamp-divider"/>
@@ -338,8 +335,7 @@ export default function App(){
     </section>
     <section className="profile-section profile-essential-section"><Heading title="Quick access"/>
       <div className="profile-shortcuts profile-shortcuts-final">
-
-<button type="button" onClick={()=>go('replan')}><span><Map size={27} strokeWidth={1.65}/></span>My trips</button>
+        <button type="button" onClick={()=>go('replan')}><span><Map size={27} strokeWidth={1.65}/></span>My trips</button>
         <button type="button" onClick={()=>{packSection.current='contacts';go('pack')}}><span><Phone size={27} strokeWidth={1.65}/></span>Contacts</button>
         <button type="button" onClick={()=>go('pack')}><span><FolderOpen size={27} strokeWidth={1.65}/></span>Offline pack</button>
       </div>
@@ -360,121 +356,35 @@ export default function App(){
         <AppRow icon={CircleHelp} title="Help & information" onClick={()=>openDialog('help')}/>
       </div>
     </section>
-    <button
-      type="button"
-      className="signout"
-      onClick={async () => {
-        try {
-          if (firebaseUser) await signOut(auth);
-          setIsGuest(false);
-          setIsAuthenticated(false);
-          setPage('home');
-          navigationDepth.current = 0;
-          window.history.replaceState(
-            { safehaven: true, page: 'home', scroll: 0, depth: 0, dialog: null },
-            ''
-          );
-          setName('Traveler');
-          setToast('');
-        } catch (error) {
-          console.error('Sign-out failed:', error);
-          setToast('Unable to sign out. Please try again.');
-        }
-      }}
-    >
-      Sign out
-    </button>
-  </>;}
-
-  function languagePage(){return <>
-    <BackHeader title="Language settings" back={back}/>
-    <section className="content-section">
-      <h2>Preferred language</h2>
-      <p>Used for safety guidance and report explanations. The rest of the interface currently remains in English.</p>
-      <label className="tool-field">Language
-        <select aria-label="Preferred language" value={read('language',language)} onChange={event=>{setLanguage(event.target.value);setToast('Language preference saved');}}>
-          {Object.entries(languageNames).map(([code,title])=><option key={code} value={code}>{title}</option>)}
-        </select>
-      </label>
-    </section>
-  </>;}
-
-  if (authLoading) {
-    return (
-      <div className="preview-stage" aria-busy="true" aria-live="polite">
-        <div className="phone-shell"><div className="phone-scroll"><div className="screen-content">
-          <p>Loading SafeHaven...</p>
-        </div></div></div>
+    <button type="button" className="signout" onClick={()=>{void (async()=>{
+      try {
+        if(firebaseUser)await signOutGoogle();
+        setEnteredApp(false);setPage('home');setDialog(null);navigationDepth.current=0;
+        window.history.replaceState({safehaven:true,page:'home',scroll:0,depth:0,dialog:null},'');
+        setName('Traveler');setToast('');
+      } catch {setToast('Unable to sign out. Please try again.');}
+    })()}}>{firebaseUser?'Sign out':'Back to welcome screen'}</button>
+  </>}
+  function languagePage(){return <><BackHeader title="Language settings" back={back}/><section className="content-section"><h2>Preferred language</h2><p>Used for safety guidance and report explanations. The rest of the interface currently remains in English.</p><label className="tool-field">Language<select aria-label="Preferred language" value={read('language',language)} onChange={event=>{setLanguage(event.target.value);setToast('Language preference saved');}}>{Object.entries(languageNames).map(([code,title])=><option key={code} value={code}>{title}</option>)}</select></label><p className="tool-muted">Hindi and Tamil have prepared translations. French and Spanish require the online AI service. Translations are unreviewed; English source text stays available.</p><button className="secondary-button" onClick={()=>go('guide')}>Preview safety guidance <ArrowRight size={17}/></button></section></>}
+  function privacy(){return <><BackHeader title="Privacy & sharing" back={back}/><section className="content-section"><h2>Your choices</h2><p>Contacts, plans, saved guidance and language preferences are stored on this device. Editing your display name lasts for this session.</p><p>Private group check-ins require consent and an online service. Nearby check-ins require a connected phone and separate consent. Beacons share your location only when you publish one.</p><p>Stopping RescueMesh disconnects peers and removes saved pending SOS/check-ins and beacons. Pending messages are encrypted on this phone, survive an app restart and expire within 24 hours. No background delivery is guaranteed. Leaving a private group removes your membership from that group.</p><button className="secondary-button" onClick={()=>go('pack')}>Manage group sharing</button><button className="secondary-button" onClick={()=>go('mesh')}>Manage nearby connections</button></section></>}
+  const content=()=>({home,explore,risk,replan,guide:guidePage,mesh,beacon,pack,profile,language:languagePage,privacy,sos}[page]());
+  if(authLoading)return <div className="preview-stage" aria-busy="true"><main className="phone-shell"><div className="phone-scroll"><SkeletonScreen/></div></main></div>;
+  if(!enteredApp)return <GoogleLoginPage onLoginSuccess={user=>{setFirebaseUser(user);setName(user.displayName||'Traveler');enter(false);}} onGuestContinue={()=>enter(true)}/>;
+  return <div className="preview-stage">
+    <aside className="desktop-side"><Brand/><h1>Thoughtful design.<br/><span>Ready for the journey.</span></h1><p>Discover places, prepare for the unexpected, and keep your plans in one place.</p><div className="desktop-help"><Smartphone size={21}/><span>Choose a destination, review your trip, and save your safety essentials before you travel.</span></div><p className="desktop-disclaimer">Emergency information is source-dependent. Always check local authorities.</p></aside>
+    <main className="phone-shell" aria-label="Meridian application">
+      <div className="phone-scroll" ref={scrollRef} onScroll={handleScroll}>
+        {<AnimatePresence mode="wait" initial={false}><motion.div key={page} className="screen-content" initial={reduceMotion?false:{opacity:0,y:14,filter:'blur(3px)'}} animate={{opacity:1,y:0,filter:'blur(0px)'}} exit={reduceMotion?{}:{opacity:0,y:-9,filter:'blur(2px)'}} transition={{type:'spring',stiffness:310,damping:31,mass:.8}}>
+          {loading?<SkeletonScreen profile={page==='profile'}/>:content()}
+        </motion.div></AnimatePresence>}
       </div>
-    );
-  }
-
-  if (!isAuthenticated && !isGuest) {
-    return (
-      <GoogleLoginPage
-        onLoginSuccess={(user) => {
-          if (user?.displayName) setName(user.displayName);
-          setIsAuthenticated(true);
-          setToast("Welcome to SafeHaven");
-        }}
-        onGuestContinue={() => {
-          setIsGuest(true);
-          setToast("Welcome to SafeHaven");
-        }}
-      />
-    );
-  }
-
-  return (
-    <div className="preview-stage">
-      <main className="phone-shell">
-        <div className="phone-scroll" onScroll={handleScroll} ref={scrollRef}>
-          <div className="screen-content" aria-busy={loading}>
-      {loading ? <SkeletonScreen profile={page==='profile'}/> : <>
-      {page === 'home' && home()}
-      {page === 'explore' && explore()}
-      {page === 'risk' && risk()}
-      {page === 'replan' && replan()}
-      {page === 'guide' && guidePage()}
-      {page === 'mesh' && mesh()}
-      {page === 'beacon' && beacon()}
-      {page === 'pack' && pack()}
-      {page === 'profile' && profile()}
-      {page === 'language' && languagePage()}
-      {page === 'privacy' && <>
-        <BackHeader title="Privacy & sharing" back={back}/>
-        <div className="content-section">
-          <h2>Your choices</h2>
-          <p>Contacts, plans, saved guidance and language preferences are stored on this device.</p>
-          <p>Private group check-ins and nearby sharing are separate. Review consent for each audience independently.</p>
-          <button className="secondary-button" onClick={()=>go('pack')}>Manage group sharing</button>
-          <button className="secondary-button" onClick={()=>go('mesh')}>Manage nearby connections</button>
-        </div>
-      </>}
-      {page === 'sos' && sos()}
-      </>}
-          </div>
-        </div>
-      <nav className={`floating-dock ${compact?'dock-compact':''}`} aria-label="Main navigation">
-        {([{id:'home',label:'Home',icon:Home},{id:'explore',label:'Explore',icon:Compass}] as const).map(item=>{
-          const Icon=item.icon;
-          return <button key={item.id} type="button" aria-label={item.label} aria-current={tab===item.id?'page':undefined} onClick={()=>go(item.id)} className={`dock-item ${tab===item.id?'dock-active':''}`}>
-            <span className="dock-active-bg" aria-hidden="true"/><Icon size={22} strokeWidth={2.1}/><span>{item.label}</span>
-          </button>;
-        })}
-        <motion.button type="button" className="dock-sos" aria-label="Emergency SOS" aria-current={page==='sos'?'page':undefined} onClick={()=>go('sos')} whileTap={{scale:.92}}>
-          <ShieldAlert size={21}/><small>SOS</small>
-        </motion.button>
-        {([{id:'mesh',label:'Mesh',icon:Radio},{id:'profile',label:'Profile',icon:UserRound}] as const).map(item=>{
-          const Icon=item.icon;
-          return <button key={item.id} type="button" aria-label={item.label} aria-current={tab===item.id?'page':undefined} onClick={()=>go(item.id)} className={`dock-item ${tab===item.id?'dock-active':''}`}>
-            <span className="dock-active-bg" aria-hidden="true"/><Icon size={22} strokeWidth={2.1}/><span>{item.label}</span>
-          </button>;
-        })}
-      </nav>
-      <Modal kind={dialog} close={closeDialog} person={name} saveName={setName} navigate={go} checkDestination={()=>openDestination(read<Place|null>('destination',null)?.name||'Manali')}/>
-      {toast && <NotificationToast message={toast} />}
-      </main>
-    </div>
-  );
+      {enteredApp&&<nav className={`floating-dock ${compact?'dock-compact':''}`} aria-label="Main navigation">
+        {([{id:'home',label:'Home',icon:Home},{id:'explore',label:'Explore',icon:Compass}] as const).map(t=>{const Icon=t.icon;return <button key={t.id} type="button" aria-label={t.label} aria-current={tab===t.id?'page':undefined} onClick={()=>go(t.id)} className={`dock-item ${tab===t.id?'dock-active':''}`}><span className="dock-active-bg" aria-hidden="true"/><Icon size={22} strokeWidth={2.1}/><span>{t.label}</span></button>})}
+        <motion.button type="button" className="dock-sos" aria-label="Emergency SOS" aria-current={page==='sos'?'page':undefined} onClick={()=>go('sos')} whileTap={{scale:.92}}><ShieldAlert size={21}/><small>SOS</small></motion.button>
+        {([{id:'mesh',label:'Mesh',icon:Radio},{id:'profile',label:'Profile',icon:UserRound}] as const).map(t=>{const Icon=t.icon;return <button key={t.id} type="button" aria-label={t.label} aria-current={tab===t.id?'page':undefined} onClick={()=>go(t.id)} className={`dock-item ${tab===t.id?'dock-active':''}`}><span className="dock-active-bg" aria-hidden="true"/><Icon size={22} strokeWidth={2.1}/><span>{t.label}</span></button>})}
+      </nav>}
+      <Modal kind={dialog} close={closeDialog} person={name} saveName={setName} navigate={go} checkDestination={()=>{const place=read<Place|null>('destination',null);if(place)openDestination(place.name);else go('risk')}}/>
+      <AnimatePresence mode="wait">{toast&&<NotificationToast key={toast} message={toast}/>}</AnimatePresence>
+    </main>
+  </div>
 }

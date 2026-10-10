@@ -1,4 +1,4 @@
-# SafeHaven AI
+# Meridian AI
 
 Canonical branch: `ui`. React/Vite travel-safety interface, FastAPI services and a Capacitor Android Nearby bridge. Guest preparation requires no account. **Firebase Google web sign-in is wired into the login page**; production hosting and native Android OAuth validation remain outstanding.
 
@@ -43,3 +43,5 @@ Earlier baseline: 22 browser/21 backend checks passed; later focused restoration
 Risk/weather/incident/map/route/AI content is source-dependent; unknown or empty official coverage is not proof of safety. Translations are unreviewed. Shelters/consular contacts need maintained real data. No offline street-map download, SMS or native FCM is implemented.
 
 Tests (PowerShell): `$env:PLAYWRIGHT_CHANNEL='chrome'; npm run test:web`; `.\.venv\Scripts\python.exe -m pytest backend/test_app.py backend/test_safety.py -q`. Use focused subsets for cosmetic changes. [MESH_TEST_GUIDE.md](MESH_TEST_GUIDE.md) covers physical acceptance; [RESCUEMESH_INTEGRATION.md](RESCUEMESH_INTEGRATION.md) describes native wiring. Historical standalone sources/design branches must not replace ui.
+
+The combined UI retains Meridian’s earlier widgets/navigation/animations with the newer Firebase login. Android account-chooser setup and exact signing fingerprints: [GOOGLE_SIGNIN_SETUP.md](GOOGLE_SIGNIN_SETUP.md). Offline Mesh remains accessible as guest.

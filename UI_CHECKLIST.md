@@ -46,3 +46,7 @@ Latest validation: three focused browser checks passed for fixed SVG artwork (6 
 
 - [x] Nearby adds optional two-phone Host/Join setup without replacing the automatic help network, known-partner mode or fixed icons/widgets. Native startup failures reset to Stopped; two-phone waiting/connected state is explicit.
 - [ ] Physical Host/Join pairing, bidirectional acknowledged chat/SOS and reconnect acceptance; instructions in MESH_TEST_GUIDE.md.
+
+- [x] Combined newer Google welcome/auth with the earlier Meridian shell, Motion page/toast transitions, history/scroll restoration and destination chooser. Restored alignment, dock morph and outline shimmer overrides.
+- [x] Google profile email/sign-out and guest route preserved; fixed six Home + three trip SVGs and Mesh Host/Join code remain intact.
+- [ ] Live native Google account acceptance after Firebase Android project/certificate configuration.
