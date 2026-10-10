@@ -7,6 +7,11 @@ import com.google.android.gms.nearby.Nearby
 import com.google.android.gms.nearby.connection.*
 import com.google.gson.Gson
 import com.safehaven.rescuemesh.db.RescueMeshDatabase
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+
+import com.safehaven.rescuemesh.db.SOSMessageEntity
 
 class RescueMeshManager(
     private val context: Context,
@@ -123,16 +128,30 @@ class RescueMeshManager(
         )
     
         if (connectedEndpoints.isEmpty()) {
+
+        CoroutineScope(
+            Dispatchers.IO
+        ).launch {
     
-            SOSQueue.addSOS(sos)
+            database.sosDao().insertSOS(
     
-            Log.d(
-                TAG,
-                "SOS Queued"
+                SOSMessageEntity(
+                    id = sos.id,
+                    senderId = sos.senderId,
+                    emergencyText = sos.emergencyText,
+                    timestamp = sos.timestamp,
+                    status = sos.status
+                )
             )
-    
-            return
         }
+    
+        Log.d(
+            TAG,
+            "SOS Saved To Room DB"
+        )
+
+    return
+}
     
         forwardSOS(sos)
     }
