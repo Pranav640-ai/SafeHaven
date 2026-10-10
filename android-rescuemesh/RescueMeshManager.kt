@@ -6,6 +6,7 @@ import android.util.Log
 import com.google.android.gms.nearby.Nearby
 import com.google.android.gms.nearby.connection.*
 import com.google.gson.Gson
+import com.safehaven.rescuemesh.db.RescueMeshDatabase
 
 class RescueMeshManager(
     private val context: Context,
