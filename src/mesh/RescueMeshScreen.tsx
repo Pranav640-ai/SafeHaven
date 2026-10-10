@@ -1,5 +1,4 @@
 import {useEffect, useState} from 'react';
-import {AnimatePresence, motion, useReducedMotion} from 'motion/react';
 import {ArrowLeft, CheckCircle2, ChevronRight, CircleHelp, MapPin, MessageCircle,
   RadioTower, Send, ShieldAlert, ShieldCheck, Users, WifiOff, X} from 'lucide-react';
 import type {MeshController, MeshBeacon} from './useRescueMesh';
@@ -7,7 +6,6 @@ import type {MeshController, MeshBeacon} from './useRescueMesh';
 type Tab = 'Chats'|'Nearby'|'Beacons'|'SOS';
 export function RescueMeshScreen({mesh,onBack,onGuide,standaloneSOS=false,initialTab='Chats'}:
   {mesh:MeshController;onBack:()=>void;onGuide?:()=>void;standaloneSOS?:boolean;initialTab?:Tab}) {
-  const reduced=useReducedMotion();
   const [tab,setTab] = useState<Tab>(initialTab);
   const [deviceName,setDeviceName]=useState('SafeHaven traveler');
   const [draft,setDraft]=useState('');
@@ -26,12 +24,12 @@ export function RescueMeshScreen({mesh,onBack,onGuide,standaloneSOS=false,initia
 
   return <div className="mesh-live">
     <header className="back-header"><button type="button" className="icon-button" aria-label="Back" onClick={onBack}><ArrowLeft size={20}/></button><h1>{title}</h1><span className={`mesh-live-indicator ${linked?'is-connected':''}`}>{linked?`${connected} nearby`:unavailable}</span></header>
-    <div className="mesh-live-intro"><div className="mesh-live-icon"><RadioTower size={28}/></div><div><h2>Stay connected, even offline.</h2><p>{mesh.available ? mesh.state.discovering ? 'Nearby discovery is active on this Android phone.' : mesh.state.running ? 'Nearby startup needs attention. Check the error below and restart discovery.' : 'Connect directly to participating Android phones.' : 'This feature needs the SafeHaven Android app.'}</p></div></div>
+    <div className="mesh-live-intro"><div className="mesh-live-icon"><RadioTower size={28}/></div><div><h2>Stay connected, even offline.</h2><p>{mesh.available ? mesh.state.discovering ? 'Nearby discovery is active on this Android phone.' : mesh.state.running ? mesh.error ? 'Discovery could not start. Check the message below and try again.' : 'Starting nearby discovery…' : 'Connect directly to participating Android phones.' : 'This feature needs the SafeHaven Android app.'}</p></div></div>
     {mesh.error&&<p className="mesh-live-alert" role="alert">{mesh.error}</p>}
     {mesh.notice&&<p className="mesh-live-notice" role="status">{mesh.notice}</p>}
-    {!linked&&<p className="mesh-live-status" role="status">{mesh.available?'Messaging and beacon sharing activate after pairing. Start discovery in Nearby. SOS can still be queued on this phone.':'Preview mode: these controls need the installed Android app. A mobile browser cannot connect to nearby phones.'}</p>}
+    {!linked&&<p className="mesh-live-status" role="status">{mesh.available?'Messaging and beacon sharing activate after pairing. Start discovery in Nearby. SOS can still be queued on this phone.':'Install the SafeHaven Android app to connect nearby phones. The controls below activate when you connect.'}</p>}
     {!standaloneSOS&&<div className="mesh-tabs" role="tablist" aria-label="RescueMesh sections">{(['Chats','Nearby','Beacons','SOS'] as const).map(t=><button key={t} type="button" role="tab" aria-selected={tab===t} onClick={()=>setTab(t)} className={tab===t?'selected':''}>{t}</button>)}</div>}
-    <AnimatePresence mode="wait" initial={false}><motion.section key={tab} className="mesh-live-section" initial={reduced?false:{opacity:0,x:12}} animate={{opacity:1,x:0}} exit={reduced?{}:{opacity:0,x:-10}} transition={{duration:reduced?0:.2}}>
+    <section key={tab} className="mesh-live-section">
     {tab==='Chats'&&<>
       <div className="mesh-live-sectionhead"><h3>Group messages</h3><span>{connected?`${connected} linked phones`:'No active link'}</span></div>
       <div className="mesh-live-chat" aria-live="polite">
@@ -39,7 +37,7 @@ export function RescueMeshScreen({mesh,onBack,onGuide,standaloneSOS=false,initia
         {mesh.messages.filter(m=>m.type==='chat'||m.type==='checkin').map(m=><div key={m.id} className={`mesh-live-bubble ${m.received?'received':'sent'}`}><strong>{m.received?m.fromName:'You'}</strong><p>{m.type==='checkin'?`Check-in: ${m.body}`:m.body}</p><small>{m.received?'Received over Nearby':m.status||'Sending'}</small></div>)}
       </div>
       <form className="mesh-live-compose" onSubmit={e=>{e.preventDefault();if(!draft.trim())return;const text=draft.trim();run(async()=>{await mesh.sendChat(text);setDraft('')})}}><input aria-label="Message" value={draft} maxLength={500} onChange={e=>setDraft(e.target.value)} placeholder="Message nearby phones" disabled={!mesh.available||connected===0}/><button type="submit" disabled={!linked||busy||!draft.trim()} aria-label="Send message"><Send size={19}/></button></form>
-      {!mesh.available&&<p className="mesh-live-hint">The hosted website cannot use Android Nearby Connections.</p>}
+      {!mesh.available&&<p className="mesh-live-hint">Pair two Android phones in Nearby to start messaging.</p>}
     </>}
     {tab==='Nearby'&&<>
       <div className="mesh-live-sectionhead"><h3>Phone connections</h3><span>{mesh.state.discovering?'Searching':mesh.state.running?'Discovery unavailable':'Stopped'}</span></div>
@@ -72,7 +70,7 @@ export function RescueMeshScreen({mesh,onBack,onGuide,standaloneSOS=false,initia
       {mesh.state.queuedSOS>0&&<button type="button" className="secondary-button mesh-live-cta" disabled={busy} onClick={()=>run(()=>mesh.cancelQueuedSOS())}>Cancel pending SOS ({mesh.state.queuedSOS})</button>}
       {mesh.messages.filter(m=>m.type==='sos').map(m=><div key={m.id} className="mesh-live-peer"><ShieldAlert size={20}/><span><strong>{m.received?`From ${m.fromName}`:'Your SOS'}</strong><p>{m.body}</p><small>{m.received?'Received':m.status||'Not confirmed'}</small></span></div>)}
     </>}
-    </motion.section></AnimatePresence>
+    </section>
   </div>;
 }
 

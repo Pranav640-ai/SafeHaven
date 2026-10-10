@@ -52,14 +52,33 @@ function PlaceSearch({ select }: {
     return <div className="place-search"><form onSubmit={e => { e.preventDefault(); void search(); }} className="tool-inline"><input aria-label="Destination search" placeholder="Search a town or city" value={q} minLength={2} maxLength={100} required onChange={e => setQ(e.target.value)}/><button className="secondary-button" disabled={busy}>{busy ? 'Searching…' : 'Search'}</button></form><ErrorNote error={error}/>{places.length > 0 && <div className="list-panel">{places.map((p, i) => <button className="tool-place" key={`${p.latitude}-${p.longitude}-${i}`} onClick={() => { select(p); setPlaces([]); setQ(''); }}><MapPin size={18}/><span><strong>{p.name}</strong><small>{p.region}, {p.country}</small></span><ArrowRight size={17}/></button>)}</div>}</div>;
 }
 const DEFAULT: Place = { name: 'Manali', latitude: 32.2396, longitude: 77.1887, country: 'India', region: 'Himachal Pradesh', timezone: 'Asia/Kolkata' };
-export function RiskTool({ back, notify, destination }: Props & {
-    destination: string;
+export function RiskTool({ back, notify, destination }: Props & { destination: string | null }) {
+    const previous = read<Place | null>('destination', null);
+    const [chosen, setChosen] = useState<Place | null>(destination && previous?.name === destination ? previous : null);
+    const [error, setError] = useState('');
+    const [resolving, setResolving] = useState(Boolean(destination && previous?.name !== destination));
+    useEffect(() => {
+        if (!destination || chosen) return;
+        let active = true;
+        api<{ places: Place[] }>(`/destinations?q=${encodeURIComponent(destination)}`).then(r => {
+            if (!active) return;
+            if (r.places[0]) { save('destination', r.places[0]); setChosen(r.places[0]); }
+            else setError('Destination not found. Try searching for the town below.');
+        }).catch(() => { if (active) setError('Unable to find this destination. Connect to the internet and try searching below.'); })
+          .finally(() => { if (active) setResolving(false); });
+        return () => { active = false; };
+    }, [destination]);
+    if (chosen) return <SelectedRiskTool back={back} notify={notify} destination={chosen}/>;
+    return <><Header title="Risk intelligence" back={back}/><section className="tool-card"><h2>Where are you travelling?</h2><p>Choose a destination to see its weather outlook and nearby source reports.</p></section>{resolving && <p role="status">Finding {destination}…</p>}<ErrorNote error={error}/><PlaceSearch select={p => { save('destination', p); setChosen(p); }}/>{previous && <button className="secondary-button" onClick={() => setChosen(previous)}><MapPin size={18}/> Continue with {previous.name}</button>}</>;
+}
+function SelectedRiskTool({ back, notify, destination }: Props & {
+    destination: Place;
 }) {
     const [explanation, setExplanation] = useState<{
         id: string;
         data: Explanation;
     } | null>(null);
-    const [place, setPlace] = useSaved<Place>('destination', DEFAULT);
+    const [place, setPlace] = useSaved<Place>('destination', destination);
     const [date, setDate] = useState(today());
     const [tab, setTab] = useState('Overview');
     const [weather, setWeather] = useState<Weather | null>(() => read(`weather:${place.latitude},${place.longitude}`, null));
@@ -68,11 +87,6 @@ export function RiskTool({ back, notify, destination }: Props & {
     const [error, setError] = useState('');
     const [cached, setCached] = useState(true);
     const requestId = useRef(0);
-    useEffect(() => { if (destination === place.name)
-        return; let active = true; api<{
-        places: Place[];
-    }>(`/destinations?q=${encodeURIComponent(destination)}`).then(r => { if (active && r.places[0])
-        setPlace(r.places[0]); }).catch(() => { }); return () => { active = false; }; }, [destination]);
     const refresh = async () => {
         const id = ++requestId.current;
         setBusy(true);

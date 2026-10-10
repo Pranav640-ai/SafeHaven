@@ -246,3 +246,40 @@ test('SOS has its own route and Mesh previews visible disabled controls', async 
     await page.getByRole('button', {name:'View emergency guidance'}).click();
     await expect(page.getByRole('heading', {name:'Emergency guide',exact:true})).toBeVisible();
 });
+
+
+test('Home risk entry asks for a destination instead of opening Manali', async ({page}) => {
+    await page.goto('/');
+    await page.getByRole('button', {name:'Explore as guest'}).click();
+    await page.getByRole('button', {name:'Risk insights Warnings & reports',exact:true}).click();
+    await expect(page.getByRole('heading', {name:'Where are you travelling?'})).toBeVisible();
+    await expect(page.getByRole('heading', {name:'Manali',exact:true})).toHaveCount(0);
+    await expect(page.getByRole('textbox', {name:'Destination search'})).toBeVisible();
+});
+
+for (const width of [320,375,390,430]) {
+    test(`SOS and Mesh have separate touch targets at ${width}px, including after scrolling`, async ({browser}) => {
+        const context=await browser.newContext({viewport:{width,height:844},isMobile:true,hasTouch:true,reducedMotion:'reduce'});
+        const page=await context.newPage();
+        await page.goto(process.env.TEST_BASE_URL || 'http://127.0.0.1:8000');
+        await page.getByRole('button',{name:'Explore as guest'}).click();
+        const nav=page.getByRole('navigation',{name:'Main navigation'});
+        for (const scroll of [0,700]) {
+            await page.locator('.phone-scroll').evaluate((el,y)=>{el.scrollTop=y;},scroll);
+            await expect(nav.getByRole('button',{name:'Emergency SOS'})).toBeVisible();
+            const boxes=await nav.locator(':scope > button').evaluateAll(els=>els.map(el=>{const r=el.getBoundingClientRect();return {x:r.x,y:r.y,w:r.width,h:r.height};}));
+            expect(boxes).toHaveLength(5);
+            for(let i=0;i<4;i++) expect(boxes[i].x+boxes[i].w).toBeLessThanOrEqual(boxes[i+1].x);
+            for(const b of boxes) {expect(b.w).toBeGreaterThanOrEqual(44);expect(b.h).toBeGreaterThanOrEqual(44);}
+            await page.touchscreen.tap(boxes[2].x+boxes[2].w-4,boxes[2].y+boxes[2].h/2);
+            await expect(page.getByRole('heading',{name:'Emergency SOS',exact:true})).toBeVisible();
+            await nav.getByRole('button',{name:'Mesh',exact:true}).tap();
+            await expect(page.getByRole('heading',{name:'RescueMesh',exact:true})).toBeVisible();
+            await page.getByRole('tab',{name:'Nearby',exact:true}).tap();
+            await expect(page.getByRole('button',{name:'Start Nearby discovery'})).toBeVisible();
+            await nav.getByRole('button',{name:'Home',exact:true}).tap();
+            await expect(page.getByText('A better way to be prepared.')).toBeVisible();
+        }
+        await context.close();
+    });
+}

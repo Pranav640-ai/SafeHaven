@@ -70,3 +70,12 @@
 .dock-sos[aria-current="page"]{outline:2px solid #f9dfdc;outline-offset:3px}
 @media(max-width:340px){.mesh-live-indicator{max-width:115px;font-size:10px;padding:6px 8px}.mesh-live .back-header h1{font-size:20px}}
 @media(prefers-reduced-motion:reduce){.mesh-live button{transition:none!important}}
+
+.mesh-live .back-header{flex-wrap:wrap}
+.mesh-live .back-header h1{flex:1}
+.mesh-live .back-header .mesh-live-indicator{max-width:none;margin-left:42px;text-align:left;flex:0 1 auto}
+.mesh-live .mesh-tabs{width:100%;margin:18px 0;min-height:54px}
+.mesh-live-section{opacity:1;transform:none}
+.mesh-live-sectionhead{align-items:center;flex-wrap:wrap}
+.mesh-live .mesh-live-guide{min-height:44px}
+.mesh-live-field input,.mesh-live-field textarea,.mesh-live-field select{box-sizing:border-box}

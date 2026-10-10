@@ -11,3 +11,11 @@
 .group-member{display:flex;align-items:center;gap:10px;padding:14px 0;border-bottom:1px solid #a7b69b50}.group-member span{flex:1}.group-member small{display:block;font-size:11px;line-height:1.6;color:#627461;margin-top:5px}.invite-code{font-size:11px;margin:10px 0}
 .content-section>h2{font-size:20px;margin:12px 0}.tool-card summary{cursor:pointer;font-size:13px;color:#34563f}
 @media(max-width:350px){.tool-inline{gap:7px}.tool-inline>.secondary-button{font-size:11px}.tool-card{padding:13px}}
+
+.tool-inline{align-items:stretch}
+.tool-inline>.tool-field{flex:1 1 130px;justify-content:flex-end}
+.tool-inline>.secondary-button{flex:0 0 auto;min-height:44px;margin:0}
+.tool-inline>input{min-height:44px}
+.tool-place>span,.group-member>span{min-width:0;overflow-wrap:anywhere}
+.tool-place>svg,.group-member>.icon-button{flex:none}
+.tool-card>.secondary-button{min-height:44px;justify-content:center}

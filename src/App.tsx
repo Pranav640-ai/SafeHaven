@@ -21,7 +21,7 @@ import {
 
 type Page = 'home' | 'explore' | 'risk' | 'replan' | 'guide' | 'mesh' | 'beacon' | 'pack' | 'profile' | 'language' | 'privacy' | 'sos';
 type GuideKind = 'Flood' | 'Extreme heat' | 'Earthquake';
-type Dialog = 'sos' | 'profile' | 'help' | null;
+type Dialog = 'profile' | 'help' | null;
 
 const features: { title: string; detail: string; icon: LucideIcon; art: string; accent: string; page: Page }[] = [
   { title: 'Risk insights', detail: 'Warnings & reports', icon: ShieldAlert, art: '', accent: 'rose', page: 'risk' },
@@ -80,7 +80,7 @@ function FeatureCard({feature, index, open}: {feature:typeof features[number];in
 }
 function SkeletonScreen({ profile = false }: {profile?:boolean}) {
   const c = {baseColor:'#dfe8e9',highlightColor:'#f7fbfa',duration:1.25};
-  return <div className="loading-scene" aria-busy="true" aria-label="Loading preview content">
+  return <div className="loading-scene" aria-busy="true" aria-label="Loading content">
     <Skeleton height={19} width="48%" {...c}/><Skeleton height={34} width="72%" {...c}/>
     <Skeleton height={profile?220:182} borderRadius={24} {...c}/>
     <div className="skeleton-group">{Array.from({length:profile?3:6},(_,i)=><Skeleton key={i} height={profile?76:130} borderRadius={19} {...c}/>)}</div>
@@ -135,16 +135,15 @@ function Carousel({items,onOpen}: {items:{kicker:string;title:string;subtitle:st
 function AppRow({icon:Icon,title,subtitle,end,onClick,tone='default'}:{icon:LucideIcon;title:string;subtitle?:string;end?:ReactNode;onClick:()=>void;tone?:string}) {
   return <button type="button" className="app-row" onClick={onClick}><span className={`row-icon row-${tone}`}><Icon size={20}/></span><span className="row-body"><strong>{title}</strong>{subtitle&&<small>{subtitle}</small>}</span>{end??<ChevronRight size={18} className="row-chevron"/>}</button>;
 }
-function Modal({kind,close,go,person,saveName}: {kind:Dialog;close:()=>void;go:(p:Page)=>void;person:string;saveName:(s:string)=>void}) {
+function Modal({kind,close,person,saveName}: {kind:Dialog;close:()=>void;person:string;saveName:(s:string)=>void}) {
   const [draft,setDraft]=useState(person);
   useEffect(()=>setDraft(person),[person,kind]);
-  return <AnimatePresence>{kind && <motion.div className={`modal-backdrop ${kind==='sos'?'sos-modal':''}`} initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} onClick={close}>
+  return <AnimatePresence>{kind && <motion.div className="modal-backdrop" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} onClick={close}>
     <motion.section className="bottom-sheet" role="dialog" aria-modal="true" aria-label={`${kind} dialog`} onClick={e=>e.stopPropagation()}
       initial={{y:'100%'}} animate={{y:0}} exit={{y:'100%'}} transition={{type:'spring',stiffness:340,damping:34}}>
       <div className="sheet-handle"/><IconButton icon={X} onClick={close} label="Close dialog" className="sheet-close"/>
-      {kind==='sos'&&<><div className="sos-icon"><ShieldAlert size={39}/></div><h2>Emergency SOS</h2><p>SOS is not connected yet. No message will be sent.</p><div className="caution-inline"><AlertTriangle size={19}/> Emergency sending is not connected</div><button className="primary-button" type="button" onClick={()=>go('guide')}>View emergency guidance <ArrowRight size={18}/></button><button className="quiet-button" type="button" onClick={close}>Close</button></>}
-      {kind==='profile'&&<><h2>Edit display name</h2><p>This change stays in your browser session.</p><label className="field-label" htmlFor="profile-name">Display name</label><input className="form-input" id="profile-name" maxLength={32} value={draft} onChange={e=>setDraft(e.target.value)}/><button className="primary-button" type="button" onClick={()=>{saveName(draft.trim()||'Traveler');close()}}>Save changes</button></>}
-      {kind==='help'&&<><h2>About SafeHaven</h2><p>On Android, RescueMesh connects participating phones with Nearby Connections and manual code confirmation. Online data services and downloadable packs are separate features.</p><button className="primary-button" type="button" onClick={close}>Understood</button></>}
+      {kind==='profile'&&<><h2>Edit display name</h2><p>Your display name is saved until you close the app.</p><label className="field-label" htmlFor="profile-name">Display name</label><input className="form-input" id="profile-name" maxLength={32} value={draft} onChange={e=>setDraft(e.target.value)}/><button className="primary-button" type="button" onClick={()=>{saveName(draft.trim()||'Traveler');close()}}>Save changes</button></>}
+      {kind==='help'&&<><h2>About SafeHaven</h2><p>Start with Explore to choose a destination and check its weather and reports. Add your activities in Trip replanner, then save contacts and guidance in Safety pack. On Android, open Mesh → Nearby to pair phones using matching codes. Use SOS to ask connected travelers for help.</p><button className="primary-button" type="button" onClick={close}>Understood</button></>}
     </motion.section>
   </motion.div>}</AnimatePresence>;
 }
@@ -173,7 +172,7 @@ export default function App(){
   const [toast,setToast]=useState('');
   const [query,setQuery]=useState('');
   const packSection=useRef<'contacts'|'group'|null>(null);
-  const [selectedDestination,setSelectedDestination]=useState('Manali');
+  const [selectedDestination,setSelectedDestination]=useState<string|null>(null);
   const [destinationMood,setDestinationMood]=useState('All');
   const meshApi=useRescueMesh();
   const [tripNote,setTripNote]=useSaved('trip-note','');
@@ -189,7 +188,7 @@ export default function App(){
 
   useEffect(()=>{if(!authenticated)return;setLoading(true);const t=window.setTimeout(()=>setLoading(false),page==='home'?640:420);return()=>window.clearTimeout(t)},[page,authenticated]);
   useEffect(()=>{if(!toast)return;const t=window.setTimeout(()=>setToast(''),1600);return()=>window.clearTimeout(t)},[toast]);
-  const openDestination=(name:string)=>{setSelectedDestination(name);go('risk')};
+  const openDestination=(name:string)=>{go('risk');setSelectedDestination(name)};
   const pendingScroll=useRef<number|null>(null);
   const navigationDepth=useRef(0);
   const languageNames:Record<string,string>={en:'English',hi:'Hindi',ta:'Tamil',fr:'French',es:'Spanish'};
@@ -198,6 +197,7 @@ export default function App(){
   const go=(p:Page)=>{
     if(p===page && !dialog)return;
     if(p!=='pack')packSection.current=null;
+    if(p==='risk')setSelectedDestination(null);
     rememberScroll();
     if(!dialog)navigationDepth.current+=1;
     window.history[dialog?'replaceState':'pushState']({safehaven:true,page:p,scroll:0,depth:navigationDepth.current,dialog:null},'');
@@ -320,7 +320,7 @@ export default function App(){
     </>
   }
 
-  function risk(){return <RiskTool key={selectedDestination} destination={selectedDestination} back={back} notify={setToast}/>;}
+  function risk(){return <RiskTool key={selectedDestination||"choose-destination"} destination={selectedDestination} back={back} notify={setToast}/>;}
 
   function replan(){return <ReplanTool back={back} notify={setToast}/>;}
 
@@ -372,7 +372,7 @@ export default function App(){
   function privacy(){return <><BackHeader title="Privacy & sharing" back={back}/><section className="content-section"><h2>Your choices</h2><p>Contacts, plans, saved guidance and language preferences are stored on this device. Editing your display name lasts for this session.</p><p>Private group check-ins require consent and an online service. Nearby check-ins require a connected phone and separate consent. Beacons share your location only when you publish one.</p><p>Stopping RescueMesh disconnects peers and clears its in-memory SOS queue and beacons. Leaving a private group removes your membership from that group.</p><button className="secondary-button" onClick={()=>go('pack')}>Manage group sharing</button><button className="secondary-button" onClick={()=>go('mesh')}>Manage nearby connections</button></section></>}
   const content=()=>({home,explore,risk,replan,guide:guidePage,mesh,beacon,pack,profile,language:languagePage,privacy,sos}[page]());
   return <div className="preview-stage">
-    <aside className="desktop-side"><Brand/><h1>Thoughtful design.<br/><span>Ready for the journey.</span></h1><p>Discover places, prepare for the unexpected, and keep your plans in one place.</p><div className="desktop-help"><Smartphone size={21}/><span>Use Chrome device mode for a phone-sized preview.<br/><b>F12 → Ctrl + Shift + M</b></span></div><p className="desktop-disclaimer">Emergency information is source-dependent. Always check local authorities.</p></aside>
+    <aside className="desktop-side"><Brand/><h1>Thoughtful design.<br/><span>Ready for the journey.</span></h1><p>Discover places, prepare for the unexpected, and keep your plans in one place.</p><div className="desktop-help"><Smartphone size={21}/><span>Choose a destination, review your trip, and save your safety essentials before you travel.</span></div><p className="desktop-disclaimer">Emergency information is source-dependent. Always check local authorities.</p></aside>
     <main className={`phone-shell ${!authenticated?'phone-onboarding':''}`} aria-label="SafeHaven application">
       <div className="phone-scroll" ref={scrollRef} onScroll={handleScroll}>
         {!authenticated ? login() : <AnimatePresence mode="wait" initial={false}><motion.div key={page} className="screen-content" initial={reduceMotion?false:{opacity:0,y:14,filter:'blur(3px)'}} animate={{opacity:1,y:0,filter:'blur(0px)'}} exit={reduceMotion?{}:{opacity:0,y:-9,filter:'blur(2px)'}} transition={{type:'spring',stiffness:310,damping:31,mass:.8}}>
@@ -384,7 +384,7 @@ export default function App(){
         <motion.button type="button" className="dock-sos" aria-label="Emergency SOS" aria-current={page==='sos'?'page':undefined} onClick={()=>go('sos')} whileTap={{scale:.92}}><ShieldAlert size={21}/><small>SOS</small></motion.button>
         {([{id:'mesh',label:'Mesh',icon:Radio},{id:'profile',label:'Profile',icon:UserRound}] as const).map(t=>{const Icon=t.icon;return <button key={t.id} type="button" aria-label={t.label} aria-current={tab===t.id?'page':undefined} onClick={()=>go(t.id)} className={`dock-item ${tab===t.id?'dock-active':''}`}><span className="dock-active-bg" aria-hidden="true"/><Icon size={22} strokeWidth={2.1}/><span>{t.label}</span></button>})}
       </nav>}
-      <Modal kind={dialog} close={closeDialog} go={go} person={name} saveName={setName}/>
+      <Modal kind={dialog} close={closeDialog} person={name} saveName={setName}/>
       <AnimatePresence mode="wait">{toast&&<NotificationToast key={toast} message={toast}/>}</AnimatePresence>
     </main>
   </div>
