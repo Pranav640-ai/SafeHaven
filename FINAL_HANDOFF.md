@@ -128,3 +128,11 @@ Cleanup removed compiler-confirmed unused imports/dead DemoNote, consolidated re
 New help mode still needs physical two-phone automatic connection, ACK, three-phone relay and abuse-control acceptance. The prior emulator pairing failures remain unresolved evidence; enabling auto-accept is not proof that those radio I/O failures are fixed. Use NEXT_AGENT_CONTEXT.md as the takeover starting point.
 
 Final cleanup verification: TypeScript noUnusedLocals/noUnusedParameters passed; production web and Android debug builds passed; APK assets match dist; package installed on 5558/5560. Two focused browser checks passed for default help-mode copy/selection and the separate SOS route. Automatic radio pairing and delivery were not claimed as verified.
+
+Current visual/scope reference: [AGENTS.md](AGENTS.md), [UI_CHECKLIST.md](UI_CHECKLIST.md) and [FEATURE_CHECKLIST.md](FEATURE_CHECKLIST.md). The six Home and three trip-card styled SVG illustrations are fixed; historical emoji artwork must not replace them.
+
+## Final visible-scope audit
+
+The preferred six Home and three trip-card styled SVG illustrations were restored from the 6b61d84 design, with fonts/frames/animations untouched. Historical emoji replacements and unused art properties were removed. Only the separate Home mini-checklist and trip-note editor were removed as duplicates of Safety pack; old notes supply the pack default when no hotel field exists. Core cards, carousel and useful quick actions remain fixed. Profile Pencil edits name; gear opens Settings with real language/privacy actions. UI_CHECKLIST.md records each keep/remove decision and FEATURE_CHECKLIST.md checks all five core implementations and 25 proposed additions, without marking external/field gaps complete.
+
+Latest validation: three focused browser checks passed for fixed SVG artwork (6 + 3), duplicate removal/legacy note retention, Profile edit/settings, dialog Back/SOS and all Home/core routes. TypeScript strict unused checks, production web build and final Android build passed. APK assets match dist and the package installed on 5558/5560. Physical Mesh/production acceptance gaps remain unchanged.

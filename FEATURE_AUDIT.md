@@ -49,3 +49,5 @@ Read with FINAL_HANDOFF.md. Implemented means code exists, not proof of producti
 3. Maintained official advisory/closure/shelter/consular data; reviewed translations.
 4. Shared trip/navigation model and usability testing; real AI and push provider acceptance.
 5. Licensed offline maps, native notifications/SMS only with consent and a defined provider.
+
+Current visual/scope reference: [AGENTS.md](AGENTS.md), [UI_CHECKLIST.md](UI_CHECKLIST.md) and [FEATURE_CHECKLIST.md](FEATURE_CHECKLIST.md). The six Home and three trip-card styled SVG illustrations are fixed; historical emoji artwork must not replace them.

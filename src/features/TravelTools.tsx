@@ -236,7 +236,7 @@ export function PackTool({ back, notify, navigate, nearbyShare, checklist, toggl
     }[]>('contacts', []);
     const [contact, setContact] = useState('');
     const [phone, setPhone] = useState('');
-    const [hotel, setHotel] = useSaved('hotel', '');
+    const [hotel, setHotel] = useSaved('hotel', read('trip-note', ''));
     const [packTime, setPackTime] = useSaved<string | null>('pack-time', null);
     const [offline, setOffline] = useState(!navigator.onLine);
     const [error, setError] = useState('');

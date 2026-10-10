@@ -12,3 +12,5 @@
 10. Safety beacon publishes a chosen GPS refuge/meeting point to nearby peers; check expiry and sender. It is not an authority-certified shelter.
 
 Back returns to the previous page. Profile holds language, contacts and privacy settings. For installation/testing and remaining features read FINAL_HANDOFF.md and FEATURE_AUDIT.md.
+
+Current visual/scope reference: [AGENTS.md](AGENTS.md), [UI_CHECKLIST.md](UI_CHECKLIST.md) and [FEATURE_CHECKLIST.md](FEATURE_CHECKLIST.md). The six Home and three trip-card styled SVG illustrations are fixed; historical emoji artwork must not replace them.

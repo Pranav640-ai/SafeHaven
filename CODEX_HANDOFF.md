@@ -105,3 +105,5 @@ Suggested Python FastAPI contract (design first; no backend exists yet): destina
 The bridge and handoff changes are consolidated into `ui`. Continue work there; preserve the historical branches and original sources on `main`. Do not force-push over teammates. Release integration into `main` still requires the device tests above. Make focused commits and update docs using observed build/device outcomes.
 
 **Definition of done for integration:** frontend build green, Android build green on the final commit, A↔B peer handshake/message/ack evidence, A↔B↔C relay evidence, beacon/SOS safety flow verified, all still within the same APK, and no false live-data/sending claims.
+
+Current visual/scope reference: [AGENTS.md](AGENTS.md), [UI_CHECKLIST.md](UI_CHECKLIST.md) and [FEATURE_CHECKLIST.md](FEATURE_CHECKLIST.md). The six Home and three trip-card styled SVG illustrations are fixed; historical emoji artwork must not replace them.

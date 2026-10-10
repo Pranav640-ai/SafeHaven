@@ -13,24 +13,24 @@ import type {Place} from './services/api';
 import { useSaved, read } from './services/storage';
 import {
   ArrowLeft, ArrowRight, Bell, Bookmark,
-  BookOpen, Check, CheckCheck, ChevronDown, ChevronRight, CircleHelp,
+  BookOpen, CheckCheck, ChevronDown, ChevronRight, CircleHelp,
   CloudRain, Compass, Home,
   Menu, Languages, LockKeyhole, Map, MapPin, Navigation, Phone, Radio, Search, Settings,
   Shield, ShieldAlert, ShieldCheck, Smartphone, ThermometerSun,
-  X, Zap, FileText, Save, Mountain, Waves, Trees, UserRound, CalendarCheck2, FolderOpen, type LucideIcon,
+  X, Zap, Pencil, Mountain, Waves, Trees, UserRound, CalendarCheck2, FolderOpen, type LucideIcon,
 } from 'lucide-react';
 
 type Page = 'home' | 'explore' | 'risk' | 'replan' | 'guide' | 'mesh' | 'beacon' | 'pack' | 'profile' | 'language' | 'privacy' | 'sos';
 type GuideKind = 'Flood' | 'Extreme heat' | 'Earthquake';
-type Dialog = 'profile' | 'help' | 'alerts' | 'menu' | null;
+type Dialog = 'profile' | 'help' | 'alerts' | 'menu' | 'settings' | null;
 
-const features: { title: string; detail: string; icon: LucideIcon; art: string; accent: string; page: Page }[] = [
-  { title: 'Risk insights', detail: 'Check before your visit', icon: ShieldAlert, art: '🌩️', accent: 'rose', page: 'risk' },
-  { title: 'Trip replanner', detail: 'Plan your dated activities', icon: Navigation, art: '🧭', accent: 'blue', page: 'replan' },
-  { title: 'Emergency guide', detail: 'Find steps for an emergency', icon: BookOpen, art: '🚨', accent: 'amber', page: 'guide' },
-  { title: 'RescueMesh', detail: 'Connect nearby without internet', icon: Radio, art: '📡', accent: 'violet', page: 'mesh' },
-  { title: 'Safety beacon', detail: 'Share a refuge location', icon: MapPin, art: '📍', accent: 'teal', page: 'beacon' },
-  { title: 'Safety pack', detail: 'Save for offline use', icon: Bookmark, art: '🎒', accent: 'indigo', page: 'pack' },
+const features: { title: string; detail: string; icon: LucideIcon; accent: string; page: Page }[] = [
+  { title: 'Risk insights', detail: 'Check before your visit', icon: ShieldAlert, accent: 'rose', page: 'risk' },
+  { title: 'Trip replanner', detail: 'Plan your dated activities', icon: Navigation, accent: 'blue', page: 'replan' },
+  { title: 'Emergency guide', detail: 'Find steps for an emergency', icon: BookOpen, accent: 'amber', page: 'guide' },
+  { title: 'RescueMesh', detail: 'Connect nearby without internet', icon: Radio, accent: 'violet', page: 'mesh' },
+  { title: 'Safety beacon', detail: 'Share a refuge location', icon: MapPin, accent: 'teal', page: 'beacon' },
+  { title: 'Safety pack', detail: 'Save for offline use', icon: Bookmark, accent: 'indigo', page: 'pack' },
 ];
 
 const guides: Record<GuideKind, {icon:LucideIcon; lead:string; steps:string[]}> = {
@@ -72,7 +72,7 @@ function FeatureCard({feature, index, open}: {feature:typeof features[number];in
   const Icon = feature.icon;
   return <motion.button type="button" className={`feature-card tint-${feature.accent}`} onClick={open}
     initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} transition={{delay:index*.035,duration:.28}} whileTap={{scale:.96}}>
-    <span className="feature-art" aria-hidden="true"><span className="feature-halo"/><span className="feature-illustration">{feature.art||<Icon size={43} strokeWidth={1.55}/>}</span><span className="feature-corner-icon"><Icon size={15} strokeWidth={2}/></span></span>
+    <span className="feature-art" aria-hidden="true"><span className="feature-halo"/><span className="feature-illustration"><Icon size={43} strokeWidth={1.55}/></span><span className="feature-corner-icon"><Icon size={15} strokeWidth={2}/></span></span>
     <strong>{feature.title}</strong><span className="feature-detail">{feature.detail}</span>
   </motion.button>;
 }
@@ -125,9 +125,9 @@ function SwipeRow({children, label}:{children:ReactNode;label:string}) {
     </div>
   </div>;
 }
-function Carousel({items,onOpen}: {items:{kicker:string;title:string;subtitle:string;icon:LucideIcon;art:string;tint:string;page:Page}[];onOpen:(page:Page)=>void}) {
+function Carousel({items,onOpen}: {items:{kicker:string;title:string;subtitle:string;icon:LucideIcon;tint:string;page:Page}[];onOpen:(page:Page)=>void}) {
   return <SwipeRow label="Featured stories">{items.map(x=>{const Icon=x.icon;return <div className="native-carousel-item" key={x.title}>
-    <button type="button" onClick={()=>onOpen(x.page)} className={`carousel-card carousel-${x.tint}`}><span className="carousel-overline">{x.kicker}</span><span className="carousel-art" aria-hidden="true"><span className="carousel-art-illustration">{x.art||<Icon size={58} strokeWidth={1.35}/>}</span><Icon className="carousel-art-symbol" size={24}/></span><h3>{x.title}</h3><p>{x.subtitle}</p></button>
+    <button type="button" onClick={()=>onOpen(x.page)} className={`carousel-card carousel-${x.tint}`}><span className="carousel-overline">{x.kicker}</span><span className="carousel-art" aria-hidden="true"><span className="carousel-art-illustration"><Icon size={58} strokeWidth={1.35}/></span><Icon className="carousel-art-symbol" size={24}/></span><h3>{x.title}</h3><p>{x.subtitle}</p></button>
   </div>})}</SwipeRow>;
 }
 function AppRow({icon:Icon,title,subtitle,end,onClick,tone='default'}:{icon:LucideIcon;title:string;subtitle?:string;end?:ReactNode;onClick:()=>void;tone?:string}) {
@@ -143,6 +143,7 @@ function Modal({kind,close,person,saveName,navigate,checkDestination}: {kind:Dia
       {kind==='profile'&&<><h2>Edit display name</h2><p>Your display name is saved until you close the app.</p><label className="field-label" htmlFor="profile-name">Display name</label><input className="form-input" id="profile-name" maxLength={32} value={draft} onChange={e=>setDraft(e.target.value)}/><button className="primary-button" type="button" onClick={()=>{saveName(draft.trim()||'Traveler');close()}}>Save changes</button></>}
       {kind==='alerts'&&<><h2>Destination warnings</h2><p>Review saved notices and check the latest information for your destination.</p><SavedAreaWarnings/><button className="primary-button" onClick={checkDestination}>Check latest warnings</button></>}
       {kind==='menu'&&<><h2>Your travel tools</h2><AppRow icon={Navigation} title="My trip plan" subtitle="Compare and approve proposed changes" onClick={()=>navigate('replan')}/><AppRow icon={Bookmark} title="Safety pack" onClick={()=>navigate('pack')}/><AppRow icon={Languages} title="Language settings" onClick={()=>navigate('language')}/><AppRow icon={CircleHelp} title="How to use SafeHaven" onClick={()=>navigate('guide')}/></>}
+      {kind==='settings'&&<><h2>Settings</h2><AppRow icon={Languages} title="Language" subtitle="Choose your guidance language" onClick={()=>navigate('language')}/><AppRow icon={LockKeyhole} title="Privacy & sharing" subtitle="Manage consent and saved information" onClick={()=>navigate('privacy')}/></>}
       {kind==='help'&&<><h2>About SafeHaven</h2><p>Start with Explore to choose a destination and check its weather and reports. Add your activities in Trip replanner, then save contacts and guidance in Safety pack. On Android, open Mesh → Nearby to join the nearby help network without exchanging codes. Participants are unverified. Use SOS to ask connected travelers for help.</p><button className="primary-button" type="button" onClick={close}>Understood</button></>}
     </motion.section>
   </motion.div>}</AnimatePresence>;
@@ -175,13 +176,9 @@ export default function App(){
   const [selectedDestination,setSelectedDestination]=useState<string|null>(null);
   const [destinationMood,setDestinationMood]=useState('All');
   const meshApi=useRescueMesh();
-  const [tripNote,setTripNote]=useSaved('trip-note','');
-  const [noteOpen,setNoteOpen]=useState(false);
-  const [noteSaved,setNoteSaved]=useState(false);
   const [checklist,setChecklist]=useSaved<string[]>('checklist',[]);
   const [showQuickGuide,setShowQuickGuide]=useState(false);
   const [homeGuide,setHomeGuide]=useState<GuideKind>('Flood');
-  const [homeChecklist,setHomeChecklist]=useSaved<string[]>('home-checklist',[]);
   const scrollRef=useRef<HTMLDivElement>(null);
   const lastTop=useRef(0);
   const reduceMotion=useReducedMotion();
@@ -284,21 +281,12 @@ export default function App(){
         <div className="home-guide-inner"><div className="home-guide-types" role="group" aria-label="Safety topic">{(Object.keys(guides) as GuideKind[]).map(k=><button key={k} type="button" className={homeGuide===k?'is-active':''} aria-pressed={homeGuide===k} onClick={()=>setHomeGuide(k)}>{k}</button>)}</div>
         <p>{guides[homeGuide].steps[0]}</p><small>General guidance · verify local authority instructions</small></div>
       </motion.div>}</AnimatePresence>
-      <div className="home-prep"><div><strong>Before you head out</strong><span>{homeChecklist.length} of 3 reviewed</span></div>
-        <div className="home-prep-tasks">{['Check forecast','Save emergency contacts','Share plans with your group'].map(t=><button type="button" key={t} aria-pressed={homeChecklist.includes(t)} className={homeChecklist.includes(t)?'done':''} onClick={()=>setHomeChecklist(old=>old.includes(t)?old.filter(v=>v!==t):[...old,t])}><span>{homeChecklist.includes(t)?<Check size={15}/>:null}</span>{t}</button>)}</div>
-        <p>Your checklist is saved on this device.</p>
-      </div>
-    </section>
-    <section className="home-note-area"><Heading title="Trip note" sub="Keep a reminder handy on this device" right={<button className="section-link" type="button" onClick={()=>setNoteOpen(v=>!v)}>{noteOpen?'Close':'Edit'} <ChevronRight size={15}/></button>}/>
-      <div className="home-note-card"><div className="home-note-head"><span><FileText size={20}/></span><div><strong>{noteSaved&&tripNote?'Your reminder':'A note for later'}</strong><small>Saved on this device</small></div></div>
-        {noteOpen?<><textarea maxLength={220} aria-label="Trip reminder" placeholder="For example: hotel address, bus stop, or who to call" value={tripNote} onChange={e=>{setTripNote(e.target.value);setNoteSaved(false)}} rows={3}/><button className="note-save" type="button" onClick={()=>{setNoteSaved(true);setNoteOpen(false);setToast('Reminder saved on this device')}}><Save size={16}/> Save note</button></>:<button className="note-display" type="button" onClick={()=>setNoteOpen(true)}>{tripNote||'Add a hotel address, contact or meeting point.'}<ArrowRight size={17}/></button>}
-      </div>
     </section>
     <section className="home-section"><Heading title="For your next trip" right={<button className="section-link" onClick={()=>go('explore')}>See all <ChevronRight size={15}/></button>}/>
       <Carousel onOpen={go} items={[
-        {kicker:'DESTINATION CHECK',title:'Before you leave',subtitle:'Review known conditions',icon:MapPin,art:'🌍',tint:'indigo',page:'risk'},
-        {kicker:'YOUR ITINERARY',title:'Plans can change',subtitle:'Compare alternatives',icon:Navigation,art:'🧭',tint:'violet',page:'replan'},
-        {kicker:'STAY IN TOUCH',title:'Keep your group close',subtitle:'Explore offline chat',icon:Radio,art:'📡',tint:'teal',page:'mesh'},
+        {kicker:'DESTINATION CHECK',title:'Before you leave',subtitle:'Review known conditions',icon:MapPin,tint:'indigo',page:'risk'},
+        {kicker:'YOUR ITINERARY',title:'Plans can change',subtitle:'Compare alternatives',icon:Navigation,tint:'violet',page:'replan'},
+        {kicker:'STAY IN TOUCH',title:'Keep your group close',subtitle:'Explore offline chat',icon:Radio,tint:'teal',page:'mesh'},
       ]}/>
 
     </section>
@@ -334,12 +322,12 @@ export default function App(){
   function pack(){return <PackTool initialSection={packSection.current} back={back} notify={setToast} navigate={go} checklist={checklist} toggleChecklist={title=>setChecklist(old=>old.includes(title)?old.filter(x=>x!==title):[...old,title])} nearbyShare={meshApi.available&&meshApi.state.peers.length>0?meshApi.sendCheckIn:undefined}/>;}
 
   function profile(){return <>
-    <BackHeader title="Profile" back={back} action={<IconButton icon={Settings} label="Help and settings" onClick={()=>openDialog('help')}/>}/>
+    <BackHeader title="Profile" back={back} action={<IconButton icon={Settings} label="Profile settings" onClick={()=>openDialog('settings')}/>}/>
     <section className="profile-revamp" aria-label="Your profile">
       <div className="profile-revamp-top">
         <div className="profile-revamp-avatar"><UserRound size={32} strokeWidth={1.5}/></div>
         <div className="profile-revamp-person"><span>YOUR ACCOUNT</span><h2>{name}</h2><p>Guest account</p></div>
-        <button type="button" className="profile-revamp-edit" onClick={()=>openDialog('profile')} aria-label="Edit profile"><Settings size={18}/></button>
+        <button type="button" className="profile-revamp-edit" onClick={()=>openDialog('profile')} aria-label="Edit profile"><Pencil size={18}/></button>
       </div>
       <div className="profile-revamp-divider"/>
       <div className="profile-revamp-bottom"><span><ShieldCheck size={19}/> Your safety essentials, together</span><button type="button" onClick={()=>go('pack')}>View pack <ArrowRight size={16}/></button></div>

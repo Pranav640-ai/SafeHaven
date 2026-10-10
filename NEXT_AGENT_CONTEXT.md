@@ -4,7 +4,7 @@ Start here, then read FINAL_HANDOFF.md, FEATURE_AUDIT.md and MESH_TEST_GUIDE.md.
 
 ## User constraints
 
-Preserve sage/ivory palette, existing fonts, original card/carousel artwork, icons/widgets, static grid background, short green notifications, outline shimmer on every page and animated compact dock. Make only necessary UI changes; do not replace functional screens with old demonstration screens. Never fabricate live alerts, shelters, routes, connected peers, Google login or successful delivery. Keep updates concise and use focused tests, not repeated full-suite runs.
+Preserve sage/ivory palette, existing fonts, fixed styled SVG card/carousel artwork from 6b61d84, icons/widgets, static grid background, short green notifications, outline shimmer on every page and animated compact dock. Make only necessary UI changes; do not replace functional screens with old demonstration screens. Never fabricate live alerts, shelters, routes, connected peers, Google login or successful delivery. Keep updates concise and use focused tests, not repeated full-suite runs.
 
 ## Product journey / current behavior
 
@@ -37,3 +37,9 @@ Use PLAYWRIGHT_CHANNEL=chrome for tests (bundled browser unavailable). Backend: 
 5. Shared Trip and navigation registry, split TravelTools, carefully consolidate old CSS without visual changes. Full feature audit lists partial and absent items.
 
 Final cleanup verification: TypeScript noUnusedLocals/noUnusedParameters passed; production web and Android debug builds passed; APK assets match dist; package installed on 5558/5560. Two focused browser checks passed for default help-mode copy/selection and the separate SOS route. Automatic radio pairing and delivery were not claimed as verified.
+
+Current visual/scope reference: [AGENTS.md](AGENTS.md), [UI_CHECKLIST.md](UI_CHECKLIST.md) and [FEATURE_CHECKLIST.md](FEATURE_CHECKLIST.md). The six Home and three trip-card styled SVG illustrations are fixed; historical emoji artwork must not replace them.
+
+Latest UI decision: two duplicate Home preparation widgets removed (mini-checklist and trip-note editor); Safety pack remains canonical and reads legacy note data when no hotel field exists. The six cards and three For your next trip cards are retained. Profile name edit uses Pencil; gear opens Settings rather than About. Follow the new repository AGENTS.md visual freeze.
+
+Latest validation: three focused browser checks passed for fixed SVG artwork (6 + 3), duplicate removal/legacy note retention, Profile edit/settings, dialog Back/SOS and all Home/core routes. TypeScript strict unused checks, production web build and final Android build passed. APK assets match dist and the package installed on 5558/5560. Physical Mesh/production acceptance gaps remain unchanged.

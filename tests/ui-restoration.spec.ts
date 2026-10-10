@@ -51,3 +51,24 @@ test('Nearby help mode does not require travellers to meet or compare codes',asy
  await expect(page.getByText(/For a known travel partner/)).toBeVisible();
  await expect(page.getByRole('button',{name:'Start Nearby discovery'})).toBeDisabled();
 });
+
+test('Home retains the fixed SVG artwork, removes duplicate preparation and Profile icons match actions',async({page})=>{
+ await page.addInitScript(()=>localStorage.setItem('safehaven:trip-note',JSON.stringify('Legacy meeting point')));
+ await page.goto('/');await page.getByRole('button',{name:'Explore as guest'}).click();
+ await expect(page.locator('.feature-grid>.feature-card')).toHaveCount(6);
+ await expect(page.locator('.feature-illustration>svg')).toHaveCount(6);
+ await expect(page.locator('.carousel-art-illustration>svg')).toHaveCount(3);
+ await expect(page.locator('.home-prep,.home-note-area')).toHaveCount(0);
+ await page.getByRole('button',{name:/Safety pack Save for offline use/}).click();
+ await expect(page.getByLabel('Hotel details and meeting point')).toHaveValue('Legacy meeting point');
+ await page.getByRole('button',{name:'Profile',exact:true}).click();
+ await expect(page.getByRole('button',{name:'Edit profile',exact:true}).locator('svg')).toHaveClass(/lucide-pencil/);
+ await page.getByRole('button',{name:'Edit profile',exact:true}).click();
+ await expect(page.getByRole('heading',{name:'Edit display name'})).toBeVisible();
+ await page.getByRole('button',{name:'Close dialog'}).click();
+ await page.getByRole('button',{name:'Profile settings'}).click();
+ await expect(page.getByRole('heading',{name:'Settings',exact:true})).toBeVisible();
+ await expect(page.getByRole('heading',{name:'About SafeHaven'})).toHaveCount(0);
+ await page.getByRole('dialog').getByRole('button',{name:/Language Choose/}).click();
+ await expect(page.getByRole('heading',{name:'Language settings'})).toBeVisible();
+});

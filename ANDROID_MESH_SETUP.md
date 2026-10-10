@@ -53,3 +53,5 @@ The first six permission names explicitly requested are included (with `BLUETOOT
 - Before merge: add the Kotlin Capacitor plugin bridge, handlers for event/state updates, per-Android-version permission flows, disconnect cleanup and tests on **two physical phones**, then **three phones** for relay.
 
 The UI branch still uses clearly labeled local demo state and does not claim that the mesh module is running.
+
+Current visual/scope reference: [AGENTS.md](AGENTS.md), [UI_CHECKLIST.md](UI_CHECKLIST.md) and [FEATURE_CHECKLIST.md](FEATURE_CHECKLIST.md). The six Home and three trip-card styled SVG illustrations are fixed; historical emoji artwork must not replace them.
