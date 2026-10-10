@@ -205,6 +205,38 @@ class RescueMeshManager(
             "Queued SOS Sent"
         )
     }
+    fun sendGroupStatus(
+        status: String
+    ) {
+    
+        val groupStatus =
+            GroupStatus(
+                userId = deviceName,
+                status = status,
+                timestamp = System.currentTimeMillis()
+            )
+    
+        val json =
+            gson.toJson(groupStatus)
+    
+        val payload =
+            Payload.fromBytes(
+                json.toByteArray()
+            )
+    
+        connectedEndpoints.forEach {
+    
+            connectionsClient.sendPayload(
+                it,
+                payload
+            )
+        }
+    }
+    fun getGroupStatuses():
+            List<GroupStatus> {
+    
+        return GroupStore.getStatuses()
+    }
     fun stopAllConnections() {
 
         connectionsClient.stopAdvertising()
@@ -319,6 +351,30 @@ class RescueMeshManager(
     
         val json =
             String(bytes)
+        try {
+
+        val groupStatus =
+            gson.fromJson(
+                json,
+                GroupStatus::class.java
+            )
+    
+        if (groupStatus.userId.isNotBlank()) {
+    
+            GroupStore.updateStatus(
+                groupStatus
+            )
+    
+            Log.d(
+                TAG,
+                "Group Status Received: ${groupStatus.status}"
+            )
+    
+            return
+        }
+    
+    } catch (_: Exception) {
+    }
     
         try {
     
