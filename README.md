@@ -121,5 +121,5 @@ Source coverage, configured providers and device capabilities determine which on
 ## Submission links
 
 - **Live demo:** [Open Meridian](https://safehaven-production-3da2.up.railway.app)
-- **Video submission:** Link to be added. <!-- Replace this line with the final video URL. -->
+- **Video submission:**   https://drive.google.com/drive/folders/11rSV4GMN5BkwquFdde6Fpu_9oJNwD4kU?usp=drive_link  <!-- Replace this line with the final video URL. -->
 - **Android APK:** [Download Meridian](https://github.com/Pranav640-ai/SafeHaven/raw/refs/heads/ui/downloads/Meridian.apk)
