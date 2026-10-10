@@ -9,13 +9,26 @@ import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.safehaven.rescuemesh.db.RescueMeshDatabase
 import com.safehaven.rescuemesh.db.SOSMessageEntity
+import kotlinx.coroutines.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
+
+var onBeaconsChanged: (() -> Unit)? = null
+var onGroupChanged: (() -> Unit)? = null
+var onPeersChanged: ((Int) -> Unit)? = null
+var onMessageReceived: ((RelayMessage) -> Unit)? = null
+
+private var beaconJob: Job? = null
+private var myBeaconId: String? = null
 
 class RescueMeshManager(
     private val context: Context,
@@ -37,7 +50,7 @@ class RescueMeshManager(
     private val connectedEndpoints: MutableSet<String> = ConcurrentHashMap.newKeySet()
     private val pendingEndpoints: MutableSet<String> = ConcurrentHashMap.newKeySet()
     private val processedMessages: MutableSet<String> = ConcurrentHashMap.newKeySet()
-    private val processedBeacons: MutableSet<String> = ConcurrentHashMap.newKeySet()
+    
     private val processedSOS: MutableSet<String> = ConcurrentHashMap.newKeySet()
 
     /** Set from UI/ViewModel to be notified of SOS messages from other devices. */
