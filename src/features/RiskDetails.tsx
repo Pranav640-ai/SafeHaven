@@ -1,0 +1,28 @@
+import {useEffect,useState,useRef} from 'react';
+import {api, type Place} from '../services/api';
+
+type SourceState={source_name:string;status:string;last_fetched_at?:string;message?:string};
+type Assessment={reported_events?:{id:string;title:string;source:string;url?:string;published_at:string;distance_km:number;status:string}[];assessed_at:string;window:string;limitations:string;summary:{source_statuses:SourceState[];activity_assessments:{risk_score:number|null;risk_category:string;recommended_action:string;uncertainty:{description:string};evidence:{id:string;headline:string;details:string;source_name:string;source_url?:string;verification_status:string;published_at:string}[]}[]}};
+export function RiskDetails({place,date}:{place:Place;date:string}) {
+  const [kind,setKind]=useState('outdoor');
+  const [data,setData]=useState<Assessment|null>(null);
+  const [error,setError]=useState('');
+  const [busy,setBusy]=useState(false);
+  useEffect(()=>{
+    let active=true;setData(null);setError('');setBusy(true);
+    void api<Assessment>('/intelligence/risk/assess',{place,date,kind}).then(value=>{if(active)setData(value)}).catch(()=>{if(active)setError('Detailed risk sources are unavailable. Check the weather and reports below; no safety conclusion can be made.')}).finally(()=>{if(active)setBusy(false)});
+    return()=>{active=false;};
+  },[place.latitude,place.longitude,date,kind]);
+  const row=data?.summary.activity_assessments[0];
+  return <section className="tool-card" aria-label="Detailed activity risk"><h3>Activity risk details</h3><label className="tool-field">Activity to check<select aria-label="Risk activity type" value={kind} onChange={e=>setKind(e.target.value)}><option value="outdoor">Outdoor activity</option><option value="indoor">Indoor activity</option><option value="water">Water activity</option></select></label>{busy&&<p role="status">Checking activity and source coverage…</p>}{error&&<p className="tool-notice">{error}</p>}{row&&<><strong>{row.risk_score===null?'No safety conclusion':row.risk_category.replaceAll('_',' ')+' · model estimate'}</strong><p>{row.recommended_action}</p><p className="tool-muted">{data?.window}</p><p>{row.uncertainty.description}</p><details><summary>Evidence and source coverage</summary>{row.evidence.map(e=><article key={e.id}><h4>{e.headline}</h4><p>{e.details}</p><small>{e.verification_status} · {new Date(e.published_at).toLocaleString()}</small>{e.source_url&&<p><a href={e.source_url} target="_blank" rel="noreferrer">{e.source_name}</a></p>}</article>)}{data?.summary.source_statuses.map(s=><p key={s.source_name}><strong>{s.source_name}</strong> · {s.status}{s.last_fetched_at?' · '+new Date(s.last_fetched_at).toLocaleString():''}</p>)}</details>{data?.reported_events?.map(e=><article key={e.id}><h4>{e.title}</h4><p>{e.status}</p><small>Reported {new Date(e.published_at).toLocaleString()} · event centre {e.distance_km} km away</small>{e.url&&<p><a href={e.url} target="_blank" rel="noreferrer">{e.source}</a></p>}</article>)}<p className="tool-muted">{data?.limitations}</p></>}</section>;
+}
+
+type Candidate={id:string;name:string;category:string;distance_km:number;source_url?:string;ranking_explanation:string;information_gaps:string[]};
+export function NearbyAlternatives({place,onChoose}:{place:Place;onChoose:(name:string,indoor:boolean)=>void}) {
+  const [data,setData]=useState<{candidates:Candidate[];source_status:SourceState;limitations:string}|null>(null);
+  const [error,setError]=useState('');const [busy,setBusy]=useState(false);
+  const request=useRef(0);
+  useEffect(()=>{request.current++;setData(null);setError('');setBusy(false);return()=>{request.current++}},[place.latitude,place.longitude]);
+  const discover=async()=>{const id=++request.current;setBusy(true);setError('');try{const value=await api<{candidates:Candidate[];source_status:SourceState;limitations:string}>(`/intelligence/destinations/nearby?latitude=${place.latitude}&longitude=${place.longitude}&prefer_indoor=true`);if(id===request.current)setData(value)}catch{if(id===request.current)setError('Nearby suggestions are unavailable. Keep your plan and confirm alternatives locally.')}finally{if(id===request.current)setBusy(false)}};
+  return <details className="tool-card"><summary>Find nearby alternatives</summary><p>Look for real places near {place.name}. Choosing one fills the activity draft; it does not change your saved itinerary.</p><button className="secondary-button" disabled={busy} onClick={()=>void discover()}>{busy?'Finding places…':'Find nearby places'}</button>{error&&<p className="tool-notice">{error}</p>}{data&&<><p>{data.limitations}</p><p className="tool-muted">{data.source_status.source_name} · {data.source_status.status}</p>{data.candidates.length===0&&<p>No matching places returned. This does not establish local availability.</p>}{data.candidates.map(c=><article key={c.id}><h4>{c.name}</h4><p>{c.distance_km} km straight-line · {c.ranking_explanation}</p><p className="tool-muted">{c.information_gaps.join(' · ')}</p>{c.source_url&&<a href={c.source_url} target="_blank" rel="noreferrer">Check OpenStreetMap listing</a>}<button className="secondary-button" onClick={()=>onChoose(c.name,c.category.startsWith('indoor_'))}>Use as activity draft</button></article>)}</>}</details>;
+}

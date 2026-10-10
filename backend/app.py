@@ -26,6 +26,8 @@ from pydantic import BaseModel, Field
 
 load_dotenv(Path(__file__).with_name('.env'))
 app = FastAPI(title='Meridian API', version='0.2.0')
+from backend.intelligence.routes import router as intelligence_router
+app.include_router(intelligence_router)
 app.add_middleware(CORSMiddleware, allow_origins=os.getenv('CORS_ORIGINS', 'http://localhost:5173,http://127.0.0.1:5173,https://localhost,http://localhost').split(','), allow_methods=['GET', 'POST', 'DELETE'], allow_headers=['Content-Type', 'Authorization'])
 cache: dict = {}
 request_windows: dict = {}

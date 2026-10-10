@@ -15,3 +15,4 @@ backend/data/
 *.db
 test-results/
 native/google-services.json
+native/google-services*.json

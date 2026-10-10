@@ -45,3 +45,5 @@ Risk/weather/incident/map/route/AI content is source-dependent; unknown or empty
 Tests (PowerShell): `$env:PLAYWRIGHT_CHANNEL='chrome'; npm run test:web`; `.\.venv\Scripts\python.exe -m pytest backend/test_app.py backend/test_safety.py -q`. Use focused subsets for cosmetic changes. [MESH_TEST_GUIDE.md](MESH_TEST_GUIDE.md) covers physical acceptance; [RESCUEMESH_INTEGRATION.md](RESCUEMESH_INTEGRATION.md) describes native wiring. Historical standalone sources/design branches must not replace ui.
 
 The combined UI retains Meridian’s earlier widgets/navigation/animations with the newer Firebase login. Android account-chooser setup and exact signing fingerprints: [GOOGLE_SIGNIN_SETUP.md](GOOGLE_SIGNIN_SETUP.md). Offline Mesh remains accessible as guest.
+
+Risk and nearby-place functionality from the backend branch is now integrated; see [FUNCTIONALITY_INTEGRATION.md](FUNCTIONALITY_INTEGRATION.md) for API routes, user flow and provider requirements.

@@ -29,3 +29,5 @@ Enable Google in Firebase Authentication and add the deployed hostname under aut
 Browser UI/guest checks and compilation are separate from real Google account acceptance. Google login currently identifies the profile; it does not sync saved travel data, validate a Mesh participant identity or grant backend/operator access. Server Firebase ID-token verification and user-scoped storage/roles remain separate work.
 
 References: [Firebase Google Android setup](https://firebase.google.com/docs/auth/android/google-signin) and [Android Credential Manager](https://developer.android.com/identity/sign-in/credential-manager-siwg).
+
+Current Android Google configuration: the updated local Firebase download contains the Android OAuth client matching this APK’s SHA-1. The final APK was rebuilt with that configuration and all packaged web assets match dist. Real account sign-in/cancellation/session persistence still needs phone acceptance; backend token validation and operator roles remain pending. Local Firebase downloads stay ignored by Git.

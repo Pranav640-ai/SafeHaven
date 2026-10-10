@@ -41,7 +41,7 @@ Checked means the stated V1 capability exists in code and has the evidence recor
 ## Release gates - still open
 
 - [ ] Deploy persistent HTTPS API and configure/rebuild online Android API origin.
-- [ ] Live Google account acceptance/native registration plus server token validation/operator roles.
+- [ ] Live Google account acceptance plus server token validation/operator roles (debug native registration configured).
 - [ ] Physical two/three-phone Mesh delivery and abuse/trust acceptance.
 - [ ] Maintained official/directory feeds and reviewed translations.
 - [ ] Real AI/photo/push provider acceptance; first-use Android permission denial/approximate-location tests.
@@ -50,4 +50,7 @@ The item-by-item technical evidence and exact feature locations are in FEATURE_A
 
 Two-phone repair: optional Host/Join point-to-point implementation added alongside the existing automatic cluster network. Physical connectivity and delivery gates above remain unchecked.
 
-Auth integration: Firebase browser popup/session and Android Credential Manager→Firebase token exchange are implemented. Live browser/native account acceptance, Firebase Android registration and backend token/role enforcement remain required. Guest offline Mesh is retained.
+Auth integration: Firebase browser popup/session and Android Credential Manager→Firebase token exchange are implemented. Debug Firebase Android registration is configured; live browser/native account acceptance and backend token/role enforcement remain required. Guest offline Mesh is retained.
+
+- [x] Activity-type/hourly risk evidence, provider coverage and reported-event context from feature/backend integrated into Risk Overview. Prototype estimates only; official/local coverage/calibration gates remain open.
+- [x] Ranked OSM nearby alternative discovery integrated into Trip replanner; selected suggestion fills draft only and keeps saved bookings/approval state. Venue availability/access/safety still require confirmation.
