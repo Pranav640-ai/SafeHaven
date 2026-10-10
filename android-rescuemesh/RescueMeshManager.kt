@@ -10,6 +10,7 @@ import com.safehaven.rescuemesh.db.RescueMeshDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 
 import com.safehaven.rescuemesh.db.SOSMessageEntity
 
@@ -34,6 +35,8 @@ class RescueMeshManager(
 
     private val processedMessages =
         mutableSetOf<String>()
+    private val processedBeacons =
+    mutableSetOf<String>()
 
     fun startAdvertising() {
 
@@ -182,50 +185,35 @@ class RescueMeshManager(
             "SOS Forwarded"
         )
     }
-    private fun forwardSOS(
-        sos: SOSMessage
-    ) {
+
+   private fun sendQueuedSOS() {
+
+        CoroutineScope(Dispatchers.IO).launch {
     
-        val json =
-            gson.toJson(sos)
+            val queuedSOS =
+                database.sosDao().getAllSOS()
     
-        val payload =
-            Payload.fromBytes(
-                json.toByteArray()
-            )
+            queuedSOS.forEach {
     
-        connectedEndpoints.forEach {
+                val sos =
+                    SOSMessage(
+                        id = it.id,
+                        senderId = it.senderId,
+                        emergencyText =
+                            it.emergencyText,
+                        timestamp = it.timestamp,
+                        status = it.status
+                    )
     
-            connectionsClient.sendPayload(
-                it,
-                payload
-            )
+                forwardSOS(sos)
+    
+                database
+                    .sosDao()
+                    .deleteSOS(it)
+            }
         }
-    
-        sos.status = "FORWARDED"
-    
-        Log.d(
-            TAG,
-            "SOS Forwarded"
-        )
     }
-    private fun sendQueuedSOS() {
-    
-        val queue =
-            SOSQueue.getAllSOS()
-    
-        queue.toList().forEach {
-    
-            forwardSOS(it)
-    
-            SOSQueue.removeSOS(it)
-        }
-    
-        Log.d(
-            TAG,
-            "Queued SOS Sent"
-        )
-    }
+
     fun sendGroupStatus(
         status: String
     ) {
@@ -270,6 +258,82 @@ class RescueMeshManager(
     
         return SafetyPackStore.getPack()
     }
+    private fun handleBeacon(
+        beacon: Beacon
+    ) {
+    
+        if (
+            processedBeacons.contains(
+                beacon.beaconId
+            )
+        ) {
+            return
+        }
+    
+        processedBeacons.add(
+            beacon.beaconId
+        )
+    
+        val age =
+            System.currentTimeMillis() -
+            beacon.timestamp
+    
+        if (
+            age >
+            30 * 60 * 1000
+        ) {
+    
+            Log.d(
+                TAG,
+                "Beacon Expired"
+            )
+    
+            return
+        }
+    
+        BeaconStore.addBeacon(
+            beacon
+        )
+    
+        relayBeacon(
+            beacon
+        )
+    
+        Log.d(
+            TAG,
+            "Beacon Received"
+        )
+    }
+    private fun relayBeacon(
+        beacon: Beacon
+    ) {
+    
+        val json =
+            gson.toJson(beacon)
+    
+        val payload =
+            Payload.fromBytes(
+                json.toByteArray()
+            )
+    
+        connectedEndpoints.forEach {
+    
+            connectionsClient.sendPayload(
+                it,
+                payload
+            )
+        }
+    
+        Log.d(
+            TAG,
+            "Beacon Relayed"
+        )
+    }
+    fun getNearbyBeacons():
+        List<Beacon> {
+    
+        return BeaconStore.getAllBeacons()
+    }
     fun stopAllConnections() {
 
         connectionsClient.stopAdvertising()
@@ -307,7 +371,92 @@ class RescueMeshManager(
                 )
             }
         }
-
+        private fun relayMessage(
+            msg: RelayMessage
+        ) {
+        
+            val json =
+                gson.toJson(msg)
+        
+            val payload =
+                Payload.fromBytes(
+                    json.toByteArray()
+                )
+        
+            connectedEndpoints.forEach {
+        
+                connectionsClient.sendPayload(
+                    it,
+                    payload
+                )
+            }
+        }
+        fun broadcastBeacon(
+            latitude: Double,
+            longitude: Double,
+            capacity: Int,
+            message: String
+        ) {
+        
+            val beacon =
+                Beacon(
+                    beaconId = UUID.randomUUID().toString(),
+                    ownerId = deviceName,
+                    latitude = latitude,
+                    longitude = longitude,
+                    timestamp = System.currentTimeMillis(),
+                    capacity = capacity,
+                    message = message,
+                    isVerified = false
+                )
+        
+            relayBeacon(beacon)
+        }
+    private fun handleRelayMessage(
+        msg: RelayMessage
+    ) {
+    
+        if (
+            processedMessages.contains(
+                msg.messageId
+            )
+        ) {
+            return
+        }
+    
+        processedMessages.add(
+            msg.messageId
+        )
+    
+        if (
+            msg.receiverId ==
+            deviceName
+        ) {
+    
+            Log.d(
+                TAG,
+                "Relay Delivered"
+            )
+    
+            return
+        }
+    
+        if (msg.ttl <= 0) {
+    
+            Log.d(
+                TAG,
+                "TTL Expired"
+            )
+    
+            return
+        }
+    
+        relayMessage(
+            msg.copy(
+                ttl = msg.ttl - 1
+            )
+        )
+    }
     private val connectionLifecycleCallback =
         object : ConnectionLifecycleCallback() {
 
@@ -385,6 +534,26 @@ class RescueMeshManager(
         val json =
             String(bytes)
         try {
+        
+            val beacon =
+                gson.fromJson(
+                    json,
+                    Beacon::class.java
+                )
+        
+            if (beacon.beaconId.isNotBlank()) {
+        
+                handleBeacon(
+                    beacon
+                )
+        
+                return
+            }
+        
+        } catch (_: Exception) {
+        }
+
+        try {
 
         val groupStatus =
             gson.fromJson(
@@ -449,3 +618,45 @@ class RescueMeshManager(
             "Normal Message: $json"
         )
     }
+         override fun onPayloadTransferUpdate(
+    endpointId: String,
+    update: PayloadTransferUpdate
+) {
+
+    when (update.status) {
+
+        PayloadTransferUpdate.Status.IN_PROGRESS -> {
+
+            Log.d(
+                TAG,
+                "Transfer Progress: ${update.bytesTransferred}"
+            )
+        }
+
+        PayloadTransferUpdate.Status.SUCCESS -> {
+
+            Log.d(
+                TAG,
+                "Transfer Successful"
+            )
+        }
+
+        PayloadTransferUpdate.Status.FAILURE -> {
+
+            Log.d(
+                TAG,
+                "Transfer Failed"
+            )
+        }
+
+        PayloadTransferUpdate.Status.CANCELED -> {
+
+            Log.d(
+                TAG,
+                "Transfer Cancelled"
+            )
+        }
+    }
+}
+}
+}
