@@ -103,3 +103,6 @@ patch(main, source => {
   return source.replace('import com.safehaven.rescuemesh.RescueMeshPlugin;','import com.safehaven.rescuemesh.RescueMeshPlugin;\nimport com.safehaven.rescuemesh.SafetySpeechPlugin;').replace('registerPlugin(RescueMeshPlugin.class);','registerPlugin(RescueMeshPlugin.class);\n        registerPlugin(SafetySpeechPlugin.class);');
 });
 patch(manifest, source=>source.includes('android.intent.action.TTS_SERVICE')?source:source.replace('<application','<queries><intent><action android:name="android.intent.action.TTS_SERVICE" /></intent></queries>\n    <application'));
+
+// Keep the launcher icon reproducible when Capacitor recreates the Android project.
+fs.cpSync(path.join(root, 'native/resources'), path.join(android, 'app/src/main/res'), { recursive: true });
