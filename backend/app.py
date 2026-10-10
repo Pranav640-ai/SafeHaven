@@ -25,7 +25,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 load_dotenv(Path(__file__).with_name('.env'))
-app = FastAPI(title='SafeHaven API', version='0.2.0')
+app = FastAPI(title='Meridian API', version='0.2.0')
 app.add_middleware(CORSMiddleware, allow_origins=os.getenv('CORS_ORIGINS', 'http://localhost:5173,http://127.0.0.1:5173,https://localhost,http://localhost').split(','), allow_methods=['GET', 'POST', 'DELETE'], allow_headers=['Content-Type', 'Authorization'])
 cache: dict = {}
 request_windows: dict = {}
@@ -60,7 +60,7 @@ async def fetch(url, params=None, xml=False):
         return cache[key][1]
     try:
         async with httpx.AsyncClient(timeout=20, follow_redirects=True, verify=ssl.create_default_context()) as client:
-            response = await client.get(url, params=params, headers={'User-Agent': 'SafeHaven/0.2 educational travel prototype'})
+            response = await client.get(url, params=params, headers={'User-Agent': 'Meridian/0.2 educational travel prototype'})
             response.raise_for_status()
             value = response.text if xml else response.json()
             if isinstance(value, dict):
@@ -438,5 +438,5 @@ if DIST.exists():
         if candidate.is_relative_to(DIST.resolve()) and candidate.is_file():
             return FileResponse(candidate)
         if not (DIST / 'index.html').is_file():
-            return JSONResponse({'detail':'SafeHaven is temporarily unavailable. Please retry shortly.'},status_code=503)
+            return JSONResponse({'detail':'Meridian is temporarily unavailable. Please retry shortly.'},status_code=503)
         return FileResponse(DIST / 'index.html')

@@ -1,4 +1,4 @@
-# SafeHaven repository instructions
+# Meridian repository instructions
 
 Read NEXT_AGENT_CONTEXT.md, UI_CHECKLIST.md, FEATURE_CHECKLIST.md and FINAL_HANDOFF.md before changes. Canonical branch is ui; old design branches and historical Kotlin handoffs are references.
 

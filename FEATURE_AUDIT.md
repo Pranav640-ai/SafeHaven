@@ -1,4 +1,4 @@
-# SafeHaven feature audit — 10 October 2026
+# Meridian feature audit — 10 October 2026
 
 Read with FINAL_HANDOFF.md. Implemented means code exists, not proof of production readiness. No official coverage, rescue dispatch or safe route guarantee is implied. Both pasted feature lists are covered below.
 

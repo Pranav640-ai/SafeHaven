@@ -1,4 +1,4 @@
-# SafeHaven complete handoff — 10 October 2026
+# Meridian complete handoff — 10 October 2026
 
 Canonical branch: `ui`. Read FEATURE_AUDIT.md for every item from both supplied feature lists, USER_GUIDE.md for the user journey, and MESH_TEST_GUIDE.md for radio acceptance. This replaces earlier handoff assumptions about in-memory pending Mesh queues. Do not merge old design backups or the unrelated historical Kotlin app into this branch.
 
@@ -107,7 +107,7 @@ The new destination-required/scenario UI check passed using fixtures; the real a
 
 ## Current native test evidence
 
-ADB showed four emulators. 5554/5556 were blocked by Android launcher ANRs, unrelated to SafeHaven. The final APK installed on responsive 5558/5560 (API 35); real native bridge initialization, disconnected SOS queue/cancel and Android hardware Back from SOS to the previous Mesh screen passed. An initial discovery attempt received mismatched requests/STATUS_ENDPOINT_UNKNOWN with unrelated peers visible. The harness now selects named counterpart requests, never blindly the first request. Final pairing result is recorded below. These results do not validate encrypted queue restoration after force-stop, compass, native speech, physical range or multi-hop.
+ADB showed four emulators. 5554/5556 were blocked by Android launcher ANRs, unrelated to Meridian. The final APK installed on responsive 5558/5560 (API 35); real native bridge initialization, disconnected SOS queue/cancel and Android hardware Back from SOS to the previous Mesh screen passed. An initial discovery attempt received mismatched requests/STATUS_ENDPOINT_UNKNOWN with unrelated peers visible. The harness now selects named counterpart requests, never blindly the first request. Final pairing result is recorded below. These results do not validate encrypted queue restoration after force-stop, compass, native speech, physical range or multi-hop.
 
 Final selected-pair attempt: timed out after 60 seconds with `8012: STATUS_ENDPOINT_IO_ERROR` on 5558/5560. Pairing, bidirectional chat ACK and connected SOS ACK did NOT pass. Preserve `test-results/mesh-emulators/results.json` and failure screenshots locally when diagnosing. Next test on two real Play-services phones, isolate other discoverers and capture Nearby/Play services logs. Investigate symmetric request initiation only if the isolated physical test reproduces it; emulator I/O errors alone do not prove that cause. Do not claim Mesh connectivity complete.
 
@@ -136,3 +136,7 @@ Current visual/scope reference: [AGENTS.md](AGENTS.md), [UI_CHECKLIST.md](UI_CHE
 The preferred six Home and three trip-card styled SVG illustrations were restored from the 6b61d84 design, with fonts/frames/animations untouched. Historical emoji replacements and unused art properties were removed. Only the separate Home mini-checklist and trip-note editor were removed as duplicates of Safety pack; old notes supply the pack default when no hotel field exists. Core cards, carousel and useful quick actions remain fixed. Profile Pencil edits name; gear opens Settings with real language/privacy actions. UI_CHECKLIST.md records each keep/remove decision and FEATURE_CHECKLIST.md checks all five core implementations and 25 proposed additions, without marking external/field gaps complete.
 
 Latest validation: three focused browser checks passed for fixed SVG artwork (6 + 3), duplicate removal/legacy note retention, Profile edit/settings, dialog Back/SOS and all Home/core routes. TypeScript strict unused checks, production web build and final Android build passed. APK assets match dist and the package installed on 5558/5560. Physical Mesh/production acceptance gaps remain unchanged.
+
+## Meridian rename
+
+The product name is now Meridian throughout visible web/Android copy, installation metadata, notifications and current documentation. Web build and focused branding browser checks passed; Android debug build and packaged launcher/manifest/assets checks passed. Compatibility identifiers (com.safehaven.ai, native package and Nearby service, saved-data keys and database filenames) remain unchanged to preserve upgrades and data. GitHub repository and existing local folder remain SafeHaven. The shield-check app icon, layouts, widgets, fonts and animations are unchanged.

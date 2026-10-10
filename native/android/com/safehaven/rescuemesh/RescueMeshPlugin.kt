@@ -107,7 +107,7 @@ class RescueMeshPlugin : Plugin() {
     }
     private fun launch(call: PluginCall) {
         try {
-            mesh.start(call.getString("deviceName") ?: "SafeHaven", call.getBoolean("allowUnverified", false) ?: false)
+            mesh.start(call.getString("deviceName") ?: "Meridian", call.getBoolean("allowUnverified", false) ?: false)
             call.resolve(mesh.state())
         } catch (e: Exception) { call.reject(e.message ?: "Cannot start Nearby", null, e) }
     }

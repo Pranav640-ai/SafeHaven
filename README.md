@@ -1,4 +1,4 @@
-# SafeHaven AI
+# Meridian
 
 Canonical branch: ui. React/Vite travel-safety interface, FastAPI services and a Capacitor Android Nearby bridge. No account is required for guest preparation. Google sign-in and production hosting remain outstanding.
 

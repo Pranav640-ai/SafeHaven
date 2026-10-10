@@ -212,7 +212,7 @@ test('all home feature routes, destination links and profile shortcuts open thei
         await expect(page.getByRole('heading', { name: 'Profile', exact: true })).toBeVisible();
     }
     await page.getByRole('button', { name: 'Help & information', exact: true }).click();
-    await expect(page.getByRole('heading', { name: 'About SafeHaven' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'About Meridian' })).toBeVisible();
     await page.keyboard.press('Escape');
     await expect(page.getByRole('dialog')).toHaveCount(0);
     await page.getByRole('button', { name: 'Back to welcome screen', exact: true }).click();

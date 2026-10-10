@@ -661,7 +661,7 @@ button,input,select,textarea{font-family:'Nunito',ui-sans-serif,system-ui,sans-s
 .mesh-v6-open:hover{background:#e4e5da}
 
 /* Visual refinement preserved from v7 (merged without changing stylesheet order). */
-/* SafeHaven final interface pass — consistent type, sapphire porcelain and restrained glass.
+/* Meridian final interface pass — consistent type, sapphire porcelain and restrained glass.
    Components underneath remain reusable React + Lucide + Motion primitives. */
 :root{
   font-family:'Nunito',ui-sans-serif,system-ui,sans-serif;

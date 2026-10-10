@@ -12,7 +12,7 @@ export default defineConfig(({mode})=>{
     injectRegister: null,
     includeAssets: ['app-icon.svg','app-icon-192.png','app-icon-512.png'],
     manifest: {
-      name: 'SafeHaven AI', short_name: 'SafeHaven', description: 'Travel planning and saved safety essentials',
+      name: 'Meridian', short_name: 'Meridian', description: 'Travel planning and saved safety essentials',
       theme_color: '#306b58', background_color: '#eef1e6', display: 'standalone', start_url: '/',
       icons: [{src:'/app-icon-192.png',sizes:'192x192',type:'image/png',purpose:'any'},{src:'/app-icon-512.png',sizes:'512x512',type:'image/png',purpose:'any'},{src:'/app-icon.svg',sizes:'any',type:'image/svg+xml',purpose:'any'}],
     },

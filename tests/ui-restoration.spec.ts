@@ -68,7 +68,7 @@ test('Home retains the fixed SVG artwork, removes duplicate preparation and Prof
  await page.getByRole('button',{name:'Close dialog'}).click();
  await page.getByRole('button',{name:'Profile settings'}).click();
  await expect(page.getByRole('heading',{name:'Settings',exact:true})).toBeVisible();
- await expect(page.getByRole('heading',{name:'About SafeHaven'})).toHaveCount(0);
+ await expect(page.getByRole('heading',{name:'About Meridian'})).toHaveCount(0);
  await page.getByRole('dialog').getByRole('button',{name:/Language Choose/}).click();
  await expect(page.getByRole('heading',{name:'Language settings'})).toBeVisible();
 });

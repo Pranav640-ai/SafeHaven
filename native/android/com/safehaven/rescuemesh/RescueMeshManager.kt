@@ -38,7 +38,7 @@ class RescueMeshManager(
     private var queueError: String? = null
     private val beaconStore = linkedMapOf<String, JSONObject>()
     private var ownBeaconId: String? = null
-    private var name: String = "SafeHaven"
+    private var name: String = "Meridian"
     private var identity: String = UUID.randomUUID().toString()
     private var running = false
     private var advertising = false
@@ -114,7 +114,7 @@ class RescueMeshManager(
 
     fun start(deviceName: String, helpNetwork: Boolean = false) {
         queueError?.let { event("error", JSObject().put("message", it)) }
-        name = deviceName.trim().take(32).ifEmpty { "SafeHaven" }
+        name = deviceName.trim().take(32).ifEmpty { "Meridian" }
         if (running) { update(); return }
         allowUnverified = helpNetwork
         running = true

@@ -106,3 +106,9 @@ patch(manifest, source=>source.includes('android.intent.action.TTS_SERVICE')?sou
 
 // Keep the launcher icon reproducible when Capacitor recreates the Android project.
 fs.cpSync(path.join(root, 'native/resources'), path.join(android, 'app/src/main/res'), { recursive: true });
+
+// Capacitor sync does not rename labels in an already-created Android project.
+const appName = JSON.parse(fs.readFileSync(path.join(android, 'app/src/main/assets/capacitor.config.json'), 'utf8')).appName;
+const escapedAppName = appName.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+patch(path.join(android, 'app/src/main/res/values/strings.xml'), source =>
+  source.replace(/(<string name="(?:app_name|title_activity_main)">)[\s\S]*?(<\/string>)/g, (_match, start, end) => `${start}${escapedAppName}${end}`));

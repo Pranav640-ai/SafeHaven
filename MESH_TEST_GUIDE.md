@@ -1,4 +1,4 @@
-# SafeHaven final mesh test guide
+# Meridian final mesh test guide
 
 Use the `ui` branch and the generated `android/` project. Historical Kotlin snippets in `ANDROID_MESH_SETUP.md` are not the current app.
 
@@ -33,7 +33,7 @@ $meshAdb='C:\Users\asus\AppData\Local\Android\Sdk\platform-tools\adb.exe'
 
 ## 2. Pair A and B in known-partner mode
 
-1. Start SafeHaven on both, choose **Explore as guest**, then **Mesh → Nearby**.
+1. Start Meridian on both, choose **Explore as guest**, then **Mesh → Nearby**.
 2. Select **Pair with a known traveller** on both devices. While stopped, set the visible device names to `TEST A` and `TEST B`.
 3. Turn Bluetooth and Wi-Fi radios on. On older Android versions also turn on system Location. Keep both apps in the foreground, devices unlocked and initially within 1–2 metres.
 4. Tap **Start Nearby discovery** on both. Grant the requested Nearby/Bluetooth permissions. Android 12 may also request location; beacon publishing requests location separately.
@@ -69,7 +69,7 @@ Only use messages clearly prefixed `TEST — no emergency`.
 5. Tap **Cancel pending SOS**. Pass: count becomes 0 and status becomes **Cancelled — not sent**. Pair again: B must not receive that cancelled test.
 6. Disconnect again, queue a different test, then start discovery on A and B and pair. Pass: the queued count clears when it is offered, B receives the text, and only a returned acknowledgement changes its status to acknowledged.
 7. Queue another test with no peers and tap **Stop discovery**. Pass: the queue clears and must not transmit on a later restart.
-8. Queue a test and force-stop A from Android Settings → Apps → SafeHaven → Force stop. Reopen. Expected current limitation: the queue is lost. Swiping a task away does not always kill its process, so use Force stop for this check. Chat and beacon state are also in memory. Durable background delivery has not been implemented.
+8. Queue a test and force-stop A from Android Settings → Apps → Meridian → Force stop. Reopen. Expected current limitation: the queue is lost. Swiping a task away does not always kill its process, so use Force stop for this check. Chat and beacon state are also in memory. Durable background delivery has not been implemented.
 
 ## 6. Beacons and permission denial
 
@@ -115,7 +115,7 @@ Record: APK commit/build date, device models/API levels, physical vs emulator, e
 - Android required message: you opened the website, not the installed APK.
 - Blank app / cannot connect to 10.0.2.2: it is still a live preview build. Run normal `npm run android:sync`, rebuild and reinstall.
 - `MISSING_PERMISSION_ACCESS_WIFI_STATE`: run current `npm run android:sync`, rebuild and reinstall. The current installer repairs an older manifest that limited Wi-Fi state permissions to API 31; the bundled Nearby SDK needs them on Android 15 too.
-- Permission error: Settings → Apps → SafeHaven → Permissions; enable the requested Nearby devices/Bluetooth/location permissions. Then stop/restart discovery. Nearby requires the permissions appropriate to the device's Android version.
+- Permission error: Settings → Apps → Meridian → Permissions; enable the requested Nearby devices/Bluetooth/location permissions. Then stop/restart discovery. Nearby requires the permissions appropriate to the device's Android version.
 - No discovery: verify same APK/service, Google Play services, radios, required system Location, foreground apps and matching supported emulator networking settings. Restart discovery on both before escalating.
 - Acknowledgement missing: inspect the recipient first, confirm pairing and link state, and capture the error. Offered is not confirmed delivery.
 - Lost queued SOS after Force stop: expected in-memory limitation.

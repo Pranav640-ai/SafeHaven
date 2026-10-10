@@ -1,4 +1,4 @@
-# Using SafeHaven
+# Using Meridian
 
 1. Enter as guest. Your preparation stays on this device.
 2. Planning a visit? Home → Check a destination → search/select → choose travel date → review Weather, Reports and Map. Save a briefing. Explore tiles open their named places.

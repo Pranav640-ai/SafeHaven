@@ -121,7 +121,7 @@ export async function api<T>(path: string, body?: unknown, token?: string, metho
             throw new Error(message);
         }
         if (!response.headers.get('content-type')?.includes('application/json'))
-            throw new Error('SafeHaven service is unavailable. Please try again when connected.');
+            throw new Error('Meridian service is unavailable. Please try again when connected.');
         return await response.json() as T;
     }
     catch (e) {

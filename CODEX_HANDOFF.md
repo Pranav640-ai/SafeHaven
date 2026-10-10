@@ -2,7 +2,7 @@
 
 For the current 10 October 2026 implementation and measured results use [FINAL_HANDOFF.md](FINAL_HANDOFF.md) and [FEATURE_AUDIT.md](FEATURE_AUDIT.md). Details below may describe an earlier version.
 
-# Codex engineering handoff — SafeHaven AI
+# Codex engineering handoff — Meridian
 
 **As of 2026-10-10.** This file is an actionable handoff, not a claim of a completed or field-proven emergency system.
 
@@ -35,7 +35,7 @@ Do not build a separate RescueMesh APK. No fabricated live weather/incident/news
 
 ```bash
 git clone -b ui https://github.com/Pranav640-ai/SafeHaven.git
-cd SafeHaven
+cd Meridian
 npm install
 npm run dev
 npm run build

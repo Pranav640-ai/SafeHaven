@@ -1,4 +1,4 @@
-# SafeHaven takeover context - current state
+# Meridian takeover context - current state
 
 Start here, then read FINAL_HANDOFF.md, FEATURE_AUDIT.md and MESH_TEST_GUIDE.md. Canonical branch ui, repository https://github.com/Pranav640-ai/SafeHaven. Recent commits before this final cleanup: 6b61d84 safety implementation, 811bf0d visual restoration/approval/location fix. Use git log for the newest cleanup commit. Old CODEX_HANDOFF.md and older design branches are historical.
 
@@ -43,3 +43,5 @@ Current visual/scope reference: [AGENTS.md](AGENTS.md), [UI_CHECKLIST.md](UI_CHE
 Latest UI decision: two duplicate Home preparation widgets removed (mini-checklist and trip-note editor); Safety pack remains canonical and reads legacy note data when no hotel field exists. The six cards and three For your next trip cards are retained. Profile name edit uses Pencil; gear opens Settings rather than About. Follow the new repository AGENTS.md visual freeze.
 
 Latest validation: three focused browser checks passed for fixed SVG artwork (6 + 3), duplicate removal/legacy note retention, Profile edit/settings, dialog Back/SOS and all Home/core routes. TypeScript strict unused checks, production web build and final Android build passed. APK assets match dist and the package installed on 5558/5560. Physical Mesh/production acceptance gaps remain unchanged.
+
+Product rename: the visible name is Meridian (including Android launcher, PWA, notifications and API messages). Existing com.safehaven.ai / com.safehaven.rescuemesh identifiers, saved-data keys, database filenames and GitHub/workspace paths intentionally remain compatible. Do not rename those without a migration. App icon remains the licensed Lucide shield-check; native/resources is copied by android:sync.

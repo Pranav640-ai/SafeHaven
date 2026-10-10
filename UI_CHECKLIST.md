@@ -1,4 +1,4 @@
-# SafeHaven visible-scope checklist
+# Meridian visible-scope checklist
 
 Current decision audit. Checked items have been inspected in code; automation evidence is recorded in FINAL_HANDOFF.md. This is a UI inventory, not a claim of field-proven disaster safety. Fixed artwork must not be replaced again; see AGENTS.md.
 

@@ -1,5 +1,5 @@
 """Prepare local publisher/push keys without printing or committing secrets.
-Run from the repository root. These keys belong to SafeHaven, not an authority.
+Run from the repository root. These keys belong to Meridian, not an authority.
 """
 import base64
 import secrets
@@ -24,7 +24,7 @@ if not values.get('VAPID_PRIVATE_KEY'):
     updates['VAPID_PUBLIC_KEY']=base64.urlsafe_b64encode(private.public_key().public_bytes(serialization.Encoding.X962,serialization.PublicFormat.UncompressedPoint)).decode().rstrip('=')
 if not values.get('VAPID_SUBJECT'):updates['VAPID_SUBJECT']='https://github.com/Pranav640-ai/SafeHaven'
 if updates:
-    with env.open('a',encoding='utf-8') as f:f.write('\n# Local SafeHaven publisher configuration\n'+''.join(f'{k}={v}\n' for k,v in updates.items()))
+    with env.open('a',encoding='utf-8') as f:f.write('\n# Local Meridian publisher configuration\n'+''.join(f'{k}={v}\n' for k,v in updates.items()))
 public=base64.b64encode(key.public_key().public_bytes(serialization.Encoding.Raw,serialization.PublicFormat.Raw)).decode()
 frontend=root/'.env.production'
 existing=dotenv_values(frontend)

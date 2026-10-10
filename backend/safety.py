@@ -364,7 +364,7 @@ async def photo(data: Photo):
     finally:
         await client.aio.aclose()
     return {**result.model_dump(), 'trust':'Model Estimate', 'assessed_at':clock().isoformat(),
-            'limitations':'Preliminary visual observations only. No visible obstruction does not establish passability. Photos can be old or miss hazards outside the frame. Do not enter floodwater. The photo is not stored by SafeHaven.'}
+            'limitations':'Preliminary visual observations only. No visible obstruction does not establish passability. Photos can be old or miss hazards outside the frame. Do not enter floodwater. The photo is not stored by Meridian.'}
 
 
 class Scenario(BaseModel):
