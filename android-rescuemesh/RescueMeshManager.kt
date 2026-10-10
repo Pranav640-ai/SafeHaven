@@ -81,14 +81,14 @@ class RescueMeshManager(
     }
 
     fun stopAllConnections() {
+        beaconJob?.cancel()
         connectionsClient.stopAdvertising()
         connectionsClient.stopDiscovery()
         connectionsClient.stopAllEndpoints()
         connectedEndpoints.clear()
         pendingEndpoints.clear()
-        scope.cancel()
+        scope.coroutineContext.cancelChildren()
     }
-
     // -------------------------------------------------------------- Sending
 
     /** Sends to every connected endpoint except [exclude]. */
@@ -169,53 +169,80 @@ class RescueMeshManager(
         )
         broadcast(gson.toJson(groupStatus))
     }
+    // ADJUST the constructor arguments to match YOUR RelayMessage.kt
+    fun sendText(receiverId: String, text: String, ttl: Int = 5) {
+        sendRelayMessage(
+            RelayMessage(
+                messageId = UUID.randomUUID().toString(),
+                senderId = deviceName,
+                receiverId = receiverId,
+                text = text,
+                timestamp = System.currentTimeMillis(),
+                ttl = ttl
+            )
+        )
+    }
 
     fun getGroupStatuses(): List<GroupStatus> = GroupStore.getStatuses()
 
-    fun saveSafetyPack(pack: SafetyPack) = SafetyPackStore.savePack(pack)
-
-    fun getSafetyPack(): SafetyPack? = SafetyPackStore.getPack()
+    fun sendGroupStatus(status: String) {
+        val gs = GroupStatus(deviceName, status, System.currentTimeMillis())
+        GroupStore.updateStatus(gs)          // show my own status locally too
+        onGroupChanged?.invoke()
+        broadcast(gson.toJson(gs))
+    }
 
     // -------------------------------------------------------------- Beacons
 
-    fun broadcastBeacon(
-        latitude: Double,
-        longitude: Double,
-        capacity: Int,
-        message: String
+    // Owner keeps the beacon alive: re-publishes every 60 s with a fresh timestamp
+// (same beaconId, newer timestamp => receivers accept it and relay it again).
+    fun activateBeacon(
+        latitude: Double, longitude: Double, capacity: Int, message: String,
+        shelter: Boolean, food: Boolean, medical: Boolean
     ) {
-        val beacon = Beacon(
-            beaconId = UUID.randomUUID().toString(),
-            ownerId = deviceName,
-            latitude = latitude,
-            longitude = longitude,
-            timestamp = System.currentTimeMillis(),
-            capacity = capacity,
-            message = message,
-            isVerified = false
-        )
-        processedBeacons.add(beacon.beaconId) // don't re-handle our own beacon
-        BeaconStore.addBeacon(beacon)         // show it locally too
-        relayBeacon(beacon)
-    }
-
-    private fun handleBeacon(beacon: Beacon, fromEndpoint: String) {
-        if (!processedBeacons.add(beacon.beaconId)) return // already seen
-
-        val age = System.currentTimeMillis() - beacon.timestamp
-        if (age > BEACON_TTL_MS) {
-            Log.d(TAG, "Beacon Expired")
-            return
+        val id = myBeaconId ?: UUID.randomUUID().toString().also { myBeaconId = it }
+        beaconJob?.cancel()
+        beaconJob = scope.launch {
+            val stopAt = System.currentTimeMillis() + BeaconStore.EXPIRY_MS
+            while (isActive && System.currentTimeMillis() < stopAt) {
+                publishBeacon(
+                    Beacon(
+                        beaconId = id, ownerId = deviceName,
+                        latitude = latitude, longitude = longitude,
+                        timestamp = System.currentTimeMillis(),
+                        capacity = capacity, message = BeaconSafety.sanitize(message),
+                        isVerified = false, shelter = shelter, food = food, medical = medical
+                    )
+                )
+                delay(60_000)
+            }
         }
-
-        BeaconStore.addBeacon(beacon)
-        relayBeacon(beacon, fromEndpoint)
-        Log.d(TAG, "Beacon Received")
     }
-
-    private fun relayBeacon(beacon: Beacon, exclude: String? = null) {
-        broadcast(gson.toJson(beacon), exclude)
-        Log.d(TAG, "Beacon Relayed")
+    
+    fun deactivateBeacon() {
+        beaconJob?.cancel()
+        val id = myBeaconId ?: return
+        // tombstone: tells every phone to drop it
+        publishBeacon(
+            Beacon(
+                beaconId = id, ownerId = deviceName, latitude = 0.0, longitude = 0.0,
+                timestamp = System.currentTimeMillis(), deactivated = true
+            )
+        )
+        myBeaconId = null
+    }
+    
+    private fun publishBeacon(beacon: Beacon) {
+        BeaconStore.addBeacon(beacon)
+        onBeaconsChanged?.invoke()
+        broadcast(gson.toJson(beacon))
+    }
+    
+    private fun handleBeacon(beacon: Beacon, from: String) {
+        if (System.currentTimeMillis() - beacon.timestamp > BeaconStore.EXPIRY_MS) return
+        if (!BeaconStore.addBeacon(beacon)) return          // already have it -> stop the loop
+        onBeaconsChanged?.invoke()
+        broadcast(gson.toJson(beacon), from)                // relay to everyone except the sender
     }
 
     fun getNearbyBeacons(): List<Beacon> = BeaconStore.getAllBeacons()
@@ -223,18 +250,23 @@ class RescueMeshManager(
     // ---------------------------------------------------------- Relay / SOS
 
     private fun handleRelayMessage(msg: RelayMessage, fromEndpoint: String) {
-        if (!processedMessages.add(msg.messageId)) return // already seen
-
-        if (msg.receiverId == deviceName) {
+        if (!processedMessages.add(msg.messageId)) return   // already seen
+    
+        val forMe = msg.receiverId == deviceName
+        val broadcast = msg.receiverId == "*"
+    
+        if (forMe || broadcast) {
+            onMessageReceived?.invoke(msg)   // NEW: pushes it to React via the plugin
             Log.d(TAG, "Relay Delivered")
-            return
+            if (forMe) return                // addressed to me: stop here
+            // "*" is a broadcast, so fall through and keep relaying it
         }
-
+    
         if (msg.ttl <= 0) {
             Log.d(TAG, "TTL Expired")
             return
         }
-
+    
         broadcast(gson.toJson(msg.copy(ttl = msg.ttl - 1)), fromEndpoint)
     }
 
@@ -276,9 +308,39 @@ class RescueMeshManager(
             Log.d(TAG, "Lost Device: $endpointId")
         }
     }
-
+    private fun syncStateTo(endpointId: String) {
+        val now = System.currentTimeMillis()
+    
+        // 1. Every beacon that hasn't expired
+        BeaconStore.getAllBeacons()
+            .filter { now - it.timestamp <= BeaconStore.EXPIRY_MS }
+            .forEach { sendTo(endpointId, gson.toJson(it)) }
+    
+        // 2. Every known group status
+        GroupStore.getStatuses()
+            .forEach { sendTo(endpointId, gson.toJson(it)) }
+    }
+    
+    private fun sendTo(endpointId: String, json: String) {
+        connectionsClient.sendPayload(
+            endpointId,
+            Payload.fromBytes(json.toByteArray(Charsets.UTF_8))
+        )
+    }
+    
+    private fun syncStateTo(endpointId: String) {
+        val now = System.currentTimeMillis()
+        BeaconStore.getAllBeacons()
+            .filter { now - it.timestamp <= BeaconStore.EXPIRY_MS }
+            .forEach { sendTo(endpointId, gson.toJson(it)) }
+        GroupStore.getStatuses().forEach { sendTo(endpointId, gson.toJson(it)) }
+    }
+    
+    private fun sendTo(endpointId: String, json: String) {
+        connectionsClient.sendPayload(endpointId, Payload.fromBytes(json.toByteArray(Charsets.UTF_8)))
+    }
     private val connectionLifecycleCallback = object : ConnectionLifecycleCallback() {
-
+    
         override fun onConnectionInitiated(
             endpointId: String,
             connectionInfo: ConnectionInfo
@@ -286,68 +348,71 @@ class RescueMeshManager(
             Log.d(TAG, "Connection Initiated")
             connectionsClient.acceptConnection(endpointId, payloadCallback)
         }
-
+    
         override fun onConnectionResult(
             endpointId: String,
             resolution: ConnectionResolution
         ) {
             pendingEndpoints.remove(endpointId)
-
+    
             if (resolution.status.statusCode == ConnectionsStatusCodes.STATUS_OK) {
                 connectedEndpoints.add(endpointId)
+                syncStateTo(endpointId)                          // NEW: send beacons + statuses
                 sendQueuedSOS()
+                onPeersChanged?.invoke(connectedEndpoints.size)  // NEW: tell the UI
                 Log.d(TAG, "Connected: $endpointId")
             } else {
                 Log.d(TAG, "Connection Failed")
             }
         }
-
+    
         override fun onDisconnected(endpointId: String) {
             connectedEndpoints.remove(endpointId)
             pendingEndpoints.remove(endpointId)
+            onPeersChanged?.invoke(connectedEndpoints.size)      // NEW: tell the UI
             Log.d(TAG, "Disconnected: $endpointId")
         }
     }
-
     private val payloadCallback = object : PayloadCallback() {
 
         override fun onPayloadReceived(endpointId: String, payload: Payload) {
             val bytes = payload.asBytes() ?: return
             val json = String(bytes, Charsets.UTF_8)
-
-            // Gson never throws on missing fields, so the old try/catch chain
-            // matched the first type every time. Detect the type by its keys.
+        
             val obj: JsonObject = try {
                 JsonParser.parseString(json).asJsonObject
             } catch (_: Exception) {
                 Log.d(TAG, "Normal Message: $json")
                 return
             }
-
+        
             try {
                 when {
                     obj.has("beaconId") ->
                         handleBeacon(gson.fromJson(obj, Beacon::class.java), endpointId)
-
+        
+                    // CHANGED: only update, notify and relay when the status is new or newer
                     obj.has("userId") && obj.has("status") -> {
                         val gs = gson.fromJson(obj, GroupStatus::class.java)
-                        GroupStore.updateStatus(gs)
-                        Log.d(TAG, "Group Status Received: ${gs.status}")
+                        if (GroupStore.updateStatus(gs)) {
+                            onGroupChanged?.invoke()
+                            broadcast(gson.toJson(gs), endpointId)
+                            Log.d(TAG, "Group Status Received: ${gs.status}")
+                        }
                     }
-
+        
                     obj.has("emergencyText") ->
                         handleSOS(gson.fromJson(obj, SOSMessage::class.java), endpointId)
-
+        
                     obj.has("messageId") ->
                         handleRelayMessage(gson.fromJson(obj, RelayMessage::class.java), endpointId)
-
+        
                     else -> Log.d(TAG, "Normal Message: $json")
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Bad payload", e)
             }
         }
-
         override fun onPayloadTransferUpdate(
             endpointId: String,
             update: PayloadTransferUpdate
