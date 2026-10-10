@@ -399,10 +399,10 @@ export default function App(){
 
   if (authLoading) {
     return (
-      <div className="app-shell phone-scroll desktop-phone-frame" aria-busy="true" aria-live="polite">
-        <div className="screen-content">
+      <div className="preview-stage" aria-busy="true" aria-live="polite">
+        <div className="phone-shell"><div className="phone-scroll"><div className="screen-content">
           <p>Loading Meridian...</p>
-        </div>
+        </div></div></div>
       </div>
     );
   }
@@ -424,7 +424,10 @@ export default function App(){
   }
 
   return (
-    <div className="app-shell phone-scroll desktop-phone-frame" onScroll={handleScroll} ref={scrollRef}>
+    <div className="preview-stage">
+      <main className="phone-shell">
+        <div className="phone-scroll" onScroll={handleScroll} ref={scrollRef}>
+          <div className="screen-content">
       {page === 'home' && home()}
       {page === 'explore' && explore()}
       {page === 'risk' && risk()}
@@ -446,6 +449,8 @@ export default function App(){
         </div>
       </>}
       {page === 'sos' && sos()}
+          </div>
+        </div>
       <nav className={`floating-dock ${compact?'dock-compact':''}`} aria-label="Main navigation">
         {([{id:'home',label:'Home',icon:Home},{id:'explore',label:'Explore',icon:Compass}] as const).map(item=>{
           const Icon=item.icon;
@@ -466,6 +471,7 @@ export default function App(){
       <Modal kind={dialog} close={closeDialog} person={name} saveName={setName} navigate={go} checkDestination={()=>openDestination(read<Place|null>('destination',null)?.name||'Manali')}/>
       {loading && <SkeletonScreen profile={page==='profile'} />}
       {toast && <NotificationToast message={toast} />}
+      </main>
     </div>
   );
 }
