@@ -1,124 +1,60 @@
-        <AppRow icon={LockKeyhole} title="Privacy & sharing" subtitle="Review consent and local storage" onClick={()=>go('privacy')}/>
-      </div>
-    </section>
-    <section className="profile-section"><Heading title="More"/>
-      <div className="list-panel profile-settings-list">
-        <AppRow icon={CircleHelp} title="Help & information" onClick={()=>openDialog('help')}/>
-      </div>
-    </section>
-    <button
-      type="button"
-      className="signout"
-      onClick={async () => {
-        try {
-          if (firebaseUser) await signOut(auth);
-          setIsGuest(false);
-          setIsAuthenticated(false);
-          setPage('home');
-          navigationDepth.current = 0;
-          window.history.replaceState(
-            { safehaven: true, page: 'home', scroll: 0, depth: 0, dialog: null },
-            ''
-          );
-          setName('Traveler');
-          setToast('');
-        } catch (error) {
-          console.error('Sign-out failed:', error);
-          setToast('Unable to sign out. Please try again.');
-        }
-      }}
-    >
-      Sign out
-    </button>
-  </>;}
+import { useState } from 'react';
+import { signInWithPopup, type User } from 'firebase/auth';
+import { ArrowRight, Compass, ShieldCheck, Sparkles } from 'lucide-react';
+import { auth, googleProvider } from './firebase';
+import './GoogleLoginPage.css';
 
-  function languagePage(){return <>
-    <BackHeader title="Language settings" back={back}/>
-    <section className="content-section">
-      <h2>Preferred language</h2>
-      <p>Used for safety guidance and report explanations. The rest of the interface currently remains in English.</p>
-      <label className="tool-field">Language
-        <select aria-label="Preferred language" value={read('language',language)} onChange={event=>{setLanguage(event.target.value);setToast('Language preference saved');}}>
-          {Object.entries(languageNames).map(([code,title])=><option key={code} value={code}>{title}</option>)}
-        </select>
-      </label>
-    </section>
-  </>;}
+interface GoogleLoginPageProps {
+  onLoginSuccess?: (user: User) => void;
+  onGuestContinue?: () => void;
+}
 
-  if (authLoading) {
-    return (
-      <div className="preview-stage" aria-busy="true" aria-live="polite">
-        <div className="phone-shell"><div className="phone-scroll"><div className="screen-content">
-          <p>Loading Meridian...</p>
-        </div></div></div>
-      </div>
-    );
-  }
+export default function GoogleLoginPage({ onLoginSuccess, onGuestContinue }: GoogleLoginPageProps) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  if (!isAuthenticated && !isGuest) {
-    return (
-      <GoogleLoginPage
-        onLoginSuccess={(user) => {
-          if (user?.displayName) setName(user.displayName);
-          setIsAuthenticated(true);
-          setToast("Welcome to SafeHaven");
-        }}
-        onGuestContinue={() => {
-          setIsGuest(true);
-          setToast("Welcome to SafeHaven");
-        }}
-      />
-    );
+  async function handleGoogleLogin() {
+    setError('');
+    setLoading(true);
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      onLoginSuccess?.(result.user);
+    } catch (err: unknown) {
+      const code = (err as { code?: string })?.code;
+      if (code !== 'auth/popup-closed-by-user') {
+        setError(code === 'auth/popup-blocked' ? 'Allow pop-ups to sign in with Google.' : 'Google sign-in failed. Please try again.');
+      }
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
-    <div className="preview-stage">
-      <main className="phone-shell">
-        <div className="phone-scroll" onScroll={handleScroll} ref={scrollRef}>
-          <div className="screen-content">
-      {page === 'home' && home()}
-      {page === 'explore' && explore()}
-      {page === 'risk' && risk()}
-      {page === 'replan' && replan()}
-      {page === 'guide' && guidePage()}
-      {page === 'mesh' && mesh()}
-      {page === 'beacon' && beacon()}
-      {page === 'pack' && pack()}
-      {page === 'profile' && profile()}
-      {page === 'language' && languagePage()}
-      {page === 'privacy' && <>
-        <BackHeader title="Privacy & sharing" back={back}/>
-        <div className="content-section">
-          <h2>Your choices</h2>
-          <p>Contacts, plans, saved guidance and language preferences are stored on this device.</p>
-          <p>Private group check-ins and nearby sharing are separate. Review consent for each audience independently.</p>
-          <button className="secondary-button" onClick={()=>go('pack')}>Manage group sharing</button>
-          <button className="secondary-button" onClick={()=>go('mesh')}>Manage nearby connections</button>
-        </div>
-      </>}
-      {page === 'sos' && sos()}
+    <div className="sh-login-stage">
+      <main className="sh-login-phone">
+        <section className="sh-login-hero" aria-label="SafeHaven welcome">
+          <div className="sh-login-brand"><span className="sh-brand-icon"><ShieldCheck size={23} strokeWidth={2}/></span><span>SafeHaven</span></div>
+          <div className="sh-hero-art" aria-hidden="true">
+            <div className="sh-orbit sh-orbit-one"/><div className="sh-orbit sh-orbit-two"/>
+            <div className="sh-orbit-chip sh-chip-left"><Sparkles size={22}/></div>
+            <div className="sh-hero-shield"><ShieldCheck size={66} strokeWidth={1.6}/></div>
+            <div className="sh-orbit-chip sh-chip-right"><Compass size={24}/></div>
           </div>
-        </div>
-      <nav className={`floating-dock ${compact?'dock-compact':''}`} aria-label="Main navigation">
-        {([{id:'home',label:'Home',icon:Home},{id:'explore',label:'Explore',icon:Compass}] as const).map(item=>{
-          const Icon=item.icon;
-          return <button key={item.id} type="button" aria-label={item.label} aria-current={tab===item.id?'page':undefined} onClick={()=>go(item.id)} className={`dock-item ${tab===item.id?'dock-active':''}`}>
-            <span className="dock-active-bg" aria-hidden="true"/><Icon size={22} strokeWidth={2.1}/><span>{item.label}</span>
-          </button>;
-        })}
-        <motion.button type="button" className="dock-sos" aria-label="Emergency SOS" aria-current={page==='sos'?'page':undefined} onClick={()=>go('sos')} whileTap={{scale:.92}}>
-          <ShieldAlert size={21}/><small>SOS</small>
-        </motion.button>
-        {([{id:'mesh',label:'Mesh',icon:Radio},{id:'profile',label:'Profile',icon:UserRound}] as const).map(item=>{
-          const Icon=item.icon;
-          return <button key={item.id} type="button" aria-label={item.label} aria-current={tab===item.id?'page':undefined} onClick={()=>go(item.id)} className={`dock-item ${tab===item.id?'dock-active':''}`}>
-            <span className="dock-active-bg" aria-hidden="true"/><Icon size={22} strokeWidth={2.1}/><span>{item.label}</span>
-          </button>;
-        })}
-      </nav>
-      <Modal kind={dialog} close={closeDialog} person={name} saveName={setName} navigate={go} checkDestination={()=>openDestination(read<Place|null>('destination',null)?.name||'Manali')}/>
-      {loading && <SkeletonScreen profile={page==='profile'} />}
-      {toast && <NotificationToast message={toast} />}
+          <div className="sh-hero-copy"><span>YOUR JOURNEY, WITH CONFIDENCE</span><h1>Explore freely.<br/><em>Feel safer.</em></h1></div>
+        </section>
+        <section className="sh-login-panel">
+          <div className="sh-login-intro"><h2>Welcome to SafeHaven</h2><p>Your safety companion, wherever you go.</p></div>
+          <div className="sh-login-actions">
+            <button className="sh-google-button" type="button" onClick={handleGoogleLogin} disabled={loading}>
+              <svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6C44.4 38.03 46.98 31.88 46.98 24.55z"/><path fill="#FBBC05" d="M10.53 28.59A14.4 14.4 0 0 1 9.75 24c0-1.6.27-3.14.76-4.59l-7.98-6.2A23.9 23.9 0 0 0 0 24c0 3.87.93 7.52 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.91-5.8l-7.73-6c-2.15 1.45-4.92 2.3-8.18 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+              <span>{loading ? 'Signing in…' : 'Continue with Google'}</span><ArrowRight size={18}/>
+            </button>
+            <div className="sh-divider"><span/>or<span/></div>
+            <button className="sh-guest-button" type="button" onClick={onGuestContinue} disabled={loading}>Continue as guest <ArrowRight size={18}/></button>
+            {error && <p className="sh-login-error" role="alert">{error}</p>}
+          </div>
+          <p className="sh-login-note">Plan smarter. Stay connected. Travel confidently.</p>
+        </section>
       </main>
     </div>
   );
