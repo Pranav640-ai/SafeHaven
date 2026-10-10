@@ -23,6 +23,6 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - name: Browser and offline checks
         run: |
-          python -m uvicorn backend.app:app --host 127.0.0.1 --port 8000 &
+          SAFETY_ADMIN_TOKEN=ci-test-token-not-a-secret-000000000000 python -m uvicorn backend.app:app --host 127.0.0.1 --port 8000 &
           for i in $(seq 1 30); do curl -fsS http://127.0.0.1:8000/api/health && break || sleep 1; done
           npm run test:web

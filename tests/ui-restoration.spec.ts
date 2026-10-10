@@ -5,9 +5,9 @@ test('Home restores controls and opens the selected destination',async({page})=>
  await page.route('**/api/weather',r=>r.fulfill({json:{place,days:[],source:{title:'Fixture',url:'https://example.com',trust:'Forecast'},fetched_at:new Date().toISOString(),limitations:'Fixture'}}));
  await page.route('**/api/incidents',r=>r.fulfill({json:{reports:[],errors:[],coverage:'Fixture',fetched_at:new Date().toISOString()}}));
  await page.route('**/api/safety/alerts',r=>r.fulfill({json:{alerts:[],fetched_at:new Date().toISOString()}}));
- await page.goto('/');await page.getByRole('button',{name:'Explore as guest'}).click();
+ await page.goto('/');await page.getByRole('button',{name:'Continue as guest'}).click();
  await expect(page.locator('.home-location')).toContainText(place.name);
- await expect(page.locator('.feature-illustration').first()).not.toBeEmpty();
+ await expect(page.locator('.feature-illustration').first().locator('svg')).toBeVisible();
  await page.getByRole('button',{name:'Notifications',exact:true}).click();
  await expect(page.getByRole('heading',{name:'Destination warnings'})).toBeVisible();
  await page.getByRole('button',{name:'Close dialog'}).click();
@@ -22,7 +22,7 @@ test('Approving a proposal updates the original and keeps a no-changes proposed 
  const reason='Rain forecast: move this activity indoors.';
  await page.addInitScript(({place,stop})=>{localStorage.setItem('safehaven:destination',JSON.stringify(place));if(!localStorage.getItem('safehaven:itinerary'))localStorage.setItem('safehaven:itinerary',JSON.stringify([stop]))},{place,stop});
  await page.route('**/api/replan',r=>r.fulfill({json:{stops:[{original:stop,alternative:'Museum visit',alternative_date:stop.date,alternative_kind:'indoor',changed:true,assessment:'Review rain conditions',reasons:[reason],source:null,fetched_at:null}],engine:'Fixture review',generated_at:new Date().toISOString(),limitations:'Fixture'}}));
- await page.goto('/');await page.getByRole('button',{name:'Explore as guest'}).click();
+ await page.goto('/');await page.getByRole('button',{name:'Continue as guest'}).click();
  await page.getByRole('button',{name:/Trip replanner/}).click();
  await page.getByRole('button',{name:'Review itinerary'}).click();
  await expect(page.getByRole('heading',{name:'Museum visit',exact:true})).toBeVisible();
@@ -36,13 +36,13 @@ test('Approving a proposal updates the original and keeps a no-changes proposed 
  await expect(page.getByRole('status').filter({hasText:'No pending changes'})).toBeVisible();
  await expect(page.getByRole('button',{name:'Approve changes'})).toBeDisabled();
  await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem('safehaven:itinerary')||'[]')[0]?.activity)).toBe('Museum visit');
- await page.reload();await page.getByRole('button',{name:'Explore as guest'}).click();await page.getByRole('button',{name:/Trip replanner/}).click();
+ await page.reload();await page.getByRole('button',{name:'Continue as guest'}).click();await page.getByRole('button',{name:/Trip replanner/}).click();
  await expect(page.getByRole('heading',{name:'Museum visit',exact:true})).toBeVisible();
  await page.getByRole('tab',{name:'Proposed plan'}).click();await expect(page.getByRole('button',{name:'Approve changes'})).toBeDisabled();
 });
 
 test('Nearby help mode does not require travellers to meet or compare codes',async({page})=>{
- await page.goto('/');await page.getByRole('button',{name:'Explore as guest'}).click();await page.getByRole('button',{name:'Mesh',exact:true}).click();
+ await page.goto('/');await page.getByRole('button',{name:'Continue as guest'}).click();await page.getByRole('button',{name:'Mesh',exact:true}).click();
  await page.getByRole('tab',{name:'Nearby',exact:true}).click();
  await expect(page.getByLabel('Connection mode')).toHaveValue('help');
  await expect(page.getByText(/You do not need to meet or exchange codes/)).toBeVisible();
@@ -54,7 +54,7 @@ test('Nearby help mode does not require travellers to meet or compare codes',asy
 
 test('Home retains the fixed SVG artwork, removes duplicate preparation and Profile icons match actions',async({page})=>{
  await page.addInitScript(()=>localStorage.setItem('safehaven:trip-note',JSON.stringify('Legacy meeting point')));
- await page.goto('/');await page.getByRole('button',{name:'Explore as guest'}).click();
+ await page.goto('/');await page.getByRole('button',{name:'Continue as guest'}).click();
  await expect(page.locator('.feature-grid>.feature-card')).toHaveCount(6);
  await expect(page.locator('.feature-illustration>svg')).toHaveCount(6);
  await expect(page.locator('.carousel-art-illustration>svg')).toHaveCount(3);

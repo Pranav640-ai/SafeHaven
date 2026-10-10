@@ -184,24 +184,6 @@ export default function App(){
   const lastTop=useRef(0);
   const reduceMotion=useReducedMotion();
 
-  // If user is not authenticated and hasn't chosen guest mode, render the Google Login page
-  if (!isAuthenticated && !isGuest) {
-    return (
-        <GoogleLoginPage
-        onLoginSuccess={(user) => {
-          if (user?.displayName) setName(user.displayName);
-          setIsAuthenticated(true);
-          setToast("Welcome to SafeHaven");
-        }}
-        onGuestContinue={() => {
-          setIsGuest(true);
-          setToast("Welcome to SafeHaven");
-        }}
-      />
-    );
-  }
-  
-
   useEffect(()=>{setLoading(true);const t=window.setTimeout(()=>setLoading(false),640);return()=>window.clearTimeout(t)},[page]);
   useEffect(()=>{if(!toast)return;const t=window.setTimeout(()=>setToast(''),1600);return()=>window.clearTimeout(t)},[toast]);
   const openDestination=(name:string)=>{go('risk');setSelectedDestination(name);window.history.replaceState({...window.history.state,destination:name},'')};
@@ -377,8 +359,24 @@ export default function App(){
     </section>
   </>;}
 
+  if (!isAuthenticated && !isGuest) {
+    return (
+      <GoogleLoginPage
+        onLoginSuccess={(user) => {
+          if (user?.displayName) setName(user.displayName);
+          setIsAuthenticated(true);
+          setToast("Welcome to SafeHaven");
+        }}
+        onGuestContinue={() => {
+          setIsGuest(true);
+          setToast("Welcome to SafeHaven");
+        }}
+      />
+    );
+  }
+
   return (
-    <div className="app-shell" onScroll={handleScroll} ref={scrollRef}>
+    <div className="app-shell phone-scroll" onScroll={handleScroll} ref={scrollRef}>
       {page === 'home' && home()}
       {page === 'explore' && explore()}
       {page === 'risk' && risk()}
@@ -389,8 +387,34 @@ export default function App(){
       {page === 'pack' && pack()}
       {page === 'profile' && profile()}
       {page === 'language' && languagePage()}
-      {page === 'privacy' && <><BackHeader title="Privacy & sharing" back={back}/><div className="content-section"><h2>Privacy</h2><p>Your data stays on your device.</p></div></>}
+      {page === 'privacy' && <>
+        <BackHeader title="Privacy & sharing" back={back}/>
+        <div className="content-section">
+          <h2>Your choices</h2>
+          <p>Contacts, plans, saved guidance and language preferences are stored on this device.</p>
+          <p>Private group check-ins and nearby sharing are separate. Review consent for each audience independently.</p>
+          <button className="secondary-button" onClick={()=>go('pack')}>Manage group sharing</button>
+          <button className="secondary-button" onClick={()=>go('mesh')}>Manage nearby connections</button>
+        </div>
+      </>}
       {page === 'sos' && sos()}
+      <nav className={`floating-dock ${compact?'dock-compact':''}`} aria-label="Main navigation">
+        {([{id:'home',label:'Home',icon:Home},{id:'explore',label:'Explore',icon:Compass}] as const).map(item=>{
+          const Icon=item.icon;
+          return <button key={item.id} type="button" aria-label={item.label} aria-current={tab===item.id?'page':undefined} onClick={()=>go(item.id)} className={`dock-item ${tab===item.id?'dock-active':''}`}>
+            <span className="dock-active-bg" aria-hidden="true"/><Icon size={22} strokeWidth={2.1}/><span>{item.label}</span>
+          </button>;
+        })}
+        <motion.button type="button" className="dock-sos" aria-label="Emergency SOS" aria-current={page==='sos'?'page':undefined} onClick={()=>go('sos')} whileTap={{scale:.92}}>
+          <ShieldAlert size={21}/><small>SOS</small>
+        </motion.button>
+        {([{id:'mesh',label:'Mesh',icon:Radio},{id:'profile',label:'Profile',icon:UserRound}] as const).map(item=>{
+          const Icon=item.icon;
+          return <button key={item.id} type="button" aria-label={item.label} aria-current={tab===item.id?'page':undefined} onClick={()=>go(item.id)} className={`dock-item ${tab===item.id?'dock-active':''}`}>
+            <span className="dock-active-bg" aria-hidden="true"/><Icon size={22} strokeWidth={2.1}/><span>{item.label}</span>
+          </button>;
+        })}
+      </nav>
       <Modal kind={dialog} close={closeDialog} person={name} saveName={setName} navigate={go} checkDestination={()=>openDestination(read<Place|null>('destination',null)?.name||'Manali')}/>
       {loading && <SkeletonScreen profile={page==='profile'} />}
       {toast && <NotificationToast message={toast} />}

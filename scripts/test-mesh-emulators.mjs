@@ -56,7 +56,7 @@ try{
   // Motion reads the preference at mount; reload after setting it.
   await page.reload({waitUntil:'domcontentloaded'});
   clients.push({serial,shell,port,browser,page});
-  await page.getByRole('button',{name:'Explore as guest'}).dispatchEvent('click');
+  await page.getByRole('button',{name:'Continue as guest'}).dispatchEvent('click');
   await expect(page.getByText('A better way to be prepared.',{exact:true})).toBeVisible();
   await page.getByRole('button',{name:'Mesh',exact:true}).dispatchEvent('click');
   await expect(page.getByRole('heading',{name:'RescueMesh',exact:true})).toBeVisible();

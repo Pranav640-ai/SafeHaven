@@ -4,7 +4,7 @@ test('Home stories accept native horizontal touch swipes and vertical scrolling'
     const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
     const page = await context.newPage();
     await page.goto(process.env.TEST_BASE_URL || 'http://127.0.0.1:8000');
-    await page.getByRole('button', { name: 'Explore as guest' }).click();
+    await page.getByRole('button', { name: 'Continue as guest' }).click();
     const row = page.getByLabel('Featured stories');
     await row.scrollIntoViewIfNeeded();
     const card = row.locator('.carousel-card').first();
@@ -36,7 +36,7 @@ test('itinerary edits persist and saved pack reopens offline', async ({ page, co
     const errors: string[] = [];
     page.on('pageerror', e => errors.push(e.message));
     await page.goto('/');
-    await page.getByRole('button', { name: 'Explore as guest' }).click();
+    await page.getByRole('button', { name: 'Continue as guest' }).click();
     await page.getByRole('button', { name: /Trip replanner/ }).click();
     await page.getByRole('textbox', { name: 'Activity', exact: true }).fill('Museum visit');
     await page.getByLabel('Activity type', { exact: true }).selectOption('indoor');
@@ -46,7 +46,7 @@ test('itinerary edits persist and saved pack reopens offline', async ({ page, co
     await page.getByRole('textbox', { name: 'Activity', exact: true }).fill('Gallery visit');
     await page.getByRole('button', { name: 'Save activity changes' }).click();
     await page.reload();
-    await page.getByRole('button', { name: 'Explore as guest' }).click();
+    await page.getByRole('button', { name: 'Continue as guest' }).click();
     await page.getByRole('button', { name: /Safety pack Save for offline use/ }).click();
     await expect(page.getByRole('heading', { name: 'Gallery visit' })).toBeVisible();
     await page.getByRole('button', { name: 'Prepare offline guidance' }).click();
@@ -59,7 +59,7 @@ test('itinerary edits persist and saved pack reopens offline', async ({ page, co
     await expect.poll(() => page.evaluate(() => Boolean(navigator.serviceWorker.controller))).toBeTruthy();
     await context.setOffline(true);
     await page.reload();
-    await page.getByRole('button', { name: 'Explore as guest' }).click();
+    await page.getByRole('button', { name: 'Continue as guest' }).click();
     await page.getByRole('button', { name: /Safety pack Save for offline use/ }).click();
     await expect(page.getByLabel('Hotel details and meeting point')).toHaveValue('Test hotel, lobby meeting point');
     await expect(page.getByText('Travel companion', { exact: true })).toBeVisible();
@@ -70,7 +70,7 @@ test('itinerary edits persist and saved pack reopens offline', async ({ page, co
 });
 test('prepared multilingual guidance preserves source and SOS access', async ({ page }) => {
     await page.goto('/');
-    await page.getByRole('button', { name: 'Explore as guest' }).click();
+    await page.getByRole('button', { name: 'Continue as guest' }).click();
     await page.getByRole('button', { name: 'Emergency SOS', exact: true }).click();
     await page.getByRole('button', { name: 'View emergency guidance' }).click();
     await page.getByLabel('Preferred language').selectOption('ta');
@@ -84,7 +84,7 @@ for (const width of [320, 375, 430, 768]) {
     test(`mobile layout has no horizontal overflow at ${width}px`, async ({ page }) => {
         await page.setViewportSize({ width, height: 844 });
         await page.goto('/');
-        await page.getByRole('button', { name: 'Explore as guest' }).click();
+        await page.getByRole('button', { name: 'Continue as guest' }).click();
         await page.getByRole('button', { name: /Trip replanner/ }).click();
         const overflow = await page.locator('.phone-scroll').evaluate(e => e.scrollWidth > e.clientWidth + 1);
         expect(overflow).toBeFalsy();
@@ -92,7 +92,7 @@ for (const width of [320, 375, 430, 768]) {
 }
 test('private group consent, status synchronization and leaving work', async ({ page }) => {
     await page.goto('/');
-    await page.getByRole('button', { name: 'Explore as guest' }).click();
+    await page.getByRole('button', { name: 'Continue as guest' }).click();
     await page.getByRole('button', { name: /Safety pack Save for offline use/ }).click();
     await page.getByLabel('Your display name').fill('Browser traveler');
     await page.getByLabel('New group name').fill('Browser verification group');
@@ -110,7 +110,7 @@ test('private group consent, status synchronization and leaving work', async ({ 
 
 test('page Back and browser Back follow the last page and restore scroll', async ({ page }) => {
     await page.goto('/');
-    await page.getByRole('button', { name: 'Explore as guest' }).click();
+    await page.getByRole('button', { name: 'Continue as guest' }).click();
     await page.getByRole('button', { name: 'Explore', exact: true }).click();
     await page.getByRole('button', { name: /Safety essentials/ }).click();
     await expect(page.getByRole('heading', { name: 'Emergency guide', exact: true })).toBeVisible();
@@ -129,16 +129,13 @@ test('page Back and browser Back follow the last page and restore scroll', async
 
 test('language settings, contacts shortcut and privacy routes work', async ({ page }) => {
     await page.goto('/');
-    await page.getByRole('button', { name: 'Explore as guest' }).click();
+    await page.getByRole('button', { name: 'Continue as guest' }).click();
     await page.getByRole('button', { name: 'Profile', exact: true }).click();
     await page.getByRole('button', { name: /Language English/ }).click();
     await expect(page.getByRole('heading', { name: 'Language settings' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Emergency guide' })).toHaveCount(0);
     await page.getByLabel('Preferred language').selectOption('hi');
-    await page.getByRole('button', { name: 'Preview safety guidance' }).click();
     await expect(page.getByLabel('Preferred language')).toHaveValue('hi');
-    await page.getByRole('button', { name: 'Back', exact: true }).click();
-    await expect(page.getByRole('heading', { name: 'Language settings' })).toBeVisible();
     await page.getByRole('button', { name: 'Go back', exact: true }).click();
     await expect(page.getByRole('button', { name: /Language Hindi/ })).toBeVisible();
     await expect(page.getByRole('button', { name: /Notifications|Replay loading/ })).toHaveCount(0);
@@ -157,7 +154,7 @@ test('language settings, contacts shortcut and privacy routes work', async ({ pa
 
 test('dialogs close with Back and SOS guidance returns to its origin', async ({ page }) => {
     await page.goto('/');
-    await page.getByRole('button', { name: 'Explore as guest' }).click();
+    await page.getByRole('button', { name: 'Continue as guest' }).click();
     await page.getByRole('button', { name: 'Profile', exact: true }).click();
     await page.getByRole('button', { name: 'Edit profile', exact: true }).click();
     await page.getByLabel('Display name', { exact: true }).fill('Navigator');
@@ -182,7 +179,7 @@ test('all home feature routes, destination links and profile shortcuts open thei
     const errors: string[] = [];
     page.on('pageerror', e => errors.push(e.message));
     await page.goto('/');
-    await page.getByRole('button', { name: 'Explore as guest' }).click();
+    await page.getByRole('button', { name: 'Continue as guest' }).click();
     for (const [label, title] of [
         ['Risk insights Check before your visit', 'Risk intelligence'],
         ['Trip replanner Plan your dated activities', 'Trip replanner'],
@@ -215,15 +212,15 @@ test('all home feature routes, destination links and profile shortcuts open thei
     await expect(page.getByRole('heading', { name: 'About Meridian' })).toBeVisible();
     await page.keyboard.press('Escape');
     await expect(page.getByRole('dialog')).toHaveCount(0);
-    await page.getByRole('button', { name: 'Back to welcome screen', exact: true }).click();
-    await expect(page.getByRole('button', { name: 'Explore as guest' })).toBeVisible();
+    await page.getByRole('button', { name: 'Sign out', exact: true }).click();
+    await expect(page.getByRole('button', { name: 'Continue as guest' })).toBeVisible();
     expect(errors).toEqual([]);
 });
 
 
 test('SOS has its own route and Mesh previews visible disabled controls', async ({ page }) => {
     await page.goto('/');
-    await page.getByRole('button', { name: 'Explore as guest' }).click();
+    await page.getByRole('button', { name: 'Continue as guest' }).click();
     const nav=page.getByRole('navigation', {name:'Main navigation'});
     await nav.getByRole('button', { name: 'Emergency SOS', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'Emergency SOS', exact: true })).toBeVisible();
@@ -251,7 +248,7 @@ test('SOS has its own route and Mesh previews visible disabled controls', async 
 
 test('Home risk entry asks for a destination instead of opening Manali', async ({page}) => {
     await page.goto('/');
-    await page.getByRole('button', {name:'Explore as guest'}).click();
+    await page.getByRole('button', {name:'Continue as guest'}).click();
     await page.getByRole('button', {name:'Risk insights Check before your visit',exact:true}).click();
     await expect(page.getByRole('heading', {name:'Where are you travelling?'})).toBeVisible();
     await expect(page.getByRole('heading', {name:'Manali',exact:true})).toHaveCount(0);
@@ -263,7 +260,7 @@ for (const width of [320,375,390,430]) {
         const context=await browser.newContext({viewport:{width,height:844},isMobile:true,hasTouch:true,reducedMotion:'reduce'});
         const page=await context.newPage();
         await page.goto(process.env.TEST_BASE_URL || 'http://127.0.0.1:8000');
-        await page.getByRole('button',{name:'Explore as guest'}).click();
+        await page.getByRole('button',{name:'Continue as guest'}).click();
         const nav=page.getByRole('navigation',{name:'Main navigation'});
         for (const scroll of [0,700]) {
             await page.locator('.phone-scroll').evaluate((el,y)=>{el.scrollTop=y;},scroll);
@@ -291,7 +288,7 @@ test('destination choice flows into the itinerary and Back restores the same des
     await page.addInitScript(p=>localStorage.setItem('safehaven:destination',JSON.stringify(p)),place);
     await page.route('**/api/weather',r=>r.fulfill({json:{place,days:[],source:{title:'Test forecast',url:'https://open-meteo.com/',trust:'Forecast'},fetched_at:new Date().toISOString(),timezone:place.timezone,limitations:'Test only'}}));
     await page.route('**/api/incidents',r=>r.fulfill({json:{reports:[],fetched_at:new Date().toISOString(),coverage:'Test only',errors:[]}}));
-    await page.goto('/');await page.getByRole('button',{name:'Explore as guest'}).click();
+    await page.goto('/');await page.getByRole('button',{name:'Continue as guest'}).click();
     await page.getByRole('button',{name:'Risk insights Check before your visit',exact:true}).click();
     await page.getByRole('button',{name:'Continue with Fixture town',exact:true}).click();
     await expect(page.getByRole('heading',{name:'Fixture town',exact:true})).toBeVisible();
@@ -311,7 +308,7 @@ test('local conditions map shares a consented report and lets its owner remove i
     await page.route('**/api/weather',r=>r.fulfill({json:{place,days:[],source:{title:'Test forecast',url:'https://open-meteo.com/',trust:'Forecast'},fetched_at:new Date().toISOString(),timezone:place.timezone}}));
     await page.route('**/api/incidents',r=>r.fulfill({json:{reports:[],fetched_at:new Date().toISOString(),coverage:'Test only',errors:[]}}));
     await page.route('https://tile.openstreetmap.org/**',r=>r.abort());
-    await page.goto('/');await page.getByRole('button',{name:'Explore as guest'}).click();
+    await page.goto('/');await page.getByRole('button',{name:'Continue as guest'}).click();
     await page.getByRole('button',{name:'Risk insights Check before your visit',exact:true}).click();
     await page.getByRole('button',{name:'Continue with Fixture town'}).click();
     await page.getByRole('tab',{name:'Map',exact:true}).click();
@@ -329,7 +326,7 @@ test('local conditions map shares a consented report and lets its owner remove i
 });
 
 test('guided emergency steps and source questions lead to offline phrases',async({page})=>{
-    await page.goto('/');await page.getByRole('button',{name:'Explore as guest'}).click();
+    await page.goto('/');await page.getByRole('button',{name:'Continue as guest'}).click();
     await page.getByRole('button',{name:'Emergency guide Find steps for an emergency',exact:true}).click();
     await page.getByRole('button',{name:'One step at a time'}).click();
     await expect(page.locator('.step-focus')).toContainText('STEP 1 OF 3');
@@ -356,7 +353,7 @@ test('response dashboard refuses unauthorised access',async({page})=>{
 test('Home has one destination action and search controls align on a narrow phone',async({page})=>{
     await page.setViewportSize({width:320,height:844});
     await page.goto('/');
-    await page.getByRole('button',{name:'Explore as guest'}).click();
+    await page.getByRole('button',{name:'Continue as guest'}).click();
     const hero=page.locator('.hero-risk');
     await expect(hero.locator('.hero-link')).toHaveText('Check a destination');
     await expect(hero.locator('.hero-risk-top svg')).toHaveCount(1);
@@ -371,7 +368,7 @@ test('Home has one destination action and search controls align on a narrow phon
 
 test('new itinerary requires a destination and private scenario changes remain isolated',async({page})=>{
     await page.goto('/');
-    await page.getByRole('button',{name:'Explore as guest'}).click();
+    await page.getByRole('button',{name:'Continue as guest'}).click();
     await page.getByRole('button',{name:/Trip replanner/}).click();
     await expect(page.getByText('Choose a destination above before adding activities.')).toBeVisible();
     await page.getByRole('textbox',{name:'Activity',exact:true}).fill('Museum');
