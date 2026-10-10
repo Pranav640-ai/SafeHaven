@@ -20,6 +20,8 @@ import {
   X, Zap, Pencil, Mountain, Waves, Trees, UserRound, CalendarCheck2, FolderOpen, type LucideIcon,
 } from 'lucide-react';
 import GoogleLoginPage from "./GoogleLoginPage";
+import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
+import { auth } from './firebase';
 
 type Page = 'home' | 'explore' | 'risk' | 'replan' | 'guide' | 'mesh' | 'beacon' | 'pack' | 'profile' | 'language' | 'privacy' | 'sos';
 type GuideKind = 'Flood' | 'Extreme heat' | 'Earthquake';
@@ -165,6 +167,8 @@ function NotificationToast({message}:{message:string}) {
 export default function App(){
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isGuest, setIsGuest] = useState(false);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
 
   const [name,setName]=useState('Traveler');
   const [page,setPage]=useState<Page>('home');
@@ -183,6 +187,17 @@ export default function App(){
   const scrollRef=useRef<HTMLDivElement>(null);
   const lastTop=useRef(0);
   const reduceMotion=useReducedMotion();
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setFirebaseUser(user);
+      setIsAuthenticated(Boolean(user));
+      if (user?.displayName) setName(user.displayName);
+      setAuthLoading(false);
+    });
+
+    return unsubscribe;
+  }, []);
 
   useEffect(()=>{setLoading(true);const t=window.setTimeout(()=>setLoading(false),640);return()=>window.clearTimeout(t)},[page]);
   useEffect(()=>{if(!toast)return;const t=window.setTimeout(()=>setToast(''),1600);return()=>window.clearTimeout(t)},[toast]);
@@ -343,7 +358,30 @@ export default function App(){
         <AppRow icon={CircleHelp} title="Help & information" onClick={()=>openDialog('help')}/>
       </div>
     </section>
-    <button type="button" className="signout" onClick={()=>{setIsAuthenticated(false);setIsGuest(false);setPage('home');navigationDepth.current=0;window.history.replaceState({safehaven:true,page:'home',scroll:0,depth:0,dialog:null},'');setName('Traveler');setToast('')}}>Sign out</button>
+    <button
+      type="button"
+      className="signout"
+      onClick={async () => {
+        try {
+          if (firebaseUser) await signOut(auth);
+          setIsGuest(false);
+          setIsAuthenticated(false);
+          setPage('home');
+          navigationDepth.current = 0;
+          window.history.replaceState(
+            { safehaven: true, page: 'home', scroll: 0, depth: 0, dialog: null },
+            ''
+          );
+          setName('Traveler');
+          setToast('');
+        } catch (error) {
+          console.error('Sign-out failed:', error);
+          setToast('Unable to sign out. Please try again.');
+        }
+      }}
+    >
+      Sign out
+    </button>
   </>;}
 
   function languagePage(){return <>
@@ -358,6 +396,16 @@ export default function App(){
       </label>
     </section>
   </>;}
+
+  if (authLoading) {
+    return (
+      <div className="app-shell phone-scroll desktop-phone-frame" aria-busy="true" aria-live="polite">
+        <div className="screen-content">
+          <p>Loading Meridian...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!isAuthenticated && !isGuest) {
     return (
@@ -376,7 +424,7 @@ export default function App(){
   }
 
   return (
-    <div className="app-shell phone-scroll" onScroll={handleScroll} ref={scrollRef}>
+    <div className="app-shell phone-scroll desktop-phone-frame" onScroll={handleScroll} ref={scrollRef}>
       {page === 'home' && home()}
       {page === 'explore' && explore()}
       {page === 'risk' && risk()}
