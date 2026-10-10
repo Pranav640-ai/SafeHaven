@@ -2,10 +2,13 @@ import { initializeApp, type FirebaseApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, type Auth } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: "YOUR_FIREBASE_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  appId: "YOUR_FIREBASE_APP_ID",
+  apiKey: "AIzaSyCvldgBJUaAKjNsD0OToLHO0nHi_LYJlo0",
+  authDomain: "safe-havenai.firebaseapp.com",
+  projectId: "safe-havenai",
+  storageBucket: "safe-havenai.firebasestorage.app",
+  messagingSenderId: "724792279710",
+  appId: "1:724792279710:web:b9a0d496a95da9c5c2318f",
+  measurementId: "G-BP7FW7Y6JQ"
 };
 
 const app: FirebaseApp = initializeApp(firebaseConfig);
